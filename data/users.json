@@ -1,0 +1,22 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john@example.com",
+      "password": "b1fa49e0abdcbb71410d3463fed4c7c3:c41965ec98afb2b8eda0564ca4e6e8ad1789afb33bd19c9e6a9ec9dba57b845dc3f20434a9021f656088f5a6e873a2a3464208c99feb83b2605de2b5ffda1d2f",
+      "phone": "123-456-7890",
+      "address": "Kathmandu"
+    },
+    {
+      "id": 2,
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "email": "jane@example.com",
+      "password": "8757f3f4a44839705bafab5e3b335ec3:d9970dbc11f8e9b7ddda78310e805a4ef8576052715d476bab87d12a3b05808316f8ab355cc2234c02319734f42da7a927bc68d28b4f4c1796c0e68b2fc2dbf5",
+      "phone": "987-654-3210",
+      "address": "Pokhara"
+    }
+  ]
+}
