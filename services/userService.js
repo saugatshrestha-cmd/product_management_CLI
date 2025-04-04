@@ -1,30 +1,14 @@
-import crypto from 'crypto';
-import { dataStore, saveUsers, getNewUserId } from './fileService.js';
-
-// Function to create a salt
-function createSalt() {
-    return crypto.randomBytes(16).toString('hex');
-}
-
-// Function to hash a password with a salt
-function hashPassword(password, salt) {
-    const hash = crypto.scryptSync(password, salt, 64).toString('hex'); 
-    return hash;
-}
-
-// Function to combine salt and hash into one string
-function combineSaltAndHash(salt, hash) {
-    return `${salt}:${hash}`; // Combine salt and hash in a single string, separated by ':'
-}
+import { createSalt, hashPassword, combineSaltAndHash } from '../utils/passwordUtils.js';
+import { users, addUser, saveUsers } from '../repository/customerAccountRepo.js';
 
 //Check if email is already registered
 function isEmailRegistered(email) {
-    return dataStore.users.some(user => user.email === email);
+    return users.some(user => user.email === email);
 }
 
 //Find user by id
 function findUserById(userId) {
-    return dataStore.users.find(user => user.id === userId);
+    return users.find(user => user.id === userId);
 }
 
 // Create a new user
@@ -43,8 +27,7 @@ function createUser(userData) {
     // Combine salt and hash into a single string
     const combinedSaltAndHash = combineSaltAndHash(salt, hashedPassword);
 
-    const newUser = {
-        id: getNewUserId(), // Auto-incrementing ID
+    const newUserData = {
         firstName,
         lastName,
         email,
@@ -53,7 +36,8 @@ function createUser(userData) {
         address
     };
 
-    dataStore.users.push(newUser);
+    const newUser = addUser(newUserData);
+    users.push(newUser); 
     saveUsers();
     return {message: "User registered successfully"};
 }
@@ -66,7 +50,7 @@ function getUserById(userId) {
 
 // Get all users
 function getAllUsers() {
-    return dataStore.users;
+    return users;
 }
 
 // Update user information
@@ -115,11 +99,11 @@ function updatePassword(userId, newPassword) {
 
 // Delete user
 function deleteUser(userId) {
-    const initialLength = dataStore.users.length;
-    dataStore.users = dataStore.users.filter(user => user.id !== userId);
+    const initialLength = users.length;
+    users = users.filter(user => user.id !== userId);
 
     saveUsers();
-    return {message: initialLength !== dataStore.users.length ? "User delete success" : "Not found"}
+    return {message: initialLength !== users.length ? "User delete success" : "Not found"}
 }
 
 export {

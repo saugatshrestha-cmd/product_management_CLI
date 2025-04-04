@@ -1,18 +1,13 @@
-import { dataStore, saveCategory, getNewCategoryId } from "./fileService.js";
+import { categories, addCategory, saveCategory } from "../repository/categoryDirectoryRepo.js";
 
 //Check if category exists
 function isCategoryExists(name) {
-    return dataStore.category.some(category => category.name.toLowerCase() === name.toLowerCase());
+    return categories.some(category => category.name.toLowerCase() === name.toLowerCase());
 }
 
 //Find category by id
 function findCategoryById(categoryId) {
-    return dataStore.category.find(category => category.id === categoryId);
-}
-
-//Find category by name
-function findCategoryByName(categoryName) {
-    return dataStore.category.find(category => category.name === categoryName);
+    return categories.find(category => category.id === categoryId);
 }
 
 //Create category
@@ -24,12 +19,12 @@ function createCategory(categoryData) {
         return { message: "Category already exists" };
     }
 
-    const newCategory = {
-        id: getNewCategoryId(),
+    const newCategoryData = {
         name
     };
 
-    dataStore.category.push(newCategory);
+    const newCategory = addCategory(newCategoryData);
+    categories.push(newCategory); 
     saveCategory();
     return { message: "Category added successfully" };
 }
@@ -40,15 +35,9 @@ function getCategoryById(categoryId) {
     return category || { message: "Category not found" };
 }
 
-//Get category by name
-function getCategoryByName(categoryName) {
-    const category = findCategoryByName(categoryName);
-    return category || { message: "Category not found" };
-}
-
 //Get all category
 function getAllCategory() {
-    return dataStore.category;
+    return categories;
 }
 
 //Update Category
@@ -63,10 +52,10 @@ function updateCategory(categoryId, updatedInfo) {
 
 //Delete Category
 function deleteCategory(categoryId) {
-    const initialLength = dataStore.category.length;
-    dataStore.category = dataStore.category.filter(category => category.id !== categoryId);
+    const initialLength = categories.length;
+    categories = categories.filter(category => category.id !== categoryId);
     saveCategory();
-    return { message: initialLength !== dataStore.category.length ? "Category deleted successfully" : "Not found" };
+    return { message: initialLength !== categories.length ? "Category deleted successfully" : "Not found" };
 }
 
 export { 
@@ -74,6 +63,6 @@ export {
     getCategoryById, 
     getAllCategory, 
     updateCategory, 
-    deleteCategory, 
-    getCategoryByName 
+    deleteCategory,
+    findCategoryById
 };
