@@ -3,10 +3,9 @@ import FILE_PATHS from '../constants/filePaths.js';
 
 let users = loadData(FILE_PATHS.USERS).data;
 
-let userIdCounter = users.length ? users[users.length - 1].id + 1 : 1;
 
 function getNewId() {
-    return userIdCounter++;
+    return users.length ? users[users.length - 1].id + 1 : 1;
 }
 
 // Save users to JSON file
@@ -15,7 +14,19 @@ function saveUsers() {
 }
 
 function addUser(userData) {
-    const newUser = { ...userData, id: getNewId() }; 
+    const newUserId = getNewId();
+    const newUser = {  id: newUserId, ...userData }; 
+    users.push(newUser);
+    saveUsers();
+
 }
 
-export { users, addUser, saveUsers}
+function deleteUserById(userId) {
+    const initialLength = users.length;
+    users = users.filter(user => user.id !== userId);
+
+    saveUsers();
+    return initialLength !== users.length;
+}
+
+export { users, addUser, deleteUserById, saveUsers}

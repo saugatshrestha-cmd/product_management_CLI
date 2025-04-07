@@ -1,5 +1,5 @@
 import { createSalt, hashPassword, combineSaltAndHash } from '../utils/passwordUtils.js';
-import { users, addUser, saveUsers } from '../repository/customerAccountRepo.js';
+import { users, addUser, deleteUserById, saveUsers } from '../repository/customerAccountRepo.js';
 
 //Check if email is already registered
 function isEmailRegistered(email) {
@@ -37,8 +37,6 @@ function createUser(userData) {
     };
 
     const newUser = addUser(newUserData);
-    users.push(newUser); 
-    saveUsers();
     return {message: "User registered successfully"};
 }
 
@@ -99,11 +97,8 @@ function updatePassword(userId, newPassword) {
 
 // Delete user
 function deleteUser(userId) {
-    const initialLength = users.length;
-    users = users.filter(user => user.id !== userId);
-
-    saveUsers();
-    return {message: initialLength !== users.length ? "User delete success" : "Not found"}
+    const success = deleteUserById(userId);
+    return { message: success ? "User deleted successfully" : "Not found" };
 }
 
 export {

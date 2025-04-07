@@ -3,14 +3,14 @@ import fs from 'fs';
 // Load data from JSON file
 function loadData(file) {
     try {
-        if (!fs.existsSync(file)) return { data: [] };
         const json = fs.readFileSync(file, 'utf8');
-        return JSON.parse(json);
+        return json ? JSON.parse(json) : { data: [] };
     } catch (error) {
         console.error(`Error loading ${file}:`, error);
         return { data: [] };
     }
 }
+
 
 // Save data to JSON file
 function saveData(file, dataObj) {

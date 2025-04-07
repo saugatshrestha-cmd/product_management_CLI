@@ -3,10 +3,9 @@ import FILE_PATHS from '../constants/filePaths.js';
 
 let categories = loadData(FILE_PATHS.CATEGORIES).data;
 
-let categoryIdCounter = categories.length ? categories[categories.length - 1].id + 1 : 1;
 
 function getNewId() {
-    return categoryIdCounter++;
+    return categories.length ? categories[categories.length - 1].id + 1 : 1;
 }
 
 // Save category to JSON file
@@ -15,7 +14,17 @@ function saveCategory() {
 }
 
 function addCategory(categoryData) {
-    const newCategory = { ...categoryData, id: getNewId() };
+    const newCategoryId = getNewId();
+    const newCategory = {  id: newCategoryId, ...categoryData }; 
+    categories.push(newCategory);
+    saveCategory();
 }
 
-export { categories, addCategory, saveCategory}
+function deleteCategoryById(categoryId) {
+    const initialLength = categories.length;
+    categories = categories.filter(category => category.id !== categoryId);
+    saveCategory();
+    return initialLength !== categories.length;
+}
+
+export { categories, addCategory, deleteCategoryById, saveCategory}

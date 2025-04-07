@@ -1,4 +1,4 @@
-import { products, addProduct, saveProducts } from "../repository/productCatalogRepo.js";
+import { products, addProduct, deleteProductById, saveProducts } from "../repository/productCatalogRepo.js";
 import { findCategoryById } from "./categoryService.js"
 
 //Find product by id
@@ -30,10 +30,7 @@ function createProduct(productData) {
         quantity
     };
 
-    // Add the product
     const newProduct = addProduct(newProductData);
-    products.push(newProduct);
-    saveProducts();
     return { message: "Product added successfully" };
 }
 
@@ -66,11 +63,11 @@ function updateProduct(productId, updatedInfo) {
 }
 
 //Update quantity
-function updateQuantity(productId, updateQuantity) {
+function updateQuantity(productId, newQuantity) {
     const product = findProductById(productId);
     if (!product) return { message: "Product not found" };
 
-    product.quantity += updateQuantity; 
+    product.quantity += newQuantity; 
     if (product.quantity < 0) product.quantity = 0; // Prevent negative stock
     saveProducts();
     return { message: "Product quantity updated successfully" };
@@ -101,10 +98,8 @@ function bulkUpdateAllQuantities(quantityChange) {
 
 //Delete product
 function deleteProduct(productId) {
-    const initialLength = products.length;
-    products = products.filter(product => product.id !== productId);
-    saveProducts();
-    return { message: initialLength !== products.length ? "Product deleted successfully" : "Not found" };
+    const success = deleteProductById(productId);
+    return { message: success ? "Product deleted successfully" : "Not found" };
 }
 
 export {

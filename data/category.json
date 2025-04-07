@@ -1,16 +1,16 @@
 {
   "data": [
     {
-      "name": "Electronics",
-      "id": 1
+      "id": 1,
+      "name": "Electronics"
     },
     {
-      "name": "Clothes",
-      "id": 2
+      "id": 2,
+      "name": "Clothes"
     },
     {
-      "name": "Foods",
-      "id": 3
+      "id": 3,
+      "name": "Foods"
     }
   ]
 }

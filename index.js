@@ -1,54 +1,34 @@
-import { createUser, getUserById, getAllUsers, updateUser, updateEmail, updatePassword, deleteUser } from "./services/userService.js";
-import { createProduct, getProductById, getAllProducts, updateProduct, updateQuantity, bulkUpdateAllPrices, bulkUpdateAllQuantities, deleteProduct } from "./services/productService.js";
-import { createCategory, getCategoryById, getAllCategory, updateCategory, deleteCategory } from "./services/categoryService.js";
+import { handleProductCommand } from './routes/productRoute.js';
+import { handleUserCommand } from './routes/userRoute.js';
+import { handleCategoryCommand } from './routes/categoryRoute.js';
 
-console.log(createUser({firstName: 'John', lastName: 'Doe', email: 'john@example.com', password: 'password123', phone: '123-456-7890', address: 'Kathmandu'}));
-console.log(createUser({firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', password: 'password456', phone: '987-654-3210', address: 'Pokhara'}));
-console.log(createUser({firstName: 'Patrick', lastName: 'Reeves', email: 'john@example.com', password: 'password123', phone: '456-132-3574', address: 'Kathmandu'}));
+const [, , resource, command, ...args] = process.argv;
 
-// console.log(getUserById(1));
-// console.log(getUserById(3));
+switch (resource) {
+  case 'product':
+    handleProductCommand(command, args);
+    break;
+  case 'user':
+    handleUserCommand(command, args);
+    break;
+  case 'category':
+    handleCategoryCommand(command, args);
+    break;
+  default:
+    console.log(`Unknown resource: ${resource}`);
+}
 
-// console.log(updateUser(1, { firstName: 'Updated' }));
-// console.log(updateEmail(1, 'john@updated.com' ));
-// console.log(updatePassword(1, '123password' ));
+// node index.js user list
+// node index.js user add --firstName "John" --lastName "Doe" --email "john@example.com" --password "pass123" --phone "1234567890" --address "123 Main St"
+// node index.js user update 1 --email "john.doe@example.com"
+// node index.js user delete 1
 
-// console.log(getUserById(1));
+// node index.js product list
+// node index.js product add --name "Laptop" --price 999.99 --quantity 10 --categoryId 1
+// node index.js product update 1 --name "Gaming Laptop" --price 1299.99
+// node index.js product delete 1
 
-// console.log(deleteUser(1));
-// console.log(getAllUsers());
-
-console.log(createCategory({name: "Electronics"}));
-console.log(createCategory({name: "Clothes"}));
-console.log(createCategory({name: "Foods"}));
-
-// console.log(getCategoryById(1));
-// console.log(getAllCategory());
-
-// console.log(updateCategory(1,{name: "Updated"}));
-
-// console.log(deleteCategory(1));
-
-console.log(createProduct({name: "Laptop", price: 999.99, categoryName: "Electronics", quantity: 10}));
-console.log(createProduct({name: "PC", price: 1999.99, categoryName: "Electronics", quantity: 10}));
-console.log(createProduct({name: "Phone", price: 599.99, categoryName: "Electronics", quantity: 10}));
-console.log(createProduct({name: "Shirt", price: 19.99, categoryName: "Clothes", quantity: 100}));
-console.log(createProduct({name: "Carrot", price: 1.99, categoryName: "Foods", quantity: 100}));
-
-// console.log(getProductById(1));
-// console.log(getAllProducts());
-
-// console.log(updateProduct(1, {name: "Laptop updated", price: 799.99}));
-// console.log(getProductById(1));
-
-// console.log(updateQuantity(1, -11));
-// console.log(getProductById(1));
-
-// console.log(bulkUpdateAllPrices(6999.99));
-// console.log(getAllProducts());
-
-// console.log(bulkUpdateAllQuantities(-20));
-// console.log(getAllProducts());
-
-// console.log(deleteProduct(1));
-// console.log(getAllProducts());
+// node index.js category list
+// node index.js category add --name "Electronics"
+// node index.js category update 1 --name "Gadgets"
+// node index.js category delete 1

@@ -1,4 +1,4 @@
-import { categories, addCategory, saveCategory } from "../repository/categoryDirectoryRepo.js";
+import { categories, addCategory, deleteCategoryById, saveCategory } from "../repository/categoryDirectoryRepo.js";
 
 //Check if category exists
 function isCategoryExists(name) {
@@ -24,8 +24,6 @@ function createCategory(categoryData) {
     };
 
     const newCategory = addCategory(newCategoryData);
-    categories.push(newCategory); 
-    saveCategory();
     return { message: "Category added successfully" };
 }
 
@@ -52,10 +50,8 @@ function updateCategory(categoryId, updatedInfo) {
 
 //Delete Category
 function deleteCategory(categoryId) {
-    const initialLength = categories.length;
-    categories = categories.filter(category => category.id !== categoryId);
-    saveCategory();
-    return { message: initialLength !== categories.length ? "Category deleted successfully" : "Not found" };
+    const success = deleteCategoryById(categoryId);
+    return { message: success ? "Category deleted successfully" : "Not found" };
 }
 
 export { 
