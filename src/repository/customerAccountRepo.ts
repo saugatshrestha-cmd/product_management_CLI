@@ -1,8 +1,8 @@
 import { loadData, saveData } from '../utils/fileHelper.js';
 import FILE_PATHS from '../constants/filePaths.js';
+import { User } from '../types/userTypes.js';
 
-let users = loadData(FILE_PATHS.USERS).data;
-
+let users: User [] = loadData(FILE_PATHS.USERS).data;
 
 function getNewId() {
     return users.length ? users[users.length - 1].id + 1 : 1;
@@ -13,7 +13,7 @@ function saveUsers() {
     saveData(FILE_PATHS.USERS, { data: users });
 }
 
-function addUser(userData) {
+function addUser(userData: Omit<User, 'id'>) {
     const newUserId = getNewId();
     const newUser = {  id: newUserId, ...userData }; 
     users.push(newUser);
@@ -21,7 +21,7 @@ function addUser(userData) {
 
 }
 
-function deleteUserById(userId) {
+function deleteUserById(userId: number) {
     const initialLength = users.length;
     users = users.filter(user => user.id !== userId);
 
@@ -29,4 +29,4 @@ function deleteUserById(userId) {
     return initialLength !== users.length;
 }
 
-export { users, addUser, deleteUserById, saveUsers}
+export { User, users, addUser, deleteUserById, saveUsers}

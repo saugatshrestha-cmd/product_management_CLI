@@ -6,13 +6,13 @@ function createSalt() {
 }
 
 // Function to hash a password with a salt
-function hashPassword(password, salt) {
+function hashPassword(password:string, salt: string) {
     const hash = crypto.scryptSync(password, salt, 64).toString('hex');
     return hash;
 }
 
 // Function to combine salt and hash into one string
-function combineSaltAndHash(salt, hash) {
+function combineSaltAndHash(salt: string, hash: string) {
     return `${salt}:${hash}`; // Combine salt and hash in a single string, separated by ':'
 }
 

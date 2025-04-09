@@ -1,13 +1,14 @@
 import { products, addProduct, deleteProductById, saveProducts } from "../repository/productCatalogRepo.js";
 import { findCategoryById } from "./categoryService.js"
+import { Product } from "../types/productTypes.js"
 
 //Find product by id
-function findProductById(productId) {
+function findProductById(productId: number) {
     return products.find(product => product.id === productId);
 }
 
 //Create product
-function createProduct(productData) {
+function createProduct(productData: Omit<Product, 'id'>) {
     const { name, description = "", price, categoryId, quantity } = productData; // Allow empty category & description
     
     //Check if the product already exists
@@ -17,8 +18,7 @@ function createProduct(productData) {
     }
 
     //Check if the category exists
-    const category = findCategoryById(categoryId);
-    if (!categoryId) {
+    if (!categoryId || !findCategoryById(categoryId)) {
         return { message: "Invalid category Id. Category does not exist." };
     }
 
@@ -26,7 +26,7 @@ function createProduct(productData) {
         name,
         description,
         price,
-        categoryId: category.id,
+        categoryId,
         quantity
     };
 
@@ -35,26 +35,23 @@ function createProduct(productData) {
 }
 
 //Get product by id
-function getProductById(productId) {
+function getProductById(productId: number){
     const product = findProductById(productId);
     return product || { message: "Product not found" };
 }
 
 //Get all products
-function getAllProducts() {
+function getAllProducts(): Product [] {
     return products;
 }
 
 //Update product
-function updateProduct(productId, updatedInfo) {
+function updateProduct(productId: number, updatedInfo: Product) {
     const product = findProductById(productId);
     if (!product) return { message: "Product not found" };
     //Check if the category exists
-    if (updatedInfo.categoryId) {
-        const category = findCategoryById(updatedInfo.categoryId);
-        if (!category.id) {
-            return { message: "Invalid category ID. Category does not exist." };
-        }
+    if (updatedInfo.categoryId && !findCategoryById(updatedInfo.categoryId)) {
+        return { message: "Invalid category ID. Category does not exist." };
     }
 
     Object.assign(product, updatedInfo);
@@ -63,7 +60,7 @@ function updateProduct(productId, updatedInfo) {
 }
 
 //Update quantity
-function updateQuantity(productId, newQuantity) {
+function updateQuantity(productId: number, newQuantity: number) {
     const product = findProductById(productId);
     if (!product) return { message: "Product not found" };
 
@@ -74,30 +71,31 @@ function updateQuantity(productId, newQuantity) {
 }
 
 //Bulk update prices
-function bulkUpdateAllPrices(newPrice) {
+function bulkUpdateAllPrices(newPrice: number) {
     if (newPrice < 0) {
         return { message: "Price cannot be negative" };
     }
 
-    products = products.map(product => ({ ...product, price: newPrice }));
+    products.forEach(product => {
+        product.price = newPrice;
+    });
     saveProducts();
     return { message: `Updated price for all ${products.length} product(s)` };
 }
 
 //Bulk Update quantities
-function bulkUpdateAllQuantities(quantityChange) {
-    products = products.map(product => {
+function bulkUpdateAllQuantities(quantityChange: number) {
+    products.forEach(product => {
         let newQuantity = product.quantity + quantityChange;
         if (newQuantity < 0) newQuantity = 0; // Prevent negative stock
-
-        return { ...product, quantity: newQuantity };
+        product.quantity = newQuantity;
     });
     saveProducts();
     return { message: `Updated quantity for all ${products.length} product(s)` };
 }
 
 //Delete product
-function deleteProduct(productId) {
+function deleteProduct(productId: number) {
     const success = deleteProductById(productId);
     return { message: success ? "Product deleted successfully" : "Not found" };
 }

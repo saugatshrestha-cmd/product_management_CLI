@@ -1,17 +1,18 @@
 import { categories, addCategory, deleteCategoryById, saveCategory } from "../repository/categoryDirectoryRepo.js";
+import { Category } from "../types/categoryTypes.js"
 
 //Check if category exists
-function isCategoryExists(name) {
+function isCategoryExists(name: string) {
     return categories.some(category => category.name.toLowerCase() === name.toLowerCase());
 }
 
 //Find category by id
-function findCategoryById(categoryId) {
+function findCategoryById(categoryId: number) {
     return categories.find(category => category.id === categoryId);
 }
 
 //Create category
-function createCategory(categoryData) {
+function createCategory(categoryData: Omit<Category, 'id'>) {
     const { name } = categoryData;
 
     //Check if category exists
@@ -28,18 +29,18 @@ function createCategory(categoryData) {
 }
 
 //Get category by id
-function getCategoryById(categoryId) {
+function getCategoryById(categoryId: number) {
     const category = findCategoryById(categoryId);
     return category || { message: "Category not found" };
 }
 
 //Get all category
-function getAllCategory() {
+function getAllCategory(): Category [] {
     return categories;
 }
 
 //Update Category
-function updateCategory(categoryId, updatedInfo) {
+function updateCategory(categoryId: number, updatedInfo: Category) {
     const category = findCategoryById(categoryId);
     if (!category) return { message: "Category not found" };
 
@@ -49,7 +50,7 @@ function updateCategory(categoryId, updatedInfo) {
 }
 
 //Delete Category
-function deleteCategory(categoryId) {
+function deleteCategory(categoryId: number) {
     const success = deleteCategoryById(categoryId);
     return { message: success ? "Category deleted successfully" : "Not found" };
 }
