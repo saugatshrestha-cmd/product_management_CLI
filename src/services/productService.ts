@@ -70,6 +70,15 @@ function updateQuantity(productId: number, newQuantity: number) {
     return { message: "Product quantity updated successfully" };
 }
 
+function decreaseQuantity(productId: number, newQuantity: number) {
+    const product = findProductById(productId);
+    if (!product) return { message: "Product not found" };
+
+    product.quantity -= newQuantity; 
+    if (product.quantity < 0) product.quantity = 0; // Prevent negative stock
+    saveProducts();
+}
+
 //Bulk update prices
 function bulkUpdateAllPrices(newPrice: number) {
     if (newPrice < 0) {
@@ -106,6 +115,7 @@ export {
     getAllProducts,
     updateProduct,
     updateQuantity,
+    decreaseQuantity,
     bulkUpdateAllPrices,
     bulkUpdateAllQuantities,
     deleteProduct

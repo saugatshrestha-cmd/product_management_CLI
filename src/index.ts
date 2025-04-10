@@ -1,6 +1,8 @@
 import { handleProductCommand } from './routes/productRoute.js';
 import { handleUserCommand } from './routes/userRoute.js';
 import { handleCategoryCommand } from './routes/categoryRoute.js';
+import { handleCartCommand } from './routes/cartRoute.js';
+import { handleOrderCommand } from './routes/orderRoute.js';
 
 const [, , resource, command, ...args] = process.argv;
 
@@ -13,6 +15,12 @@ switch (resource) {
     break;
   case 'category':
     handleCategoryCommand(command, args);
+    break;
+  case 'cart':
+    handleCartCommand(command, args);
+    break;
+  case 'order':
+    handleOrderCommand(command, args);
     break;
   default:
     console.log(`Unknown resource: ${resource}`);
@@ -32,3 +40,12 @@ switch (resource) {
 // node index.js category add --name "Electronics"
 // node index.js category update 1 --name "Gadgets"
 // node index.js category delete 1
+
+// node index.js cart add 2 --quantity 100 --userId 1
+// node index.js cart view --userId 1
+// node index.js cart remove 2 --userId 1
+// node index.js cart total --userId 1
+
+// node index.js order add --userId 1
+// node index.js order view --userId 1
+// node index.js order update-status --orderId 1 --status Shipped

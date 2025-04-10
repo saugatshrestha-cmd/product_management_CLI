@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -15,7 +15,14 @@ const getDataPath = (filename: string) =>
 
 export const loadData = (filename: string) => {
     const filePath = getDataPath(filename);
+    if (!existsSync(filePath)) {
+        saveData(filename, { data: [] });
+    }
     const fileContent = readFileSync(filePath, 'utf-8');
+    if (!fileContent.trim()) {
+        saveData(filename, { data: [] });
+        return { data: [] };
+    }
     return JSON.parse(fileContent);
 };
 
