@@ -1,65 +1,68 @@
-import { categories, addCategory, deleteCategoryById, saveCategory } from "../repository/categoryDirectoryRepo.js";
-import { Category } from "../types/categoryTypes.js"
+import { CategoryRepository } from "../repository/categoryDirectoryRepo";
+import { Category } from "../types/categoryTypes";
 
-//Check if category exists
-function isCategoryExists(name: string) {
-    return categories.some(category => category.name.toLowerCase() === name.toLowerCase());
-}
+export class CategoryService {
+  private categoryRepo: CategoryRepository;
 
-//Find category by id
-function findCategoryById(categoryId: number) {
-    return categories.find(category => category.id === categoryId);
-}
+  constructor() {
+    this.categoryRepo = new CategoryRepository();
+  }
 
-//Create category
-function createCategory(categoryData: Omit<Category, 'id'>) {
+  // Check if a category exists by name
+  private isCategoryExists(name: string): boolean {
+    return this.categoryRepo.getAll().some(
+      category => category.name.toLowerCase() === name.toLowerCase()
+    );
+  }
+
+  // Find category by id
+  public findCategoryById(categoryId: number): Category | undefined {
+    return this.categoryRepo.getAll().find(
+      category => category.id === categoryId
+    );
+  }
+
+  // Create a new category
+  createCategory(categoryData: Omit<Category, 'id'>) {
     const { name } = categoryData;
 
-    //Check if category exists
-    if (isCategoryExists(name)) {
-        return { message: "Category already exists" };
+    // Check if category exists
+    if (this.isCategoryExists(name)) {
+      return { message: "Category already exists" };
     }
 
-    const newCategoryData = {
-        name
-    };
-
-    const newCategory = addCategory(newCategoryData);
+    // Add the category
+    this.categoryRepo.addCategory(categoryData);
     return { message: "Category added successfully" };
-}
+  }
 
-//Get category by id
-function getCategoryById(categoryId: number) {
-    const category = findCategoryById(categoryId);
+  // Get category by id
+  getCategoryById(categoryId: number) {
+    const category = this.findCategoryById(categoryId);
     return category || { message: "Category not found" };
-}
+  }
 
-//Get all category
-function getAllCategory(): Category [] {
-    return categories;
-}
+  // Get all categories
+  getAllCategories(): Category[] {
+    return this.categoryRepo.getAll();
+  }
 
-//Update Category
-function updateCategory(categoryId: number, updatedInfo: Category) {
-    const category = findCategoryById(categoryId);
-    if (!category) return { message: "Category not found" };
+  // Update category details
+  updateCategory(categoryId: number, updatedInfo: Partial<Category>) {
+    const category = this.findCategoryById(categoryId);
+    if (!category) {
+      return { message: "Category not found" };
+    }
 
+    // Update category properties
     Object.assign(category, updatedInfo);
-    saveCategory();
+    this.categoryRepo.saveCategories();
     return { message: "Category updated successfully" };
-}
+  }
 
-//Delete Category
-function deleteCategory(categoryId: number) {
-    const success = deleteCategoryById(categoryId);
-    return { message: success ? "Category deleted successfully" : "Not found" };
+  // Delete category by id
+  deleteCategory(categoryId: number) {
+    const success = this.categoryRepo.deleteCategoryById(categoryId);
+    return { message: success ? "Category deleted successfully" : "Category not found" };
+  }
 }
-
-export { 
-    createCategory, 
-    getCategoryById, 
-    getAllCategory, 
-    updateCategory, 
-    deleteCategory,
-    findCategoryById
-};

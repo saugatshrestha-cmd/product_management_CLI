@@ -1,32 +1,41 @@
-import { loadData, saveData } from '../utils/fileHelper.js';
-import FILE_PATHS from '../constants/filePaths.js';
-import { Product } from '../types/productTypes.js';
+import { FileService } from '../utils/fileHelper';
+import FILE_PATHS from '../constants/filePaths';
+import { Product } from '../types/productTypes';
 
+export class ProductRepository {
+  private fileService: FileService;
+  private products: Product[];
 
-let products: Product [] = loadData(FILE_PATHS.PRODUCTS).data;
+  constructor() {
+    this.fileService = new FileService(FILE_PATHS.PRODUCTS);
+    this.products = this.fileService.load();
+  }
 
-function getNewId(): number {
-    return products.length ? products[products.length - 1].id + 1 : 1;
+  private getNewId(): number {
+    return this.products.length ? this.products[this.products.length - 1].id + 1 : 1;
+  }
+
+  public saveProducts(): void {
+    this.fileService.save({ data: this.products });
+  }
+
+  getAll(): Product[] {
+    return this.products;
+  }
+
+  addProduct(productData: Omit<Product, 'id'>): void {
+    const newProduct: Product = {
+      id: this.getNewId(),
+      ...productData,
+    };
+    this.products.push(newProduct);
+    this.saveProducts();
+  }
+
+  deleteProductById(productId: number): boolean {
+    const initialLength = this.products.length;
+    this.products = this.products.filter(product => product.id !== productId);
+    this.saveProducts();
+    return initialLength !== this.products.length;
+  }
 }
-
-// Save users to JSON file
-function saveProducts(){
-    saveData(FILE_PATHS.PRODUCTS, { data: products });
-}
-
-function addProduct(productData: Omit<Product, 'id'>) {
-    const newProductId = getNewId(); 
-    const newProduct = {  id: newProductId, ...productData };  
-    products.push(newProduct);
-    saveProducts();
-
-}
-
-function deleteProductById(productId: number) {
-    const initialLength = products.length;
-    products = products.filter(product => product.id !== productId);
-    saveProducts();
-    return initialLength !== products.length;
-}
-
-export { Product, products, addProduct, deleteProductById, saveProducts}

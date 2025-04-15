@@ -1,88 +1,103 @@
-import { Product } from '../types/productTypes.js';
-import { getProductById } from './productService.js';
-import { carts, saveCarts, addCart, updateCart } from '../repository/cartRepo.js';
-import { decreaseQuantity } from './productService.js';
+import { Product } from '../types/productTypes';
+import { CartRepository } from '../repository/cartRepo';
+import { ProductService } from './productService';
+import { Cart } from '../types/cartTypes';
 
-function isProduct(product: any): product is Product {
+export class CartService {
+  private cartRepo: CartRepository;
+  private productService: ProductService;
+
+  constructor() {
+    this.cartRepo = new CartRepository();
+    this.productService = new ProductService();
+  }
+
+  // Helper function to check if an object is a valid Product
+  private isProduct(product: any): product is Product {
     return product && typeof product.id === 'number' && typeof product.price === 'number';
-}
+  }
 
-function createCart(item: Product, quantity: number, userId: number) {
-    const product = getProductById(item.id);
+  // Create or update a cart with an item
+  createCart(item: Product, quantity: number, userId: number) {
+    const product = this.productService.getProductById(item.id);
 
-    if (!isProduct(product)) {
-        return { message: "Product not found" };
+    if (!this.isProduct(product)) {
+      return { message: "Product not found" };
     }
 
     const cartData = {
-        userId,
-        items: [{ productId: item.id, quantity }],
+      userId,
+      items: [{ productId: item.id, quantity }],
     };
 
-    const userCart = carts.find(cart => cart.userId === userId);
+    const userCart = this.cartRepo.findCartByUserId(userId);
 
     if (!userCart) {
-        addCart(cartData);
+      this.cartRepo.addCart(cartData);
     } else {
-        const userCartItemIndex = userCart.items.findIndex(
-            cartItem => cartItem.productId === product.id
-        );
+      const userCartItemIndex = userCart.items.findIndex(
+        cartItem => cartItem.productId === product.id
+      );
 
-        if (userCartItemIndex === -1) {
-            userCart.items.push({ productId: item.id, quantity });
-        } else {
-            userCart.items[userCartItemIndex].quantity += quantity;
-        }
+      if (userCartItemIndex === -1) {
+        userCart.items.push({ productId: item.id, quantity });
+      } else {
+        userCart.items[userCartItemIndex].quantity += quantity;
+      }
 
-        updateCart(userId, userCart.items);
+      this.cartRepo.updateCart(userId, userCart.items);
     }
-    decreaseQuantity(product.id, quantity);
 
+    this.productService.decreaseQuantity(product.id, quantity);
     return { message: 'Product added to cart successfully' };
-}
+  }
 
-function removeFromCart(productId: number, userId: number) {
-    const userCart = carts.find(cart => cart.userId === userId);
+  // Remove a product from the cart
+  removeFromCart(productId: number, userId: number) {
+    const userCart = this.cartRepo.findCartByUserId(userId);
 
     if (!userCart) {
-        return { message: `Cart not found for userId: ${userId}` };
+      return { message: `Cart not found for userId: ${userId}` };
     }
 
     const itemIndex = userCart.items.findIndex(item => item.productId === productId);
     if (itemIndex !== -1) {
-        userCart.items.splice(itemIndex, 1);
+      userCart.items.splice(itemIndex, 1);
     }
 
-    saveCarts();
+    this.cartRepo.saveCarts();
     return { message: 'Product removed from cart successfully' };
-}
+  }
 
-function calculateTotal(userId: number) {
-    const userCart = carts.find(cart => cart.userId === userId);
+  removeCartByUserId(userId: number) {
+    const removed = this.cartRepo.removeCartByUserId(userId);
+    return removed
+      ? { message: 'Cart removed successfully' }
+      : { message: `Cart not found for userId: ${userId}` };
+  }
+
+  // Calculate total cost of items in the cart
+  calculateTotal(userId: number) {
+    const userCart = this.cartRepo.findCartByUserId(userId);
 
     if (!userCart) {
-        return { message: `Cart not found for userId: ${userId}` };
+      return { message: `Cart not found for userId: ${userId}` };
     }
 
     const total = userCart.items.reduce((acc: number, current) => {
-        const product = getProductById(current.productId);
-        if (isProduct(product)) {
-            acc += product.price * current.quantity;
-        }
-        return acc;
+      const product = this.productService.getProductById(current.productId);
+      if (this.isProduct(product)) {
+        acc += product.price * current.quantity;
+      }
+      return acc;
     }, 0);
 
     return { total };
-}
+  }
 
-function getCartByUserId(userId: number) {
-    const userCart = carts.find(cart => cart.userId === userId);
+  // Get cart details by userId
+  getCartByUserId(userId: number) {
+    const userCart = this.cartRepo.findCartByUserId(userId);
     return userCart || { message: `Cart not found for userId: ${userId}` };
+  }
 }
-
-export {
-    createCart,
-    removeFromCart,
-    calculateTotal,
-    getCartByUserId,
-};

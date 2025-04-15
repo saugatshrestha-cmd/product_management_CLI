@@ -1,69 +1,68 @@
-import { createOrder, getOrderByUserId, updateOrderStatus } from '../services/orderService.js';
-import parseArgs from '../utils/parseArgs.js';
-import { Command, ArgsType } from '../types/parseTypes.js';
-import { OrderStatus } from '../types/orderTypes.js';
+import { OrderService } from '../services/orderService';
+import { Command, ArgsType } from '../types/parseTypes';
+import { OrderStatus } from '../types/orderTypes';
+import { ArgumentParser } from '../utils/parseArgs';
 
-export function handleOrderCommand(command: Command, args: ArgsType) {
+export class HandleOrderCommand {
+  private orderService: OrderService;
+
+  constructor() {
+    this.orderService = new OrderService();
+  }
+
+  handleCommand(command: Command, args: ArgsType) {
     switch (command) {
-        case 'add': {
-            const parsedArgs = parseArgs(args);
-            const userId = Number(parsedArgs.userId);
-
-            if (!userId) {
-                console.log("User Id is required.");
-                break;
-            }
-
-            const order = createOrder(userId);
-            if ('message' in order) {
-                console.log(order.message);
-                break;
-            }
-
-            console.log(order);
-            break;
-        }
-
-        case 'view': {
-            const parsedArgs = parseArgs(args);
-            const userId = Number(parsedArgs.userId);
-
-            if (!userId) {
-                console.log("User Id is required.");
-                break;
-            }
-
-            const order = getOrderByUserId(userId);
-            if ('message' in order) {
-                console.log(order.message);
-                break;
-            }
-
-            if (order.length === 0) {
-                console.log("No orders found for this user.");
-                break;
-            }
-
-            console.log(order);
-            break;
-        }
-        case 'update-status': {
-            const parsedArgs = parseArgs(args);
-            const orderId = Number(parsedArgs.orderId);
-            const status = parsedArgs.status as OrderStatus;
-        
-            if (!orderId || !status) {
-                console.log("Order ID and status are required.");
-                break;
-            }
-        
-            const result = updateOrderStatus(orderId, status);
-            console.log(result);
-            break;
-        }
-        
-
-        default:
-            console.log(`Unknown order command: ${command}`);
+      case 'add':
+        this.addOrder(args);
+        break;
+      case 'view':
+        this.viewOrder(args);
+        break;
+      case 'update-status':
+        this.updateOrderStatus(args);
+        break;
+      default:
+        console.log(`Unknown order command: ${command}`);
     }
+  }
+
+  private addOrder(args: ArgsType) {
+    const parsedArgs = new ArgumentParser(args).parse();
+    const userId = Number(parsedArgs.userId);
+
+    if (!userId) {
+      console.log("User Id is required.");
+      return;
+    }
+
+    const order = this.orderService.createOrder(userId);
+    console.log('message' in order ? order.message : order);
+  }
+
+  private viewOrder(args: ArgsType) {
+    const parsedArgs = new ArgumentParser(args).parse();
+    const userId = Number(parsedArgs.userId);
+
+    if (!userId) {
+      console.log("User Id is required.");
+      return;
+    }
+
+    const order = this.orderService.getOrderByUserId(userId);
+    console.log('message' in order ? order.message : (order.length ? order : "No orders found for this user."));
+  }
+
+  private updateOrderStatus(args: ArgsType) {
+    const parsedArgs = new ArgumentParser(args).parse();
+    const orderId = Number(parsedArgs.orderId);
+    const status = parsedArgs.status as OrderStatus;
+
+    if (!orderId || !status) {
+      console.log("Order ID and status are required.");
+      return;
+    }
+
+    const result = this.orderService.updateOrderStatus(orderId, status);
+    console.log(result);
+  }
 }

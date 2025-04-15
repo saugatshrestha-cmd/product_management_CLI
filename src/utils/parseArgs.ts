@@ -1,18 +1,25 @@
-type Parse = {
+type ParsedArgs = {
     [key: string]: string | number;
-}
-
-function parseArgs(argArray: string []) {
-    const parsed: Parse = {};
-    for (let i = 0; i < argArray.length; i++) {
-        if (argArray[i].startsWith('--')) {
-            const key = argArray[i].substring(2);
-            const value = argArray[i + 1];
-            parsed[key] = isNaN(Number(value)) ? value : Number(value);
-            i++;
-        }
+  };
+  
+  export class ArgumentParser {
+    private args: string[];
+  
+    constructor(args: string[]) {
+      this.args = args;
     }
-    return parsed;
-}
-
-export default parseArgs;  
+  
+    parse(): ParsedArgs {
+      const parsed: ParsedArgs = {};
+      for (let i = 0; i < this.args.length; i++) {
+        if (this.args[i].startsWith('--')) {
+          const key = this.args[i].substring(2);
+          const value = this.args[i + 1];
+          parsed[key] = isNaN(Number(value)) ? value : Number(value);
+          i++;
+        }
+      }
+      return parsed;
+    }
+  }
+  

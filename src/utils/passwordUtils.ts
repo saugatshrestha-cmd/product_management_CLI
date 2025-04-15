@@ -1,19 +1,16 @@
 import crypto from 'crypto';
 
-// Function to create a salt
-function createSalt() {
+export class PasswordManager {
+  createSalt(): string {
     return crypto.randomBytes(16).toString('hex');
-}
+  }
 
-// Function to hash a password with a salt
-function hashPassword(password:string, salt: string) {
-    const hash = crypto.scryptSync(password, salt, 64).toString('hex');
-    return hash;
-}
+  hashPassword(password: string, salt: string): string {
+    return crypto.scryptSync(password, salt, 64).toString('hex');
+  }
 
-// Function to combine salt and hash into one string
-function combineSaltAndHash(salt: string, hash: string) {
-    return `${salt}:${hash}`; // Combine salt and hash in a single string, separated by ':'
-}
+  combineSaltAndHash(salt: string, hash: string): string {
+    return `${salt}:${hash}`;
+  }
 
-export { createSalt, hashPassword, combineSaltAndHash };
+}

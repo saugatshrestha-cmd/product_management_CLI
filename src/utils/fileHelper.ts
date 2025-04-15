@@ -1,32 +1,33 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 interface DataObject {
-    data: any[];
+  data: any[];
 }
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+export class FileService {
+  private filePath: string;
 
+  constructor(filename: string) {
+    this.filePath = path.join(__dirname, '..', '..', 'data', filename);
 
-const getDataPath = (filename: string) =>
-    path.join(__dirname, '..', '..', 'data', filename); 
-
-export const loadData = (filename: string) => {
-    const filePath = getDataPath(filename);
-    if (!existsSync(filePath)) {
-        saveData(filename, { data: [] });
+    if (!existsSync(this.filePath)) {
+      this.save({ data: [] });
     }
-    const fileContent = readFileSync(filePath, 'utf-8');
+  }
+
+  load(): any[] {
+    const fileContent = readFileSync(this.filePath, 'utf-8');
     if (!fileContent.trim()) {
-        saveData(filename, { data: [] });
-        return { data: [] };
+      this.save({ data: [] });
+      return [];
     }
-    return JSON.parse(fileContent);
-};
 
-export const saveData = (filename: string, data: DataObject) => {
-    const filePath = getDataPath(filename);
-    writeFileSync(filePath, JSON.stringify(data, null, 2));
-};
+    const parsed: DataObject = JSON.parse(fileContent);
+    return parsed.data;
+  }
+
+  save(data: DataObject): void {
+    writeFileSync(this.filePath, JSON.stringify(data, null, 2));
+  }
+}

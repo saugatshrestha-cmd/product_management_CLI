@@ -1,7 +1,7 @@
 {
   "name": "project",
   "version": "1.0.0",
-  "type": "module",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -11,6 +11,6 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@types/node": "^22.14.0"
+    "@types/node": "^22.14.1"
   }
 }

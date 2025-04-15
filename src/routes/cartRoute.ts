@@ -1,86 +1,87 @@
-import {
-    createCart,
-    removeFromCart,
-    calculateTotal,
-    getCartByUserId,
-} from '../services/cartService.js';
-import parseArgs from '../utils/parseArgs.js';
-import { Command, ArgsType } from '../types/parseTypes.js';
-import { getProductById } from '../services/productService.js';
+import { CartService } from '../services/cartService';
+import { ProductService } from '../services/productService';
+import { Command, ArgsType } from '../types/parseTypes';
+import { ArgumentParser } from '../utils/parseArgs';
 
-export function handleCartCommand(command: Command, args: ArgsType) {
+export class HandleCartCommand {
+  private cartService: CartService;
+  private productService: ProductService;
+
+  constructor() {
+    this.cartService = new CartService();
+    this.productService = new ProductService();
+  }
+
+  handleCommand(command: Command, args: ArgsType) {
     switch (command) {
-        case 'add': {
-            const parsedArgs = parseArgs(args);
-            const productId = Number(args[0]);
-            const quantity = Number(parsedArgs.quantity);
-            const userId = Number(parsedArgs.userId);
-            const product = getProductById(productId);
+      case 'add': 
+        this.addToCart(args);
+        break;
 
-            if (!userId) {
-                console.log("User Id is required.");
-                break;
-            }
-            if (!product || 'message' in product) {
-                console.log("Product not found");
-                return;
-            }
+      case 'view':
+        this.viewCart(args);
+        break;
 
-            const result = createCart(product, quantity, userId);
-            console.log(result);
-            break;
-        }
-        case 'view': {
-            const parsedArgs = parseArgs(args);
-            const userId = Number(parsedArgs.userId);
-        
-            if (!userId) {
-                console.log("User Id is required.");
-                break;
-            }
-        
-            const cart = getCartByUserId(userId);
-            if ('message' in cart) {
-                console.log(cart.message);
-                break;
-            }
-        
-            if (cart.items.length === 0) {
-                console.log("Cart is empty!!");
-                break;
-            }
-        
-            console.log(cart);
-            break;
-        }
-        case 'remove': {
-            const parsedArgs = parseArgs(args);
-            const productId = Number(args[0]);
-            const userId = Number(parsedArgs.userId);
+      case 'remove':
+        this.removeFromCart(args);
+        break;
 
-            if (!userId) {
-                console.log("User Id is required.");
-                break;
-            }
+      case 'total':
+        this.viewCartTotal(args);
+        break;
 
-            const result = removeFromCart(productId, userId);
-            console.log(result);
-            break;
-        }
-        case 'total': {
-            const parsedArgs = parseArgs(args);
-            const userId = Number(parsedArgs.userId);
-
-            if (!userId) {
-                console.log("User Id is required.");
-                break;
-            }
-
-            const total = calculateTotal(userId);
-            console.log("Cart total:", total);
-            break;
-        }
-        default:
-            console.log(`Unknown cart command: ${command}`);
+      default:
+        console.log(`Unknown cart command: ${command}`);
     }
+  }
+
+  private addToCart(args: ArgsType) {
+    const { productId, quantity, userId } = this.parseArgs(args);
+    if (!userId) return console.log('User Id is required.');
+
+    const product = this.productService.getProductById(productId);
+    if ('message' in product) {
+      console.log('Product not found');
+      return;
+  }
+
+    const result = this.cartService.createCart(product, quantity, userId);
+    console.log(result);
+  }
+
+  private viewCart(args: ArgsType) {
+    const { userId } = this.parseArgs(args);
+    if (!userId) return console.log('User Id is required.');
+
+    const cart = this.cartService.getCartByUserId(userId);
+    if ('message' in cart) return console.log(cart.message);
+    if (cart.items.length === 0) return console.log('Cart is empty!');
+
+    console.log(cart);
+  }
+
+  private removeFromCart(args: ArgsType) {
+    const { productId, userId } = this.parseArgs(args);
+    if (!userId) return console.log('User Id is required.');
+
+    const result = this.cartService.removeFromCart(productId, userId);
+    console.log(result);
+  }
+
+  private viewCartTotal(args: ArgsType) {
+    const { userId } = this.parseArgs(args);
+    if (!userId) return console.log('User Id is required.');
+
+    const total = this.cartService.calculateTotal(userId);
+    console.log('Cart total:', total);
+  }
+
+  private parseArgs(args: ArgsType) {
+    const parsedArgs = new ArgumentParser(args).parse();
+    return {
+      productId: Number(args[0]),
+      quantity: Number(parsedArgs.quantity),
+      userId: Number(parsedArgs.userId),
+    };
+  }
 }

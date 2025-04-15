@@ -1,32 +1,41 @@
-import { loadData, saveData } from '../utils/fileHelper.js';
-import FILE_PATHS from '../constants/filePaths.js';
-import { User } from '../types/userTypes.js';
+import { FileService } from '../utils/fileHelper';
+import FILE_PATHS from '../constants/filePaths';
+import { User } from '../types/userTypes';
 
-let users: User [] = loadData(FILE_PATHS.USERS).data;
+export class UserRepository {
+  private fileService: FileService;
+  private users: User[];
 
-function getNewId() {
-    return users.length ? users[users.length - 1].id + 1 : 1;
+  constructor() {
+    this.fileService = new FileService(FILE_PATHS.USERS);
+    this.users = this.fileService.load();
+  }
+
+  private getNewId(): number {
+    return this.users.length ? this.users[this.users.length - 1].id + 1 : 1;
+  }
+
+  public saveUsers(): void {
+    this.fileService.save({ data: this.users });
+  }
+
+  getAll(): User[] {
+    return this.users;
+  }
+
+  addUser(userData: Omit<User, 'id'>): void {
+    const newUser: User = {
+      id: this.getNewId(),
+      ...userData,
+    };
+    this.users.push(newUser);
+    this.saveUsers();
+  }
+
+  deleteUserById(userId: number): boolean {
+    const initialLength = this.users.length;
+    this.users = this.users.filter(user => user.id !== userId);
+    this.saveUsers();
+    return initialLength !== this.users.length;
+  }
 }
-
-// Save users to JSON file
-function saveUsers() {
-    saveData(FILE_PATHS.USERS, { data: users });
-}
-
-function addUser(userData: Omit<User, 'id'>) {
-    const newUserId = getNewId();
-    const newUser = {  id: newUserId, ...userData }; 
-    users.push(newUser);
-    saveUsers();
-
-}
-
-function deleteUserById(userId: number) {
-    const initialLength = users.length;
-    users = users.filter(user => user.id !== userId);
-
-    saveUsers();
-    return initialLength !== users.length;
-}
-
-export { User, users, addUser, deleteUserById, saveUsers}

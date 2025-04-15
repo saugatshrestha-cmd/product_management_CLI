@@ -1,40 +1,62 @@
-import { loadData, saveData } from '../utils/fileHelper.js';
-import FILE_PATHS from '../constants/filePaths.js';
-import { Cart, CartItem } from '../types/cartTypes.js';
+import { FileService } from '../utils/fileHelper';
+import FILE_PATHS from '../constants/filePaths';
+import { Cart, CartItem } from '../types/cartTypes';
 
-let carts: Cart [] = loadData(FILE_PATHS.CART).data;
+export class CartRepository {
+  private fileService: FileService;
+  private carts: Cart[];
 
-function getNewId(): number {
-    return carts.length ? carts[carts.length - 1].id + 1 : 1;
-}
+  constructor() {
+    this.fileService = new FileService(FILE_PATHS.CART);
+    this.carts = this.fileService.load();
+  }
 
-function addCart(cartData: Omit<Cart, 'id'>) {
-    const newCart = {
-        id: getNewId(),
-        ...cartData,
+  private getNewId(): number {
+    return this.carts.length ? this.carts[this.carts.length - 1].id + 1 : 1;
+  }
+
+  public saveCarts(): void {
+    this.fileService.save({ data: this.carts });
+  }
+
+  getAll(): Cart[] {
+    return this.carts;
+  }
+
+  findCartByUserId(userId: number): Cart | undefined {
+    return this.carts.find(cart => cart.userId === userId);
+  }
+  
+  removeCartByUserId(userId: number): boolean {
+    const cartIndex = this.carts.findIndex(cart => cart.userId === userId);
+    if (cartIndex !== -1) {
+        this.carts.splice(cartIndex, 1);  // Remove the cart
+        this.saveCarts();  // Save the updated cart data
+        return true; // Return true if cart was removed
+      }
+    return false;
+  }
+
+  addCart(cartData: Omit<Cart, 'id'>): Cart {
+    const newCart: Cart = {
+      id: this.getNewId(),
+      ...cartData,
     };
 
-    carts.push(newCart);
-    saveCarts();
+    this.carts.push(newCart);
+    this.saveCarts();
     return newCart;
-}
+  }
 
-
-function updateCart(userId: number, updatedItems: CartItem[]) {
-    const userCart = carts.find(cart => cart.userId === userId);
+  updateCart(userId: number, updatedItems: CartItem[]): Cart | { message: string } {
+    const userCart = this.carts.find(cart => cart.userId === userId);
 
     if (!userCart) {
-        return { message: `Cart not found for userId: ${userId}` };
+      return { message: `Cart not found for userId: ${userId}` };
     }
 
     userCart.items = updatedItems;
-    saveCarts();
+    this.saveCarts();
     return userCart;
+  }
 }
-
-
-function saveCarts(){
-    saveData(FILE_PATHS.CART, { data: carts });
-}
-
-export {carts, saveCarts, addCart, updateCart}

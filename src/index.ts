@@ -1,30 +1,53 @@
-import { handleProductCommand } from './routes/productRoute.js';
-import { handleUserCommand } from './routes/userRoute.js';
-import { handleCategoryCommand } from './routes/categoryRoute.js';
-import { handleCartCommand } from './routes/cartRoute.js';
-import { handleOrderCommand } from './routes/orderRoute.js';
+import { HandleProductCommand } from './routes/productRoute';
+import { HandleUserCommand } from './routes/userRoute';
+import { HandleCategoryCommand } from './routes/categoryRoute';
+import { HandleCartCommand } from './routes/cartRoute';
+import { HandleOrderCommand } from './routes/orderRoute';
 
+class CommandHandler {
+  private productCommandHandler: HandleProductCommand;
+  private userCommandHandler: HandleUserCommand;
+  private categoryCommandHandler: HandleCategoryCommand;
+  private cartCommandHandler: HandleCartCommand;
+  private orderCommandHandler: HandleOrderCommand;
+
+  constructor() {
+    this.productCommandHandler = new HandleProductCommand();
+    this.userCommandHandler = new HandleUserCommand();
+    this.categoryCommandHandler = new HandleCategoryCommand();
+    this.cartCommandHandler = new HandleCartCommand();
+    this.orderCommandHandler = new HandleOrderCommand();
+  }
+
+  public handleCommand(resource: string, command: string, args: string[]): void {
+    switch (resource) {
+      case 'product':
+        this.productCommandHandler.handleCommand(command, args);
+        break;
+      case 'user':
+        this.userCommandHandler.handleCommand(command, args);
+        break;
+      case 'category':
+        this.categoryCommandHandler.handleCommand(command, args);
+        break;
+      case 'cart':
+        this.cartCommandHandler.handleCommand(command, args);
+        break;
+      case 'order':
+        this.orderCommandHandler.handleCommand(command, args);
+        break;
+      default:
+        console.log(`Unknown resource: ${resource}`);
+    }
+  }
+}
+
+// Main execution logic
 const [, , resource, command, ...args] = process.argv;
 
-switch (resource) {
-  case 'product':
-    handleProductCommand(command, args);
-    break;
-  case 'user':
-    handleUserCommand(command, args);
-    break;
-  case 'category':
-    handleCategoryCommand(command, args);
-    break;
-  case 'cart':
-    handleCartCommand(command, args);
-    break;
-  case 'order':
-    handleOrderCommand(command, args);
-    break;
-  default:
-    console.log(`Unknown resource: ${resource}`);
-}
+// Create an instance of CommandHandler and call the handleCommand method
+const commandHandler = new CommandHandler();
+commandHandler.handleCommand(resource, command, args);
 
 // node index.js user list
 // node index.js user add --firstName "John" --lastName "Doe" --email "john@example.com" --password "pass123" --phone "1234567890" --address "123 Main St"
@@ -41,7 +64,7 @@ switch (resource) {
 // node index.js category update 1 --name "Gadgets"
 // node index.js category delete 1
 
-// node index.js cart add 2 --quantity 100 --userId 1
+// node index.js cart add 1 --quantity 100 --userId 1
 // node index.js cart view --userId 1
 // node index.js cart remove 2 --userId 1
 // node index.js cart total --userId 1
