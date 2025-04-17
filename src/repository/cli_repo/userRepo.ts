@@ -1,6 +1,6 @@
-import { FileService } from '../utils/fileHelper';
-import FILE_PATHS from '../constants/filePaths';
-import { User } from '../types/userTypes';
+import { FileService } from '../../utils/fileHelper';
+import FILE_PATHS from '../../constants/filePaths';
+import { User } from '../../types/userTypes';
 
 export class UserRepository {
   private fileService: FileService;

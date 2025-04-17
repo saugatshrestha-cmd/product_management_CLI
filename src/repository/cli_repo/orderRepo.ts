@@ -1,6 +1,6 @@
-import { FileService } from '../utils/fileHelper';
-import FILE_PATHS from '../constants/filePaths';
-import { Order } from '../types/orderTypes';
+import { FileService } from '../../utils/fileHelper';
+import FILE_PATHS from '../../constants/filePaths';
+import { Order } from '../../types/orderTypes';
 
 export class OrderRepository {
   private fileService: FileService;

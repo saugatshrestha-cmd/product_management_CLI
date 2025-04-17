@@ -1,4 +1,4 @@
-import { ProductRepository } from '../repository/productCatalogRepo';
+import { ProductRepository } from '../repository/cli_repo/productRepo';
 import { CategoryService } from './categoryService';
 import { Product } from '../types/productTypes';
 

@@ -1,7 +1,7 @@
-import { ProductService } from '../services/productService';
-import { Command, ArgsType } from '../types/parseTypes';
-import { ArgumentParser } from '../utils/parseArgs';
-import { Product } from '../types/productTypes';
+import { ProductService } from '../../services/productService';
+import { Command, ArgsType } from '../../types/parseTypes';
+import { ArgumentParser } from '../../utils/parseArgs';
+import { Product } from '../../types/productTypes';
 
 export class HandleProductCommand {
   private productService = new ProductService();

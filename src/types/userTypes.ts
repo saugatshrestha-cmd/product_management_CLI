@@ -1,5 +1,7 @@
+import { ID } from "./commonTypes";
+
 export interface User {
-    id : number;
+    id : ID;
     firstName: string;
     lastName: string;
     email: string;

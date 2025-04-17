@@ -1,7 +1,7 @@
-import { UserService } from '../services/userService';
-import { User } from '../types/userTypes';
-import { Command, ArgsType } from '../types/parseTypes';
-import { ArgumentParser } from '../utils/parseArgs';
+import { UserService } from '../../services/userService';
+import { User } from '../../types/userTypes';
+import { Command, ArgsType } from '../../types/parseTypes';
+import { ArgumentParser } from '../../utils/parseArgs';
 
 export class HandleUserCommand {
     private userService = new UserService();

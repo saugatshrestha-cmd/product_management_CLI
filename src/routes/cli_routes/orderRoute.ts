@@ -1,7 +1,7 @@
-import { OrderService } from '../services/orderService';
-import { Command, ArgsType } from '../types/parseTypes';
-import { OrderStatus } from '../types/orderTypes';
-import { ArgumentParser } from '../utils/parseArgs';
+import { OrderService } from '../../services/orderService';
+import { Command, ArgsType } from '../../types/parseTypes';
+import { OrderStatus } from '../../types/orderTypes';
+import { ArgumentParser } from '../../utils/parseArgs';
 
 export class HandleOrderCommand {
   private orderService: OrderService;

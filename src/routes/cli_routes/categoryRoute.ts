@@ -1,7 +1,7 @@
-import { CategoryService } from '../services/categoryService';
-import { Command, ArgsType } from '../types/parseTypes';
-import { ArgumentParser } from '../utils/parseArgs';
-import { Category } from '../types/categoryTypes';
+import { CategoryService } from '../../services/categoryService';
+import { Command, ArgsType } from '../../types/parseTypes';
+import { ArgumentParser } from '../../utils/parseArgs';
+import { Category } from '../../types/categoryTypes';
 
 export class HandleCategoryCommand {
   private categoryService = new CategoryService();

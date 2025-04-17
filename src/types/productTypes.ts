@@ -1,5 +1,7 @@
+import { ID } from "./commonTypes";
+
 export interface Product {
-    id : number;
+    id : ID;
     name: string;
     description: string;
     price: number;

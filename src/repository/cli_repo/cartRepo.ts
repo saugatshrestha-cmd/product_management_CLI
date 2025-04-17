@@ -1,6 +1,6 @@
-import { FileService } from '../utils/fileHelper';
-import FILE_PATHS from '../constants/filePaths';
-import { Cart, CartItem } from '../types/cartTypes';
+import { FileService } from '../../utils/fileHelper';
+import FILE_PATHS from '../../constants/filePaths';
+import { Cart, CartItem } from '../../types/cartTypes';
 
 export class CartRepository {
   private fileService: FileService;
@@ -19,22 +19,26 @@ export class CartRepository {
     this.fileService.save({ data: this.carts });
   }
 
+  private getCarts(): Cart[] {
+      return this.fileService.load();
+  }
+
   getAll(): Cart[] {
-    return this.carts;
+    return this.getCarts();
   }
 
   findCartByUserId(userId: number): Cart | undefined {
-    return this.carts.find(cart => cart.userId === userId);
+    return this.getCarts().find(cart => cart.userId === userId);
   }
   
-  removeCartByUserId(userId: number): boolean {
+  removeCartByUserId(userId: number) {
     const cartIndex = this.carts.findIndex(cart => cart.userId === userId);
     if (cartIndex !== -1) {
         this.carts.splice(cartIndex, 1);  // Remove the cart
         this.saveCarts();  // Save the updated cart data
-        return true; // Return true if cart was removed
+        return { message: "Cart removed successfully" };
       }
-    return false;
+    return { message: "Cart not found" };
   }
 
   addCart(cartData: Omit<Cart, 'id'>): Cart {

@@ -1,6 +1,6 @@
-import { FileService } from '../utils/fileHelper';
-import FILE_PATHS from '../constants/filePaths';
-import { Product } from '../types/productTypes';
+import { FileService } from '../../utils/fileHelper';
+import FILE_PATHS from '../../constants/filePaths';
+import { Product } from '../../types/productTypes';
 
 export class ProductRepository {
   private fileService: FileService;
@@ -14,13 +14,17 @@ export class ProductRepository {
   private getNewId(): number {
     return this.products.length ? this.products[this.products.length - 1].id + 1 : 1;
   }
+  
+  private getProducts(): Product[] {
+      return this.fileService.load();
+  }
 
   public saveProducts(): void {
     this.fileService.save({ data: this.products });
   }
 
   getAll(): Product[] {
-    return this.products;
+    return this.getProducts();
   }
 
   addProduct(productData: Omit<Product, 'id'>): void {

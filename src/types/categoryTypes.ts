@@ -1,4 +1,6 @@
+import { ID } from "./commonTypes";
+
 export interface Category {
-    id : number;
+    id : ID;
     name: string;
 }

@@ -1,7 +1,7 @@
-import { CartService } from '../services/cartService';
-import { ProductService } from '../services/productService';
-import { Command, ArgsType } from '../types/parseTypes';
-import { ArgumentParser } from '../utils/parseArgs';
+import { CartService } from '../../services/cartService';
+import { ProductService } from '../../services/productService';
+import { Command, ArgsType } from '../../types/parseTypes';
+import { ArgumentParser } from '../../utils/parseArgs';
 
 export class HandleCartCommand {
   private cartService: CartService;

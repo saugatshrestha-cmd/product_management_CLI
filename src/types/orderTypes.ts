@@ -1,4 +1,5 @@
 import { CartItem } from "./cartTypes";
+import { ID } from "./commonTypes";
 
 export enum OrderStatus {
     PENDING = 'Pending',
@@ -10,7 +11,7 @@ export enum OrderStatus {
 
 
 export interface Order{
-    id: number,
+    id: ID,
     userId: number,
     total: number,
     timestamp: Date,

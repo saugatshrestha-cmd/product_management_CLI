@@ -1,6 +1,6 @@
-import { FileService } from '../utils/fileHelper';
-import FILE_PATHS from '../constants/filePaths';
-import { Category } from '../types/categoryTypes';
+import { FileService } from '../../utils/fileHelper';
+import FILE_PATHS from '../../constants/filePaths';
+import { Category } from '../../types/categoryTypes';
 
 export class CategoryRepository {
   private fileService: FileService;
@@ -19,8 +19,12 @@ export class CategoryRepository {
     this.fileService.save({ data: this.categories });
   }
 
+  private getCategories(): Category[] {
+    return this.fileService.load();
+  }
+
   getAll(): Category[] {
-    return this.categories;
+    return this.getCategories();
   }
 
   addCategory(categoryData: Omit<Category, 'id'>): void {

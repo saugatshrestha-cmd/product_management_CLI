@@ -1,4 +1,4 @@
-import { CategoryRepository } from "../repository/categoryDirectoryRepo";
+import { CategoryRepository } from "../repository/cli_repo/categoryRepo";
 import { Category } from "../types/categoryTypes";
 
 export class CategoryService {

@@ -1,4 +1,4 @@
-import { UserRepository } from '../repository/customerAccountRepo';
+import { UserRepository } from '../repository/cli_repo/userRepo';
 import { User } from '../types/userTypes';
 import { PasswordManager } from '../utils/passwordUtils';
 

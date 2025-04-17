@@ -1,7 +1,6 @@
 import { Product } from '../types/productTypes';
-import { CartRepository } from '../repository/cartRepo';
+import { CartRepository } from '../repository/cli_repo/cartRepo';
 import { ProductService } from './productService';
-import { Cart } from '../types/cartTypes';
 
 export class CartService {
   private cartRepo: CartRepository;

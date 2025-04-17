@@ -1,4 +1,4 @@
-import { OrderRepository } from '../repository/orderRepo';
+import { OrderRepository } from '../repository/cli_repo/orderRepo';
 import { CartService } from './cartService';
 import { OrderStatus } from '../types/orderTypes';
 import { CartItem } from '../types/cartTypes';
@@ -60,6 +60,6 @@ export class OrderService {
     order.status = newStatus;
     this.orderRepo.saveOrders();
 
-    return { message: `Order status updated to ${newStatus}.` };
+    return { message: "Order status updated" };
   }
 }
