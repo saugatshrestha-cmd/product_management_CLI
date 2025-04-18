@@ -15,7 +15,7 @@ export class HandleCategoryCommand {
       case 'add': {
         const categoryData = new ArgumentParser(args).parse();
         const result = this.categoryService.createCategory(categoryData as unknown as Category);
-        console.log(result.message);
+        console.log(result);
         break;
       }
 
@@ -24,7 +24,7 @@ export class HandleCategoryCommand {
         if (isNaN(categoryId)) return console.log('Invalid category ID.');
         const updatedInfo = new ArgumentParser(args.slice(1)).parse();
         const result = this.categoryService.updateCategory(categoryId, updatedInfo as unknown as Category);
-        console.log(result.message);
+        console.log(result);
         break;
       }
 
@@ -32,7 +32,7 @@ export class HandleCategoryCommand {
         const categoryId = Number(args[0]);
         if (isNaN(categoryId)) return console.log('Invalid category ID.');
         const result = this.categoryService.deleteCategory(categoryId);
-        console.log(result.message);
+        console.log(result);
         break;
       }
 

@@ -7,7 +7,7 @@ const categoryService = new CategoryService();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const categories = categoryService.getAllCategories();
+    const categories = await categoryService.getAllCategories();
     res.json(categories);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching categories' });
@@ -17,7 +17,7 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const categoryId = Number(req.params.id);
-    const result = categoryService.getCategoryById(categoryId);
+    const result = await categoryService.getCategoryById(categoryId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching category' });
@@ -28,7 +28,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 router.post('/', async (req: Request, res: Response) => {
   try {
     const categoryId = req.body;
-    const result = categoryService.createCategory(categoryId);
+    const result = await categoryService.createCategory(categoryId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error creating category' });
@@ -40,7 +40,7 @@ router.put('/:id', async (req: Request, res: Response) => {
   try {
     const categoryId = Number(req.params.id);
     const updatedInfo = req.body;
-    const result = categoryService.updateCategory(categoryId, updatedInfo);
+    const result = await categoryService.updateCategory(categoryId, updatedInfo);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error updating category' });
@@ -51,7 +51,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const categoryId = Number(req.params.id);
-    const result = categoryService.deleteCategory(categoryId);
+    const result = await categoryService.deleteCategory(categoryId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error deleting category' });

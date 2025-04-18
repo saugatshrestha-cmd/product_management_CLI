@@ -7,20 +7,20 @@ const productService = new ProductService();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const products = productService.getAllProducts();
+    const products = await productService.getAllProducts();
     res.json(products);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching categories' });
+    res.status(500).json({ message: 'Error fetching products' });
   }
 });
 
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const productId = Number(req.params.id);
-    const result = productService.getProductById(productId);
+    const result = await productService.getProductById(productId);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching category' });
+    res.status(500).json({ message: 'Error fetching product' });
   }
 });
 
@@ -28,10 +28,10 @@ router.get('/:id', async (req: Request, res: Response) => {
 router.post('/', async (req: Request, res: Response) => {
   try {
     const productId = req.body;
-    const result = productService.createProduct(productId);
+    const result = await productService.createProduct(productId);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating category' });
+    res.status(500).json({ message: 'Error creating product' });
   }
 });
 
@@ -40,10 +40,10 @@ router.put('/:id', async (req: Request, res: Response) => {
   try {
     const productId = Number(req.params.id);
     const updatedInfo = req.body;
-    const result = productService.updateProduct(productId, updatedInfo);
+    const result = await productService.updateProduct(productId, updatedInfo);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Error updating category' });
+    res.status(500).json({ message: 'Error updating product' });
   }
 });
 
@@ -51,10 +51,10 @@ router.put('/:id', async (req: Request, res: Response) => {
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const productId = Number(req.params.id);
-    const result = productService.deleteProduct(productId);
+    const result = await productService.deleteProduct(productId);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting category' });
+    res.status(500).json({ message: 'Error deleting product' });
   }
 });
 

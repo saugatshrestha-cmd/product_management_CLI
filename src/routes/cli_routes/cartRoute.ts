@@ -12,68 +12,70 @@ export class HandleCartCommand {
     this.productService = new ProductService();
   }
 
-  handleCommand(command: Command, args: ArgsType) {
+  async handleCommand(command: Command, args: ArgsType) {
     switch (command) {
-      case 'add': 
-        this.addToCart(args);
+      case 'add': {
+        const { productId, quantity, userId } = this.parseArgs(args);
+        try {
+          const product = await this.productService.getProductById(productId); 
+          if ('message' in product) {
+            console.error(product.message); // Log error if product is not found
+            return; // Exit early
+          }
+          const result = await this.cartService.createCart(product, quantity, userId); // await for cart creation
+          console.log(result.message);
+        } catch (error) {
+          console.error('Error adding to cart:', error instanceof Error ? error.message : 'Unknown error');
+        }
         break;
+      }
 
-      case 'view':
-        this.viewCart(args);
-        break;
+      case 'view': {
+        const { userId } = this.parseArgs(args);
 
-      case 'remove':
-        this.removeFromCart(args);
+        // Handle asynchronous call to view cart
+        try {
+          const cart = await this.cartService.getCartByUserId(userId); // await for cart fetch
+          console.log(cart);
+        } catch (error) {
+          console.error('Error viewing to cart:', error instanceof Error ? error.message : 'Unknown error');
+        }
         break;
+      }
 
-      case 'total':
-        this.viewCartTotal(args);
+      case 'remove': {
+        const { productId, userId } = this.parseArgs(args);
+
+        // Handle asynchronous call to remove from cart
+        try {
+          const result = await this.cartService.removeFromCart(productId, userId); // await for remove action
+          console.log(result.message);
+        } catch (error) {
+          console.error('Error removing from cart:', error instanceof Error ? error.message : 'Unknown error');
+        }
         break;
+      }
+
+      case 'total': {
+        const { userId } = this.parseArgs(args);
+
+        // Handle asynchronous call to calculate total
+        try {
+          const total = await this.cartService.calculateTotal(userId); // await for total calculation
+          if ('message' in total) {
+            console.log(total.message);
+          } else {
+            console.log('Cart total:', total.total);
+          }
+        } catch (error) {
+          console.error('Error calculating total:', error instanceof Error ? error.message : 'Unknown error');
+        }
+        break;
+      }
 
       default:
         console.log(`Unknown cart command: ${command}`);
     }
-  }
-
-  private addToCart(args: ArgsType) {
-    const { productId, quantity, userId } = this.parseArgs(args);
-    if (!userId) return console.log('User Id is required.');
-
-    const product = this.productService.getProductById(productId);
-    if ('message' in product) {
-      console.log('Product not found');
-      return;
-  }
-
-    const result = this.cartService.createCart(product, quantity, userId);
-    console.log(result);
-  }
-
-  private viewCart(args: ArgsType) {
-    const { userId } = this.parseArgs(args);
-    if (!userId) return console.log('User Id is required.');
-
-    const cart = this.cartService.getCartByUserId(userId);
-    if ('message' in cart) return console.log(cart.message);
-    if (cart.items.length === 0) return console.log('Cart is empty!');
-
-    console.log(cart);
-  }
-
-  private removeFromCart(args: ArgsType) {
-    const { productId, userId } = this.parseArgs(args);
-    if (!userId) return console.log('User Id is required.');
-
-    const result = this.cartService.removeFromCart(productId, userId);
-    console.log(result);
-  }
-
-  private viewCartTotal(args: ArgsType) {
-    const { userId } = this.parseArgs(args);
-    if (!userId) return console.log('User Id is required.');
-
-    const total = this.cartService.calculateTotal(userId);
-    console.log('Cart total:', total);
   }
 
   private parseArgs(args: ArgsType) {

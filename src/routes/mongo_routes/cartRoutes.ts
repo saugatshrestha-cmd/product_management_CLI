@@ -6,23 +6,32 @@ const router = express.Router();
 const cartService = new CartService();
 
 
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const userId = Number(req.params.id);
-    const result = cartService.getCartByUserId(userId);
-    res.json(result);
+    const carts = await cartService.getAllCarts();
+    res.json(carts);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching category' });
+    res.status(500).json({ message: 'Error fetching carts' });
   }
 });
 
-router.get('/:id/total', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const userId = Number(req.params.id);
+    const result = await cartService.getCartByUserId(userId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching cart' });
+  }
+});
+
+router.get('/:id/summary', async (req: Request, res: Response) => {
     try {
       const userId = Number(req.params.id);
-      const result = cartService.calculateTotal(userId);
+      const result = await cartService.calculateCartSummary(userId);
       res.json(result);
     } catch (error) {
-      res.status(500).json({ message: 'Error fetching category' });
+      res.status(500).json({ message: 'Error calculating summary' });
     }
   });
 
@@ -31,10 +40,22 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const { userId, productId, quantity } = req.body;
     const product = { id: productId } as Product;
-    const result = cartService.createCart(product, quantity , userId);
+    const result = await cartService.createCart(product, quantity , userId);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating category' });
+    res.status(500).json({ message: 'Error creating cart' });
+  }
+});
+
+router.put('/:id', async (req: Request, res: Response) => {
+  try {
+    const userId = Number(req.params.id);
+    const { productId, amount } = req.body;
+
+    const result = await cartService.updateItemQuantity(userId, productId, amount);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating product quantity in cart' });
   }
 });
 
@@ -42,10 +63,10 @@ router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const productId = Number(req.body.productId);
     const userId = Number(req.params.id);
-    const result = cartService.removeFromCart(productId, userId);
+    const result = await cartService.removeFromCart(productId, userId);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting category' });
+    res.status(500).json({ message: 'Error deleting cart' });
   }
 });
 

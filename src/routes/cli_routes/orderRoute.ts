@@ -42,14 +42,26 @@ export class HandleOrderCommand {
   private viewOrder(args: ArgsType) {
     const parsedArgs = new ArgumentParser(args).parse();
     const userId = Number(parsedArgs.userId);
-
+  
     if (!userId) {
       console.log("User Id is required.");
       return;
     }
-
-    const order = this.orderService.getOrderByUserId(userId);
-    console.log('message' in order ? order.message : (order.length ? order : "No orders found for this user."));
+  
+    // Handle the promise correctly by awaiting the result
+    this.orderService.getOrderByUserId(userId)
+      .then((order) => {
+        if ('message' in order) {
+          console.log(order.message); // Error message if returned
+        } else if (order.length === 0) {
+          console.log("No orders found for this user.");
+        } else {
+          console.log(order); // Orders found
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching orders:', error);
+      });
   }
 
   private updateOrderStatus(args: ArgsType) {
@@ -62,7 +74,7 @@ export class HandleOrderCommand {
       return;
     }
 
-    const result = this.orderService.updateOrderStatus(orderId, status);
+    const result = this.orderService.updateOrderStatus(orderId, {status});
     console.log(result);
   }
 }

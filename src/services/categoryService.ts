@@ -1,68 +1,59 @@
-import { CategoryRepository } from "../repository/cli_repo/categoryRepo";
+import { CategoryRepository } from "../repository/mongo_repo/categoryRepo";
 import { Category } from "../types/categoryTypes";
 
 export class CategoryService {
-  private categoryRepo: CategoryRepository;
+  private categoryRepository: CategoryRepository;
 
   constructor() {
-    this.categoryRepo = new CategoryRepository();
+    this.categoryRepository = new CategoryRepository();
   }
 
-  // Check if a category exists by name
-  private isCategoryExists(name: string): boolean {
-    return this.categoryRepo.getAll().some(
-      category => category.name.toLowerCase() === name.toLowerCase()
-    );
+  private async isCategoryExists(name: string): Promise<boolean> {
+    const categories = await this.categoryRepository.getAll();
+    return categories.some(category => category.name.toLowerCase() === name.toLowerCase());
   }
 
-  // Find category by id
-  public findCategoryById(categoryId: number): Category | undefined {
-    return this.categoryRepo.getAll().find(
-      category => category.id === categoryId
-    );
+  public async findCategoryById(categoryId: number): Promise<Category | undefined> {
+    const categories = await this.categoryRepository.getAll();
+    return categories.find(category => category.id === categoryId);
   }
 
-  // Create a new category
-  createCategory(categoryData: Omit<Category, 'id'>) {
-    const { name } = categoryData;
+  async createCategory(categoryData: Omit<Category, 'id'>): Promise<{ message: string }> {
+    const { name, description } = categoryData;
 
-    // Check if category exists
-    if (this.isCategoryExists(name)) {
+    if (await this.isCategoryExists(name)) {
       return { message: "Category already exists" };
     }
 
-    // Add the category
-    this.categoryRepo.addCategory(categoryData);
+    await this.categoryRepository.addCategory(categoryData);
     return { message: "Category added successfully" };
   }
 
-  // Get category by id
-  getCategoryById(categoryId: number) {
-    const category = this.findCategoryById(categoryId);
+  async getCategoryById(categoryId: number): Promise<Category | { message: string }> {
+    const category = await this.findCategoryById(categoryId);
     return category || { message: "Category not found" };
   }
 
-  // Get all categories
-  getAllCategories(): Category[] {
-    return this.categoryRepo.getAll();
+  async getAllCategories(): Promise<Category[]> {
+    return await this.categoryRepository.getAll();
   }
 
-  // Update category details
-  updateCategory(categoryId: number, updatedInfo: Partial<Category>) {
-    const category = this.findCategoryById(categoryId);
+  async updateCategory(categoryId: number, updatedInfo: Partial<Category>): Promise<{ message: string }> {
+    const category = await this.findCategoryById(categoryId);
     if (!category) {
       return { message: "Category not found" };
     }
 
-    // Update category properties
-    Object.assign(category, updatedInfo);
-    this.categoryRepo.saveCategories();
+    if (updatedInfo.name && await this.isCategoryExists(updatedInfo.name)) {
+      return { message: "Category name already exists" };
+    }
+
+    await this.categoryRepository.updateCategory(categoryId, updatedInfo);
     return { message: "Category updated successfully" };
   }
 
-  // Delete category by id
-  deleteCategory(categoryId: number) {
-    const success = this.categoryRepo.deleteCategoryById(categoryId);
+  async deleteCategory(categoryId: number): Promise<{ message: string }> {
+    const success = await this.categoryRepository.deleteCategoryById(categoryId);
     return { message: success ? "Category deleted successfully" : "Category not found" };
   }
 }

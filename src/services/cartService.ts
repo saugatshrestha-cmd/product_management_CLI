@@ -1,6 +1,7 @@
 import { Product } from '../types/productTypes';
-import { CartRepository } from '../repository/cli_repo/cartRepo';
+import { CartRepository } from '../repository/mongo_repo/cartRepo';
 import { ProductService } from './productService';
+import { Cart } from '../types/cartTypes';
 
 export class CartService {
   private cartRepo: CartRepository;
@@ -11,49 +12,76 @@ export class CartService {
     this.productService = new ProductService();
   }
 
-  // Helper function to check if an object is a valid Product
   private isProduct(product: any): product is Product {
     return product && typeof product.id === 'number' && typeof product.price === 'number';
   }
 
-  // Create or update a cart with an item
-  createCart(item: Product, quantity: number, userId: number) {
-    const product = this.productService.getProductById(item.id);
+  async createCart(item: Product, quantity: number, userId: number): Promise<{ message: string }> {
+    const product = await this.productService.getProductById(item.id);
 
+    // If the product is not found, return a message indicating failure
     if (!this.isProduct(product)) {
       return { message: "Product not found" };
     }
 
-    const cartData = {
-      userId,
-      items: [{ productId: item.id, quantity }],
-    };
-
-    const userCart = this.cartRepo.findCartByUserId(userId);
+    // Check if the product is already in the user's cart
+    const userCart = await this.cartRepo.findCartByUserId(userId);
 
     if (!userCart) {
-      this.cartRepo.addCart(cartData);
+      // If no cart exists, create a new one
+      await this.cartRepo.addCart({
+        userId,
+        items: [{ productId: product.id, quantity, price: product.price }],
+      });
     } else {
+      // If cart exists, add a new item
       const userCartItemIndex = userCart.items.findIndex(
         cartItem => cartItem.productId === product.id
       );
 
       if (userCartItemIndex === -1) {
-        userCart.items.push({ productId: item.id, quantity });
-      } else {
-        userCart.items[userCartItemIndex].quantity += quantity;
+        userCart.items.push({ productId: product.id, quantity, price: product.price });
       }
 
-      this.cartRepo.updateCart(userId, userCart.items);
+      await this.cartRepo.updateCart(userId, userCart.items);
     }
 
-    this.productService.decreaseQuantity(product.id, quantity);
     return { message: 'Product added to cart successfully' };
   }
 
-  // Remove a product from the cart
-  removeFromCart(productId: number, userId: number) {
-    const userCart = this.cartRepo.findCartByUserId(userId);
+  async updateItemQuantity(userId: number, productId: number, amount: number): Promise<{ message: string }> {
+    if (amount === 0) {
+      return { message: "Amount must not be zero" };
+    }
+  
+    const cart = await this.cartRepo.findCartByUserId(userId);
+    if (!cart) {
+      return { message: "Cart not found" };
+    }
+  
+    const itemIndex = cart.items.findIndex(item => item.productId === productId);
+  
+    if (itemIndex === -1) {
+      return { message: "Product not in cart" };
+    }
+  
+    // Update the quantity by adding or subtracting the amount
+    const updatedQty = cart.items[itemIndex].quantity + amount;
+  
+    // Ensure the quantity doesn't go below zero
+    if (updatedQty < 0) {
+      return { message: "Quantity cannot be negative" };
+    }
+  
+    cart.items[itemIndex].quantity = updatedQty;
+    await this.cartRepo.updateCart(userId, cart.items);
+  
+    return { message: "Product quantity updated successfully" };
+  }    
+  
+
+  async removeFromCart(productId: number, userId: number): Promise<{ message: string }> {
+    const userCart = await this.cartRepo.findCartByUserId(userId);
 
     if (!userCart) {
       return { message: `Cart not found for userId: ${userId}` };
@@ -62,41 +90,57 @@ export class CartService {
     const itemIndex = userCart.items.findIndex(item => item.productId === productId);
     if (itemIndex !== -1) {
       userCart.items.splice(itemIndex, 1);
+      await this.cartRepo.updateCart(userId, userCart.items);
     }
 
-    this.cartRepo.saveCarts();
     return { message: 'Product removed from cart successfully' };
   }
 
-  removeCartByUserId(userId: number) {
-    const removed = this.cartRepo.removeCartByUserId(userId);
+  async removeCartByUserId(userId: number): Promise<{ message: string }> {
+    const removed = await this.cartRepo.removeCartByUserId(userId);
     return removed
       ? { message: 'Cart removed successfully' }
       : { message: `Cart not found for userId: ${userId}` };
   }
 
-  // Calculate total cost of items in the cart
-  calculateTotal(userId: number) {
-    const userCart = this.cartRepo.findCartByUserId(userId);
-
+  async calculateCartSummary(userId: number): Promise<any> {
+    const userCart = await this.cartRepo.findCartByUserId(userId);
+  
     if (!userCart) {
       return { message: `Cart not found for userId: ${userId}` };
     }
-
-    const total = userCart.items.reduce((acc: number, current) => {
-      const product = this.productService.getProductById(current.productId);
+  
+    let subtotal = 0;
+    for (const item of userCart.items) {
+      const product = await this.productService.getProductById(item.productId);
       if (this.isProduct(product)) {
-        acc += product.price * current.quantity;
+        subtotal += product.price * item.quantity;
       }
-      return acc;
-    }, 0);
-
-    return { total };
+    }
+  
+    // Calculate shipping cost
+    const shipping = 10.00;
+  
+    // Calculate VAT (13%)
+    const vat = subtotal * 0.13;
+  
+    // Calculate total (including shipping and VAT)
+    const total = subtotal + shipping + vat;
+  
+    return {
+      subtotal,
+      shipping,
+      vat,
+      total,
+    };
   }
 
-  // Get cart details by userId
-  getCartByUserId(userId: number) {
-    const userCart = this.cartRepo.findCartByUserId(userId);
+  async getAllCarts(): Promise<Cart[]> {
+    return await this.cartRepo.getAll();
+  }
+
+  async getCartByUserId(userId: number): Promise<any> {
+    const userCart = await this.cartRepo.findCartByUserId(userId);
     return userCart || { message: `Cart not found for userId: ${userId}` };
   }
 }

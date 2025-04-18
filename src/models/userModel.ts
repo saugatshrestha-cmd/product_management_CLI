@@ -1,68 +1,53 @@
-// src/models/userModel.ts
-import mongoose, { Schema, Document, Model } from 'mongoose';
-import { PasswordManager } from '../utils/passwordUtils';  // Import PasswordManager
+import mongoose from 'mongoose';
+import { PasswordManager } from '../utils/passwordUtils';
 
 const passwordManager = new PasswordManager();
 
-// Define the User interface (this includes the TypeScript types for validation)
-interface UserDocument extends Document {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;  // Store hashed passwords
-  phone: string; // User phone number
-  address: string; // User address
-}
-
-
-const userSchema = new Schema<UserDocument>({
-  firstName: {
-    type: String,
-    required: true,
+const userSchema = new mongoose.Schema({
+  id: { 
+    type: Number, 
+    required: true
   },
-  lastName: {
-    type: String,
-    required: true,
+  firstName: { 
+    type: String, 
+    required: true 
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,  // Ensure the email is unique in the database
-    match: [/.+@.+\..+/, 'Please enter a valid email address'],  // Simple regex for email validation
+  lastName: { 
+    type: String, 
+    required: true 
   },
-  password: {
-    type: String,
-    required: true,
+  email: { 
+    type: String, 
+    required: true
   },
-  phone: {
-    type: String,
-    required: true,
+  password: { 
+    type: String, 
+    required: true 
   },
-  address: {
-    type: String,
-    required: true,
+  phone: { 
+    type: Number, 
+    required: true 
   },
+  address: { 
+    type: String, 
+    required: true 
+  }
 });
 
-userSchema.pre<UserDocument>('save', async function (next) {
-    if (!this.isModified('password')) return next();  // Skip if the password is not modified
-    
-    try {
-      const salt = passwordManager.createSalt();  // Generate a salt
-      const hashedPassword = passwordManager.hashPassword(this.password, salt);  // Hash the password using the salt
-      this.password = passwordManager.combineSaltAndHash(salt, hashedPassword);  // Combine the salt and hashed password
-      next();
-    } catch (error) {
-      // TypeScript infers `error` as `unknown`, so we must cast it to an Error
-    if (error instanceof Error) {
-        next(error);  // Pass the error to the next middleware
-      } else {
-        next(new Error('An unknown error occurred during password hashing'));  // If it's not an instance of Error, create a new Error object
-      }
-    }
-  });
 
+userSchema.pre('save', function (next) {
+  const user = this as any;
 
-const UserModel: Model<UserDocument>  = mongoose.model<UserDocument>('User', userSchema);
+  if (!user.isModified('password')) return next();
 
-export default UserModel;
+  try {
+    const salt = passwordManager.createSalt();
+    const hashedPassword = passwordManager.hashPassword(user.password, salt);
+    user.password = passwordManager.combineSaltAndHash(salt, hashedPassword);
+    next();
+  } catch (err) {
+    next(err instanceof Error ? err : new Error('Error hashing password'));
+  }
+});
+
+export const UserModel = mongoose.model('User', userSchema);

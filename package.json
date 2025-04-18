@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "start:api": "ts-node src/api/server.ts"
+    "start:api": "ts-node src/server.ts"
   },
   "keywords": [],
   "author": "",

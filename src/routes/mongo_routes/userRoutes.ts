@@ -7,7 +7,7 @@ const userService = new UserService();
 // Get all users
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const users = userService.getAllUsers();
+    const users = await userService.getAllUsers();
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching users' });
@@ -17,18 +17,17 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.id);
-    const result = userService.getUserById(userId);
+    const result = await userService.getUserById(userId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching user' });
   }
 });
 
-// Add a new user
 router.post('/', async (req: Request, res: Response) => {
   try {
     const userData = req.body;
-    const result = userService.createUser(userData);
+    const result = await userService.createUser(userData);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error creating user' });
@@ -40,7 +39,7 @@ router.put('/:id', async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.id);
     const updatedInfo = req.body;
-    const result = userService.updateUser(userId, updatedInfo);
+    const result = await userService.updateUser(userId, updatedInfo);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error updating user' });
@@ -51,7 +50,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.id);
-    const result = userService.deleteUser(userId);
+    const result = await userService.deleteUser(userId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error deleting user' });

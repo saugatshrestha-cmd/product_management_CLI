@@ -1,36 +1,43 @@
-import { OrderRepository } from '../repository/cli_repo/orderRepo';
+import { OrderRepository } from '../repository/mongo_repo/orderRepo';
 import { CartService } from './cartService';
-import { OrderStatus } from '../types/orderTypes';
+import { ProductService } from './productService';
+import { Order } from '../types/orderTypes';
+import { Status } from '../types/enumTypes';
 import { CartItem } from '../types/cartTypes';
 
 export class OrderService {
   private orderRepo: OrderRepository;
   private cartService: CartService;
+  private productService: ProductService;
 
   constructor() {
     this.orderRepo = new OrderRepository();
     this.cartService = new CartService();
+    this.productService = new ProductService();
   }
 
-  // Create a new order
-  createOrder(userId: number) {
-    const cart = this.cartService.getCartByUserId(userId);
+  async createOrder(userId: number): Promise<{ message: string }> {
+    const cart = await this.cartService.getCartByUserId(userId);
 
     if ('message' in cart) {
       return { message: `Cannot place order: ${cart.message}` };
     }
 
-    const totalResult = this.cartService.calculateTotal(userId);
+    const totalResult = await this.cartService.calculateCartSummary(userId);
     if ('message' in totalResult) {
       return { message: `Cannot calculate total: ${totalResult.message}` };
     }
 
-    const order = this.orderRepo.addOrder({
+    for (const item of cart.items as CartItem[]) {
+      await this.productService.decreaseQuantity(item.productId, item.quantity);
+    }
+
+    await this.orderRepo.addOrder({
       userId,
       items: cart.items as CartItem[],
       total: totalResult.total,
       timestamp: new Date(),
-      status: OrderStatus.PENDING,
+      status: Status.PENDING,
     });
 
     this.cartService.removeCartByUserId(userId);
@@ -38,9 +45,12 @@ export class OrderService {
     return { message: "Order created successfully" };
   }
 
-  // Get all orders for a specific user
-  getOrderByUserId(userId: number) {
-    const userOrders = this.orderRepo.getOrdersByUserId(userId);
+  async getAllOrders(): Promise<Order[]> {
+      return await this.orderRepo.getAll();
+    }
+
+  async getOrderByUserId(userId: number): Promise<{ message: string } | Order[]> {
+    const userOrders = await this.orderRepo.getOrdersByUserId(userId);
 
     if (userOrders.length === 0) {
       return { message: `No orders found for userId: ${userId}` };
@@ -49,17 +59,14 @@ export class OrderService {
     return userOrders;
   }
 
-  // Update the status of an order
-  updateOrderStatus(orderId: number, newStatus: OrderStatus) {
-    const order = this.orderRepo.findOrderById(orderId);
+  async updateOrderStatus(orderId: number, updatedInfo: Partial<Order>): Promise<{ message: string }> {
+    const order = await this.orderRepo.findOrderById(orderId);
 
     if (!order) {
       return { message: `Order with id ${orderId} not found.` };
     }
+    await this.orderRepo.updateOrder(orderId, updatedInfo);
 
-    order.status = newStatus;
-    this.orderRepo.saveOrders();
-
-    return { message: "Order status updated" };
+    return { message: "Order status updated successfully" };
   }
 }
