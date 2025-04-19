@@ -21,30 +21,6 @@ export class UserService {
     return users.find(user => user.id === userId);
   }
 
-  async createUser(userData: Omit<User, 'id'>): Promise<{ message: string }> {
-    const { firstName, lastName, email, password, phone, address } = userData;
-
-    if (await this.isEmailRegistered(email)) {
-      return { message: "Email already registered" };
-    }
-
-    const salt = this.passwordManager.createSalt();
-    const hashedPassword = this.passwordManager.hashPassword(password, salt);
-    const combined = this.passwordManager.combineSaltAndHash(salt, hashedPassword);
-
-    const newUserData = {
-      firstName,
-      lastName,
-      email,
-      password: combined,
-      phone,
-      address
-    };
-
-    await this.userRepository.addUser(newUserData);
-    return { message: "User registered successfully" };
-  }
-
   async getUserById(userId: number) {
     const user = await this.findUserById(userId);
     return user || { message: "User not found" };

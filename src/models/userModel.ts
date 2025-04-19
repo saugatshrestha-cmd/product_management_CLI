@@ -35,19 +35,4 @@ const userSchema = new mongoose.Schema({
 });
 
 
-userSchema.pre('save', function (next) {
-  const user = this as any;
-
-  if (!user.isModified('password')) return next();
-
-  try {
-    const salt = passwordManager.createSalt();
-    const hashedPassword = passwordManager.hashPassword(user.password, salt);
-    user.password = passwordManager.combineSaltAndHash(salt, hashedPassword);
-    next();
-  } catch (err) {
-    next(err instanceof Error ? err : new Error('Error hashing password'));
-  }
-});
-
 export const UserModel = mongoose.model('User', userSchema);
