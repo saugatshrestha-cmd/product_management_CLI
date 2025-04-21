@@ -17,7 +17,105 @@ router.get('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: 
   }
 });
 
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/my-cart', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const loggedInUser = (req as any).user;
+
+    if (!loggedInUser?.id) {
+      res.status(400).json({ message: "No userId in token" });
+      return;
+    }
+
+    const result = await cartService.getCartByUserId(loggedInUser.id);
+    if (!result) {
+      res.status(404).json({ message: "Cart not found for this user" });
+      return;
+    }
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching cart' });
+  }
+});
+
+router.post('/my-cart', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response) => {
+  try {
+    const loggedInUser = (req as any).user;
+
+    if (!loggedInUser?.id) {
+      res.status(400).json({ message: "No userId in token" });
+      return;
+    }
+
+    const { productId, quantity } = req.body;
+    const product = { id: productId } as Product;
+
+    const result = await cartService.createCart(product, quantity, loggedInUser.id);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating cart' });
+  }
+});
+
+router.put('/my-cart', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response) => {
+  try {
+    const loggedInUser = (req as any).user;
+
+    if (!loggedInUser?.id) {
+      res.status(400).json({ message: "No userId in token" });
+      return;
+    }
+
+    const { productId, amount } = req.body;
+
+    const result = await cartService.updateItemQuantity(loggedInUser.id, productId, amount);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating product quantity in cart' });
+  }
+});
+
+router.get('/my-cart/summary', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response) => {
+  try {
+    const loggedInUser = (req as any).user;
+
+    if (!loggedInUser?.id) {
+      res.status(400).json({ message: "No userId in token" });
+      return;
+    }
+
+    const summary = await cartService.calculateCartSummary(loggedInUser.id);
+
+    if (!summary) {
+      res.status(404).json({ message: "Summary not found for this user" });
+      return;
+    }
+
+    res.json(summary);
+  } catch (error) {
+    res.status(500).json({ message: 'Error calculating cart summary' });
+  }
+});
+
+router.delete('/my-cart', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response) => {
+  try {
+    const loggedInUser = (req as any).user;
+
+    if (!loggedInUser?.id) {
+      res.status(400).json({ message: "No userId in token" });
+      return;
+    }
+
+    const { productId } = req.body;
+
+    const result = await cartService.removeFromCart(productId, loggedInUser.id);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting item from cart' });
+  }
+});
+
+router.get('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.id);
     const result = await cartService.getCartByUserId(userId);
@@ -27,7 +125,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/:id/summary', async (req: Request, res: Response) => {
+router.get('/:id/summary', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
     try {
       const userId = Number(req.params.id);
       const result = await cartService.calculateCartSummary(userId);
@@ -38,7 +136,7 @@ router.get('/:id/summary', async (req: Request, res: Response) => {
   });
 
 
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const { userId, productId, quantity } = req.body;
     const product = { id: productId } as Product;
@@ -49,7 +147,7 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.id);
     const { productId, amount } = req.body;
@@ -61,7 +159,7 @@ router.put('/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const productId = Number(req.body.productId);
     const userId = Number(req.params.id);

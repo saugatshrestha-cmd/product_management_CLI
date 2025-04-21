@@ -12,6 +12,14 @@ export class UserRepository {
     return await UserModel.find();
   }
 
+  async findById(userId: number): Promise<User | null> {
+    return await UserModel.findOne({ id: userId });
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return await UserModel.findOne({ email });
+  }
+
   async addUser(userData: Omit<User, 'id'>): Promise<void> {
     const newId = await this.getNewId();
     const newUser = new UserModel({ id: newId, ...userData });

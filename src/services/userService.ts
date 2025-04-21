@@ -11,18 +11,8 @@ export class UserService {
     this.passwordManager = new PasswordManager();
   }
 
-  private async isEmailRegistered(email: string): Promise<boolean> {
-    const users = await this.userRepository.getAll();
-    return users.some(user => user.email === email);
-  }
-
-  private async findUserById(userId: number): Promise<User | undefined> {
-    const users = await this.userRepository.getAll();
-    return users.find(user => user.id === userId);
-  }
-
   async getUserById(userId: number) {
-    const user = await this.findUserById(userId);
+    const user = await this.userRepository.findById(userId);
     return user || { message: "User not found" };
   }
 
@@ -31,7 +21,7 @@ export class UserService {
   }
 
   async createAdmin(adminData: Omit<User, 'id'>): Promise<{ message: string }> {
-    const exists = await this.isEmailRegistered(adminData.email);
+    const exists = await this.userRepository.findByEmail(adminData.email);
     if (exists) return { message: "Email already registered" };
   
     const salt = this.passwordManager.createSalt();
@@ -46,26 +36,35 @@ export class UserService {
   
 
   async updateUser(userId: number, updatedInfo: User): Promise<{ message: string }> {
-    const user = await this.findUserById(userId);
+    const user = await this.userRepository.findById(userId);
     if (!user) {
       return { message: "User not found" };
     }
 
-    if (user.email !== updatedInfo.email && await this.isEmailRegistered(updatedInfo.email)) {
-      return { message: "Email already in use" };
+    if (updatedInfo.email || updatedInfo.password) {
+      return { message: "Email and password cannot be updated." };
     }
 
-    await this.userRepository.updateUser(userId, updatedInfo);
+    const { firstName, lastName, phone, address } = updatedInfo;
+
+    const updatedUserInfo = {
+      firstName,
+      lastName,
+      phone,
+      address,
+    };
+
+    await this.userRepository.updateUser(userId, updatedUserInfo);
     return { message: "User updated successfully" };
   }
 
   async updateEmail(userId: number, newEmail: string): Promise<{ message: string }> {
-    const user = await this.findUserById(userId);
+    const user = await this.userRepository.findById(userId);
     if (!user) {
       return { message: "User not found" };
     }
 
-    if (await this.isEmailRegistered(newEmail)) {
+    if (await this.userRepository.findByEmail(newEmail)) {
       return { message: "Email already in use" };
     }
 
@@ -74,7 +73,7 @@ export class UserService {
   }
 
   async updatePassword(userId: number, newPassword: string): Promise<{ message: string }> {
-    const user = await this.findUserById(userId);
+    const user = await this.userRepository.findById(userId);
     if (!user) {
       return { message: "User not found" };
     }

@@ -11,10 +11,6 @@ export class ProductService {
     this.categoryService = new CategoryService();
   }
 
-  private async findProductById(productId: number): Promise<Product | undefined> {
-    const products = await this.productRepository.getAll();
-    return products.find(product => product.id === productId);
-  }
 
   async createProduct(productData: Omit<Product, 'id'>): Promise<{ message: string }> {
     const { name, description = "", price, categoryId, quantity } = productData;
@@ -33,7 +29,7 @@ export class ProductService {
   }
 
   async getProductById(productId: number): Promise<Product | { message: string }> {
-    const product = await this.findProductById(productId);
+    const product = await this.productRepository.findById(productId);
     return product || { message: "Product not found" };
   }
 
@@ -42,7 +38,7 @@ export class ProductService {
   }
 
   async updateProduct(productId: number, updatedInfo: Partial<Product>): Promise<{ message: string }> {
-    const product = await this.findProductById(productId);
+    const product = await this.productRepository.findById(productId);
     if (!product) {
       return { message: "Product not found" };
     }
@@ -56,7 +52,7 @@ export class ProductService {
   }
 
   async updateQuantity(productId: number, newQuantity: number): Promise<{ message: string }> {
-    const product = await this.findProductById(productId);
+    const product = await this.productRepository.findById(productId);
     if (!product) {
       return { message: "Product not found" };
     }
@@ -67,7 +63,7 @@ export class ProductService {
   }
 
   async decreaseQuantity(productId: number, newQuantity: number): Promise<{ message: string }> {
-    const product = await this.findProductById(productId);
+    const product = await this.productRepository.findById(productId);
     if (!product) {
       return { message: "Product not found" };
     }
@@ -78,7 +74,7 @@ export class ProductService {
   }
 
   async increaseQuantity(productId: number, newQuantity: number): Promise<{ message: string }> {
-    const product = await this.findProductById(productId);
+    const product = await this.productRepository.findById(productId);
     if (!product) {
       return { message: "Product not found" };
     }

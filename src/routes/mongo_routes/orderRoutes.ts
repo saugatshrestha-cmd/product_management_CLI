@@ -17,7 +17,50 @@ router.get('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: 
   }
 });
 
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/my-orders', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const loggedInUser = (req as any).user;
+    if (!loggedInUser?.id) {
+      res.status(400).json({ message: 'No userId in token' });
+      return;
+    }
+
+    const result = await orderService.getOrderByUserId(loggedInUser.id);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching user orders' });
+  }
+});
+
+router.post('/my-orders', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const loggedInUser = (req as any).user;
+    if (!loggedInUser?.id) {
+      res.status(400).json({ message: 'No userId in token' });
+      return;
+    }
+
+    const result = await orderService.createOrder(loggedInUser.id);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating order' });
+  }
+});
+
+router.put('/my-orders/cancel', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response) => {
+  try {
+    const loggedInUser = (req as any).user;
+    const orderId = Number(req.body.orderId);
+
+    const result = await orderService.cancelOrder(orderId, loggedInUser.id);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error cancelling order' });
+  }
+});
+
+
+router.get('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.id);
     const result = await orderService.getOrderByUserId(userId);
@@ -28,7 +71,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const userId = Number(req.body.userId);
     const result = await orderService.createOrder(userId);
@@ -49,7 +92,7 @@ router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (re
     }
   });
 
-router.put('/:id/cancel', async (req: Request, res: Response) => {
+router.put('/:id/cancel', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const orderId = Number(req.params.id);
     const userId = Number(req.body.userId);
@@ -61,7 +104,7 @@ router.put('/:id/cancel', async (req: Request, res: Response) => {
   }
 });
 
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const orderId = Number(req.params.id);
     const result = await orderService.deleteOrder(orderId);

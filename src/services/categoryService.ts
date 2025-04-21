@@ -8,20 +8,10 @@ export class CategoryService {
     this.categoryRepository = new CategoryRepository();
   }
 
-  private async isCategoryExists(name: string): Promise<boolean> {
-    const categories = await this.categoryRepository.getAll();
-    return categories.some(category => category.name.toLowerCase() === name.toLowerCase());
-  }
-
-  public async findCategoryById(categoryId: number): Promise<Category | undefined> {
-    const categories = await this.categoryRepository.getAll();
-    return categories.find(category => category.id === categoryId);
-  }
-
   async createCategory(categoryData: Omit<Category, 'id'>): Promise<{ message: string }> {
     const { name, description } = categoryData;
 
-    if (await this.isCategoryExists(name)) {
+    if (await this.categoryRepository.findByName(name)) {
       return { message: "Category already exists" };
     }
 
@@ -30,7 +20,7 @@ export class CategoryService {
   }
 
   async getCategoryById(categoryId: number): Promise<Category | { message: string }> {
-    const category = await this.findCategoryById(categoryId);
+    const category = await this.categoryRepository.findById(categoryId);
     return category || { message: "Category not found" };
   }
 
@@ -39,12 +29,12 @@ export class CategoryService {
   }
 
   async updateCategory(categoryId: number, updatedInfo: Partial<Category>): Promise<{ message: string }> {
-    const category = await this.findCategoryById(categoryId);
+    const category = await this.categoryRepository.findById(categoryId);
     if (!category) {
       return { message: "Category not found" };
     }
 
-    if (updatedInfo.name && await this.isCategoryExists(updatedInfo.name)) {
+    if (updatedInfo.name && await this.categoryRepository.findByName(updatedInfo.name)) {
       return { message: "Category name already exists" };
     }
 

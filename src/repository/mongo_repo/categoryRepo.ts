@@ -12,6 +12,14 @@ export class CategoryRepository {
     return await CategoryModel.find();
   }
 
+  async findById(categoryId: number): Promise<Category | null> {
+    return await CategoryModel.findOne({ id: categoryId });
+  }
+
+  async findByName(name: string): Promise<Category | null> {
+    return await CategoryModel.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+  }
+
   async addCategory(categoryData: Omit<Category, 'id'>): Promise<void> {
     const newId = await this.getNewId();
     const newCategory = new CategoryModel({ id: newId, ...categoryData });

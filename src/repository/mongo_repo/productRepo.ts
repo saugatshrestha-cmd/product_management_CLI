@@ -12,6 +12,14 @@ export class ProductRepository {
     return await ProductModel.find();
   }
 
+  async findById(productId: number): Promise<Product | null> {
+    return await ProductModel.findOne({ id: productId });
+  }
+
+  async findByName(name: string): Promise<Product | null> {
+    return await ProductModel.findOne({ name });
+  }
+
   async addProduct(productData: Omit<Product, 'id'>): Promise<void> {
     const newId = await this.getNewId();
     const newProduct = new ProductModel({ id: newId, ...productData });

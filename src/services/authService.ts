@@ -45,8 +45,7 @@ export class AuthService {
     }
 
     async register(userData: Omit<User, 'id'>) {
-    const exists = await this.userRepository.getAll()
-        .then(users => users.some(u => u.email === userData.email));
+    const exists = await this.userRepository.findByEmail(userData.email);
     if (exists) return { message: 'Email already registered' };
 
     const salt = this.passwordManager.createSalt();
