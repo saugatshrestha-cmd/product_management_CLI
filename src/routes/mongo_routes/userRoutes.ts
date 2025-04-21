@@ -1,11 +1,13 @@
 import express, { Request, Response } from 'express';
 import { UserService } from '../../services/userService';
+import { AuthMiddleware } from '../../middleware/authMiddleware';
+import { RoleMiddleware } from '../../middleware/roleMiddleware';
 
 const router = express.Router();
 const userService = new UserService();
 
 // Get all users
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const users = await userService.getAllUsers();
     res.json(users);
@@ -36,8 +38,32 @@ router.put('/:id', async (req: Request, res: Response) => {
   }
 });
 
+router.put('/:id/change-password', async (req: Request, res: Response) => {
+  try {
+    const userId = Number(req.params.id);
+    const newPassword = req.body;
+
+    const result = await userService.updatePassword(userId, newPassword);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating password' });
+  }
+});
+
+router.put('/:id/change-email', async (req: Request, res: Response) => {
+  try {
+    const userId = Number(req.params.id);
+    const newEmail = req.body;
+
+    const result = await userService.updatePassword(userId, newEmail);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating password' });
+  }
+});
+
 // Delete a user
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const userId = Number(req.params.id);
     const result = await userService.deleteUser(userId);

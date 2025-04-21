@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { PasswordManager } from '../utils/passwordUtils';
+import { Role } from '../types/enumTypes';
 
 const passwordManager = new PasswordManager();
 
@@ -31,6 +32,12 @@ const userSchema = new mongoose.Schema({
   address: { 
     type: String, 
     required: true 
+  },
+  role: {
+    type: String,
+    enum: Object.values(Role),
+    default: 'user',
+    required: true
   }
 });
 

@@ -5,7 +5,8 @@ import userRoutes from './routes/mongo_routes/userRoutes';
 import orderRoutes from './routes/mongo_routes/orderRoutes';     
 import cartRoutes from './routes/mongo_routes/cartRoutes';
 import categoryRoutes from './routes/mongo_routes/categoryRoutes';
-import authRoutes from './routes/mongo_routes/authRoutes'
+import authRoutes from './routes/mongo_routes/authRoutes';
+import adminRoutes from './routes/mongo_routes/adminRoutes';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -24,6 +25,7 @@ app.use('/orders', orderRoutes);
 app.use('/carts', cartRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
 
 mongoose.connect(MONGO_URI)
     .then(() => {

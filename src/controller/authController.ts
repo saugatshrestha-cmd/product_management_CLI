@@ -1,4 +1,3 @@
-// src/auth/AuthController.ts
 import { Request, Response } from 'express';
 import { AuthService } from '../services/authService';
 
@@ -19,13 +18,7 @@ export class AuthController {
 
     res.status(200).json({
       message: result.message,
-      token: result.token,
-      user: {
-        id: result.user.id,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
-        email: result.user.email
-      }
+      token: result.token
     });
   };
 
@@ -38,13 +31,7 @@ export class AuthController {
 
     res.status(201).json({
       message: result.message,
-      token: result.token,
-      user: {
-        id: result.user.id,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
-        email: result.user.email
-      }
+      token: result.token
     });
   };
 }

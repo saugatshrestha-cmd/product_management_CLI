@@ -24,6 +24,18 @@ const orderSchema = new mongoose.Schema({
         enum: Object.values(Status),
         required: true
     },
+    cancelledAt: {
+        type: Date,
+        required: false
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
+    deletedAt: {
+        type: Date,
+        required: false,
+    },
     items: [{
         productId: {
             type: Number,

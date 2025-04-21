@@ -1,11 +1,13 @@
 import express, { Request, Response } from 'express';
 import { ProductService } from '../../services/productService';
+import { AuthMiddleware } from '../../middleware/authMiddleware';
+import { RoleMiddleware } from '../../middleware/roleMiddleware';
 
 const router = express.Router();
 const productService = new ProductService();
 
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const products = await productService.getAllProducts();
     res.json(products);
@@ -14,7 +16,7 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const productId = Number(req.params.id);
     const result = await productService.getProductById(productId);
@@ -25,7 +27,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const productId = req.body;
     const result = await productService.createProduct(productId);
@@ -36,7 +38,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const productId = Number(req.params.id);
     const updatedInfo = req.body;
@@ -48,7 +50,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 });
 
 
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const productId = Number(req.params.id);
     const result = await productService.deleteProduct(productId);

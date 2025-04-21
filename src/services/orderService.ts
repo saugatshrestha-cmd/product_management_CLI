@@ -69,4 +69,46 @@ export class OrderService {
 
     return { message: "Order status updated successfully" };
   }
+
+  async cancelOrder(orderId: number, userId: number): Promise<{ message: string }> {
+    const order = await this.orderRepo.findOrderById(orderId);
+    if (!order) return { message: "Order not found" };
+  
+    if (order.userId !== userId) return { message: "Unauthorized to cancel this order" };
+  
+    if (order.status !== Status.PENDING) return { message: "Only pending orders can be cancelled" };
+  
+    // Restock items
+    for (const item of order.items) {
+      await this.productService.increaseQuantity(item.productId, item.quantity);
+    }
+  
+    // Update order
+    await this.orderRepo.updateOrder(orderId, {
+      status: Status.CANCELLED,
+      cancelledAt: new Date(),
+    });
+  
+    return { message: "Order cancelled successfully" };
+  }
+
+  async deleteOrder(orderId: number): Promise<{ message: string }> {
+    const order = await this.orderRepo.findOrderById(orderId);
+    if (!order) return { message: "Order not found" };
+  
+    if (order.isDeleted) return { message: "Order already deleted" };
+
+    if (order.status !== Status.PENDING) {
+      return { message: `Cannot delete order. Only 'Pending' orders can be deleted.` };
+    }
+  
+    await this.orderRepo.updateOrder(orderId, {
+      isDeleted: true,
+      deletedAt: new Date()
+    });
+  
+    return { message: "Order deleted successfully" };
+  }
+  
+  
 }

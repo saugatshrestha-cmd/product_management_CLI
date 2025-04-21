@@ -30,6 +30,21 @@ export class UserService {
     return await this.userRepository.getAll();
   }
 
+  async createAdmin(adminData: Omit<User, 'id'>): Promise<{ message: string }> {
+    const exists = await this.isEmailRegistered(adminData.email);
+    if (exists) return { message: "Email already registered" };
+  
+    const salt = this.passwordManager.createSalt();
+    const hashed = this.passwordManager.hashPassword(adminData.password, salt);
+    const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
+  
+    const finalUser = { ...adminData, password: combined };
+    await this.userRepository.addUser(finalUser);
+  
+    return { message: "Admin created successfully" };
+  }  
+  
+
   async updateUser(userId: number, updatedInfo: User): Promise<{ message: string }> {
     const user = await this.findUserById(userId);
     if (!user) {

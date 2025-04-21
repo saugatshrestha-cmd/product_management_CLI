@@ -8,5 +8,8 @@ export interface Order{
     total: number,
     timestamp: Date,
     status: Status,
-    items: CartItem[]
+    items: CartItem[],
+    cancelledAt ?: Date | null,
+    isDeleted?: boolean,
+    deletedAt?: Date | null;
 }

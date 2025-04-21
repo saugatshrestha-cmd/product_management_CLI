@@ -50,8 +50,8 @@ export class CartService {
   }
 
   async updateItemQuantity(userId: number, productId: number, amount: number): Promise<{ message: string }> {
-    if (amount === 0) {
-      return { message: "Amount must not be zero" };
+    if (amount <= 0) {
+      return { message: "Amount must be greater than zero" }; // You can adjust the condition to allow only positive numbers.
     }
   
     const cart = await this.cartRepo.findCartByUserId(userId);
@@ -65,20 +65,13 @@ export class CartService {
       return { message: "Product not in cart" };
     }
   
-    // Update the quantity by adding or subtracting the amount
-    const updatedQty = cart.items[itemIndex].quantity + amount;
+    // Replace the current quantity with the new amount
+    cart.items[itemIndex].quantity = amount;
   
-    // Ensure the quantity doesn't go below zero
-    if (updatedQty < 0) {
-      return { message: "Quantity cannot be negative" };
-    }
-  
-    cart.items[itemIndex].quantity = updatedQty;
     await this.cartRepo.updateCart(userId, cart.items);
   
     return { message: "Product quantity updated successfully" };
   }    
-  
 
   async removeFromCart(productId: number, userId: number): Promise<{ message: string }> {
     const userCart = await this.cartRepo.findCartByUserId(userId);

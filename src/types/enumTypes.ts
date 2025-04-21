@@ -5,3 +5,8 @@ export enum Status {
     DELIVERED = 'Delivered',
     CANCELLED = 'Cancelled'
 }
+
+export enum Role {
+    ADMIN = 'admin',
+    USER = 'user'
+}

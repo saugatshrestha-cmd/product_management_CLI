@@ -1,12 +1,14 @@
 import express, { Request, Response } from 'express';
 import { CartService } from '../../services/cartService';
 import { Product } from '../../types/productTypes';
+import { AuthMiddleware } from '../../middleware/authMiddleware';
+import { RoleMiddleware } from '../../middleware/roleMiddleware';
 
 const router = express.Router();
 const cartService = new CartService();
 
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const carts = await cartService.getAllCarts();
     res.json(carts);

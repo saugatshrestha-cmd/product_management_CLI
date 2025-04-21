@@ -2,6 +2,7 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import { UserRepository } from '../repository/mongo_repo/userRepo';
 import { PasswordManager } from '../utils/passwordUtils';
 import { User } from '../types/userTypes';
+import { Role } from '../types/enumTypes';
 
 export class AuthService {
     private userRepository: UserRepository;
@@ -21,7 +22,6 @@ export class AuthService {
     }
     
         const passwordMatch = this.passwordManager.verifyPassword(password, user.password);
-        console.log('Password comparison result:', passwordMatch);
     
         if (!passwordMatch) {
         return { message: 'Invalid credentials' };
@@ -36,7 +36,7 @@ export class AuthService {
 
     
     const token = jwt.sign(
-        { id: user.id, email: user.email },
+        { id: user.id, email: user.email, role: user.role },
         secret as string, 
         { expiresIn } as SignOptions  
     );
@@ -53,11 +53,7 @@ export class AuthService {
     const hashed = this.passwordManager.hashPassword(userData.password, salt);
     const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
 
-    console.log('Registration Salt:', salt);
-    console.log('Registration Hash:', hashed);
-    console.log('Stored Combined Hash:', combined);
-
-    const finalUser = { ...userData, password: combined };
+    const finalUser = { ...userData, password: combined, role: Role.USER};
     await this.userRepository.addUser(finalUser);
 
     const user = await this.userRepository.getAll()
@@ -72,7 +68,7 @@ export class AuthService {
     const expiresIn = process.env.JWT_EXPIRES_IN || '1h';
 
     const token = jwt.sign(
-        { id: user.id, email: user.email },
+        { id: user.id, email: user.email, role: user.role },
         secret as string,  
         { expiresIn } as SignOptions 
     );

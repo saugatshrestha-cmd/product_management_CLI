@@ -1,4 +1,5 @@
 import { ID } from "./commonTypes";
+import { Role } from "./enumTypes";
 
 export interface User {
     id : ID;
@@ -8,4 +9,5 @@ export interface User {
     password: string;
     phone: number;
     address: string;
+    role: Role;
 }

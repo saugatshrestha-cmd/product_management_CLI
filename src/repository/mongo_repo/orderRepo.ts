@@ -9,15 +9,15 @@ export class OrderRepository {
   }
 
   async getAll(): Promise<Order[]> {
-    return await OrderModel.find();
+    return await OrderModel.find({ isDeleted: false });
   }
 
   async getOrdersByUserId(userId: number): Promise<Order[]> {
-    return await OrderModel.find({ userId });
+    return await OrderModel.find({ userId, isDeleted: false });
   }
 
   async findOrderById(orderId: number): Promise<Order | null> {
-    return await OrderModel.findOne({ id: orderId });
+    return await OrderModel.findOne({ id: orderId, isDeleted: false });
   }
 
   async addOrder(orderData: Omit<Order, 'id'>): Promise<Order> {
