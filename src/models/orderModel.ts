@@ -2,12 +2,8 @@ import mongoose from 'mongoose';
 import { Status } from '../types/enumTypes';
 
 const orderSchema = new mongoose.Schema({
-    id: {
-        type: Number,  
-        required: true,
-    },
     userId: {
-        type: Number,
+        type: String,
         required: true
     },
     total: {
@@ -38,7 +34,7 @@ const orderSchema = new mongoose.Schema({
     },
     items: [{
         productId: {
-            type: Number,
+            type: String,
             required: true
         },
         quantity: {

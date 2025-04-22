@@ -8,7 +8,7 @@ export class CategoryService {
     this.categoryRepository = new CategoryRepository();
   }
 
-  async createCategory(categoryData: Omit<Category, 'id'>): Promise<{ message: string }> {
+  async createCategory(categoryData: Category): Promise<{ message: string }> {
     const { name, description } = categoryData;
 
     if (await this.categoryRepository.findByName(name)) {
@@ -19,7 +19,7 @@ export class CategoryService {
     return { message: "Category added successfully" };
   }
 
-  async getCategoryById(categoryId: number): Promise<Category | { message: string }> {
+  async getCategoryById(categoryId: string): Promise<Category | { message: string }> {
     const category = await this.categoryRepository.findById(categoryId);
     return category || { message: "Category not found" };
   }
@@ -28,7 +28,7 @@ export class CategoryService {
     return await this.categoryRepository.getAll();
   }
 
-  async updateCategory(categoryId: number, updatedInfo: Partial<Category>): Promise<{ message: string }> {
+  async updateCategory(categoryId: string, updatedInfo: Partial<Category>): Promise<{ message: string }> {
     const category = await this.categoryRepository.findById(categoryId);
     if (!category) {
       return { message: "Category not found" };
@@ -42,7 +42,7 @@ export class CategoryService {
     return { message: "Category updated successfully" };
   }
 
-  async deleteCategory(categoryId: number): Promise<{ message: string }> {
+  async deleteCategory(categoryId: string): Promise<{ message: string }> {
     const success = await this.categoryRepository.deleteCategoryById(categoryId);
     return { message: success ? "Category deleted successfully" : "Category not found" };
   }

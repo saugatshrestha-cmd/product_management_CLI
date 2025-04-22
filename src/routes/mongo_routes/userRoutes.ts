@@ -20,7 +20,7 @@ router.get('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: 
 router.get("/profile", AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response): Promise<void> => {
   try {
     const loggedInUser = (req as any).user;
-    if (!loggedInUser?.id) {
+    if (!loggedInUser?._id) {
       res.status(400).json({ message: "No id in token" });
       return;
     }
@@ -41,7 +41,7 @@ router.get("/profile", AuthMiddleware.verifyToken, RoleMiddleware.isUser, async 
 router.put("/profile/update", AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response): Promise<void> => {
   try {
     const loggedInUser = (req as any).user;
-    if (!loggedInUser?.id) {
+    if (!loggedInUser?._id) {
       res.status(400).json({ message: "No userId in token" });
       return;
     }
@@ -59,7 +59,7 @@ router.put("/profile/update", AuthMiddleware.verifyToken, RoleMiddleware.isUser,
 router.put("/profile/change-email", AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response): Promise<void> => {
   try {
     const loggedInUser = (req as any).user;
-    if (!loggedInUser?.id) {
+    if (!loggedInUser?._id) {
       res.status(400).json({ message: "No userId in token" });
       return;
     }
@@ -77,7 +77,7 @@ router.put("/profile/change-email", AuthMiddleware.verifyToken, RoleMiddleware.i
 router.put("/profile/change-password", AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response): Promise<void> => {
   try {
     const loggedInUser = (req as any).user;
-    if (!loggedInUser?.id) {
+    if (!loggedInUser?._id) {
       res.status(400).json({ message: "No userId in token" });
       return;
     }
@@ -94,7 +94,7 @@ router.put("/profile/change-password", AuthMiddleware.verifyToken, RoleMiddlewar
 
 router.get('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const userId = Number(req.params.id);
+    const userId = req.params.id;
     const result = await userService.getUserById(userId);
     res.json(result);
   } catch (error) {
@@ -104,7 +104,7 @@ router.get('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (re
 
 router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const userId = Number(req.params.id);
+    const userId = req.params.id;
     const updatedInfo = req.body;
     const result = await userService.updateUser(userId, updatedInfo);
     res.json(result);
@@ -115,7 +115,7 @@ router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (re
 
 router.put('/:id/change-password', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const userId = Number(req.params.id);
+    const userId = req.params.id;
     const newPassword = req.body;
 
     const result = await userService.updatePassword(userId, newPassword);
@@ -127,7 +127,7 @@ router.put('/:id/change-password', AuthMiddleware.verifyToken, RoleMiddleware.is
 
 router.put('/:id/change-email', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const userId = Number(req.params.id);
+    const userId = req.params.id;
     const newEmail = req.body;
 
     const result = await userService.updateEmail(userId, newEmail);
@@ -139,7 +139,7 @@ router.put('/:id/change-email', AuthMiddleware.verifyToken, RoleMiddleware.isAdm
 
 router.delete('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const userId = Number(req.params.id);
+    const userId = req.params.id;
     const result = await userService.deleteUser(userId);
     res.json(result);
   } catch (error) {

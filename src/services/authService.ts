@@ -1,50 +1,48 @@
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repository/mongo_repo/userRepo';
+import { SellerRepository } from '../repository/mongo_repo/sellerRepo';
 import { PasswordManager } from '../utils/passwordUtils';
 import { User } from '../types/userTypes';
 import { Role } from '../types/enumTypes';
 
 export class AuthService {
     private userRepository: UserRepository;
+    private sellerRepository: SellerRepository;
     private passwordManager: PasswordManager;
 
     constructor() {
     this.userRepository = new UserRepository();
+    this.sellerRepository = new SellerRepository();
     this.passwordManager = new PasswordManager();
     }
 
-    async login(email: string, password: string) {
-        const users = await this.userRepository.getAll();
-        const user = users.find(u => u.email === email);
-        if (!user) {
-        console.log('User not found');
+    async login(email: string, password: string): Promise<{ token?: string; message: string }> {
+        // Check if it's a user
+        const user = await this.userRepository.findByEmail(email);
+        if (user && this.passwordManager.verifyPassword(password, user.password)) {
+          const token = jwt.sign(
+            { _id: user._id, role: user.role },
+            process.env.JWT_SECRET as string,
+            { expiresIn: '1d' }
+          );
+          return { token, message: 'Login successful as user' };
+        }
+    
+        // Check if it's a seller
+        const seller = await this.sellerRepository.findByEmail(email);
+        if (seller && this.passwordManager.verifyPassword(password, seller.password)) {
+          const token = jwt.sign(
+            { _id: seller._id, role: seller.role },
+            process.env.JWT_SECRET as string,
+            { expiresIn: '1d' }
+          );
+          return { token, message: 'Login successful as seller' };
+        }
+    
         return { message: 'Invalid credentials' };
     }
-    
-        const passwordMatch = this.passwordManager.verifyPassword(password, user.password);
-    
-        if (!passwordMatch) {
-        return { message: 'Invalid credentials' };
-    }
 
-        const secret = process.env.JWT_SECRET;
-        if (!secret) {
-        throw new Error('JWT_SECRET is not defined');
-    }
-
-    const expiresIn = process.env.JWT_EXPIRES_IN || '1h';
-
-    
-    const token = jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
-        secret as string, 
-        { expiresIn } as SignOptions  
-    );
-
-    return { message: 'Login successful', token, user };
-    }
-
-    async register(userData: Omit<User, 'id'>) {
+    async register(userData: User) {
     const exists = await this.userRepository.findByEmail(userData.email);
     if (exists) return { message: 'Email already registered' };
 
@@ -59,19 +57,6 @@ export class AuthService {
         .then(users => users.find(u => u.email === userData.email));
     if (!user) return { message: 'User creation failed' };
 
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-        throw new Error('JWT_SECRET is not defined');
-    }
-
-    const expiresIn = process.env.JWT_EXPIRES_IN || '1h';
-
-    const token = jwt.sign(
-        { id: user.id, email: user.email, role: user.role },
-        secret as string,  
-        { expiresIn } as SignOptions 
-    );
-
-    return { message: 'Registration successful', token, user };
+    return { message: 'Registration successful', user };
     }
 }

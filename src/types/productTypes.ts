@@ -1,10 +1,20 @@
 import { ID } from "./commonTypes";
 
 export interface Product {
-    id : ID;
+    _id: string;
     name: string;
     description: string;
     price: number;
     quantity: number;
-    categoryId: number;
+    categoryId: string;
+    sellerId: string;
+}
+
+export interface ProductInput {
+    name: string;
+    description: string;
+    price: number;
+    quantity: number;
+    categoryId: string;
+    sellerId: string;
 }

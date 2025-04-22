@@ -13,11 +13,11 @@ export class CartService {
   }
 
   private isProduct(product: any): product is Product {
-    return product && typeof product.id === 'number' && typeof product.price === 'number';
+    return product && typeof product._id === 'object';
   }
 
-  async createCart(item: Product, quantity: number, userId: number): Promise<{ message: string }> {
-    const product = await this.productService.getProductById(item.id);
+  async createCart(productId: string, quantity: number, userId: string): Promise<{ message: string }> {
+    const product = await this.productService.getProductById(productId);
 
     // If the product is not found, return a message indicating failure
     if (!this.isProduct(product)) {
@@ -31,16 +31,16 @@ export class CartService {
       // If no cart exists, create a new one
       await this.cartRepo.addCart({
         userId,
-        items: [{ productId: product.id, quantity, price: product.price }],
+        items: [{ productId: product._id, quantity}],
       });
     } else {
       // If cart exists, add a new item
       const userCartItemIndex = userCart.items.findIndex(
-        cartItem => cartItem.productId === product.id
+        cartItem => cartItem.productId === product._id
       );
 
       if (userCartItemIndex === -1) {
-        userCart.items.push({ productId: product.id, quantity, price: product.price });
+        userCart.items.push({ productId: product._id, quantity});
       }
 
       await this.cartRepo.updateCart(userId, userCart.items);
@@ -49,7 +49,7 @@ export class CartService {
     return { message: 'Product added to cart successfully' };
   }
 
-  async updateItemQuantity(userId: number, productId: number, amount: number): Promise<{ message: string }> {
+  async updateItemQuantity(userId: string, productId: string, amount: number): Promise<{ message: string }> {
     if (amount <= 0) {
       return { message: "Amount must be greater than zero" }; // You can adjust the condition to allow only positive numbers.
     }
@@ -73,7 +73,7 @@ export class CartService {
     return { message: "Product quantity updated successfully" };
   }    
 
-  async removeFromCart(productId: number, userId: number): Promise<{ message: string }> {
+  async removeFromCart(productId: string, userId: string): Promise<{ message: string }> {
     const userCart = await this.cartRepo.findCartByUserId(userId);
 
     if (!userCart) {
@@ -89,14 +89,14 @@ export class CartService {
     return { message: 'Product removed from cart successfully' };
   }
 
-  async removeCartByUserId(userId: number): Promise<{ message: string }> {
+  async removeCartByUserId(userId: string): Promise<{ message: string }> {
     const removed = await this.cartRepo.removeCartByUserId(userId);
     return removed
       ? { message: 'Cart removed successfully' }
       : { message: `Cart not found for userId: ${userId}` };
   }
 
-  async calculateCartSummary(userId: number): Promise<any> {
+  async calculateCartSummary(userId: string): Promise<any> {
     const userCart = await this.cartRepo.findCartByUserId(userId);
   
     if (!userCart) {
@@ -132,7 +132,7 @@ export class CartService {
     return await this.cartRepo.getAll();
   }
 
-  async getCartByUserId(userId: number): Promise<any> {
+  async getCartByUserId(userId: string): Promise<any> {
     const userCart = await this.cartRepo.findCartByUserId(userId);
     return userCart || { message: `Cart not found for userId: ${userId}` };
   }

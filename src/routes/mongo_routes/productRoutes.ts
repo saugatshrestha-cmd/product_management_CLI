@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { ProductService } from '../../services/productService';
 import { AuthMiddleware } from '../../middleware/authMiddleware';
 import { RoleMiddleware } from '../../middleware/roleMiddleware';
+import { AuthRequest } from '../../types/authTypes';
 
 const router = express.Router();
 const productService = new ProductService();
@@ -18,7 +19,7 @@ router.get('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: 
 
 router.get('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const productId = Number(req.params.id);
+    const productId = req.params.id;
     const result = await productService.getProductById(productId);
     res.json(result);
   } catch (error) {
@@ -27,20 +28,25 @@ router.get('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (re
 });
 
 
-router.post('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
+router.post('/', AuthMiddleware.verifyToken, RoleMiddleware.hasRole('admin', 'seller'), async (req: AuthRequest, res: Response) => {
   try {
-    const productId = req.body;
-    const result = await productService.createProduct(productId);
+    const loggedInUser = (req as any).user;
+    const productData = req.body;
+    if (loggedInUser.role === 'seller') {
+      productData.sellerId = loggedInUser._id;
+    }
+    const result = await productService.createProduct(productData);
     res.json(result);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: 'Error creating product' });
   }
 });
 
 
-router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
+router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.hasRole('admin', 'seller'), async (req: Request, res: Response) => {
   try {
-    const productId = Number(req.params.id);
+    const productId = req.params.id;
     const updatedInfo = req.body;
     const result = await productService.updateProduct(productId, updatedInfo);
     res.json(result);
@@ -52,7 +58,7 @@ router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (re
 
 router.delete('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const productId = Number(req.params.id);
+    const productId = req.params.id;
     const result = await productService.deleteProduct(productId);
     res.json(result);
   } catch (error) {

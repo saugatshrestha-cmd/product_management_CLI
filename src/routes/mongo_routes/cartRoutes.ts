@@ -21,12 +21,12 @@ router.get('/my-cart', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async 
   try {
     const loggedInUser = (req as any).user;
 
-    if (!loggedInUser?.id) {
+    if (!loggedInUser?._id) {
       res.status(400).json({ message: "No userId in token" });
       return;
     }
 
-    const result = await cartService.getCartByUserId(loggedInUser.id);
+    const result = await cartService.getCartByUserId(loggedInUser._id);
     if (!result) {
       res.status(404).json({ message: "Cart not found for this user" });
       return;
@@ -42,15 +42,14 @@ router.post('/my-cart', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async
   try {
     const loggedInUser = (req as any).user;
 
-    if (!loggedInUser?.id) {
+    if (!loggedInUser?._id) {
       res.status(400).json({ message: "No userId in token" });
       return;
     }
 
     const { productId, quantity } = req.body;
-    const product = { id: productId } as Product;
 
-    const result = await cartService.createCart(product, quantity, loggedInUser.id);
+    const result = await cartService.createCart(productId, quantity, loggedInUser._id);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error creating cart' });
@@ -61,14 +60,14 @@ router.put('/my-cart', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async 
   try {
     const loggedInUser = (req as any).user;
 
-    if (!loggedInUser?.id) {
+    if (!loggedInUser?._id) {
       res.status(400).json({ message: "No userId in token" });
       return;
     }
 
     const { productId, amount } = req.body;
 
-    const result = await cartService.updateItemQuantity(loggedInUser.id, productId, amount);
+    const result = await cartService.updateItemQuantity(loggedInUser._id, productId, amount);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error updating product quantity in cart' });
@@ -79,12 +78,12 @@ router.get('/my-cart/summary', AuthMiddleware.verifyToken, RoleMiddleware.isUser
   try {
     const loggedInUser = (req as any).user;
 
-    if (!loggedInUser?.id) {
+    if (!loggedInUser?._id) {
       res.status(400).json({ message: "No userId in token" });
       return;
     }
 
-    const summary = await cartService.calculateCartSummary(loggedInUser.id);
+    const summary = await cartService.calculateCartSummary(loggedInUser._id);
 
     if (!summary) {
       res.status(404).json({ message: "Summary not found for this user" });
@@ -101,14 +100,14 @@ router.delete('/my-cart', AuthMiddleware.verifyToken, RoleMiddleware.isUser, asy
   try {
     const loggedInUser = (req as any).user;
 
-    if (!loggedInUser?.id) {
+    if (!loggedInUser?._id) {
       res.status(400).json({ message: "No userId in token" });
       return;
     }
 
     const { productId } = req.body;
 
-    const result = await cartService.removeFromCart(productId, loggedInUser.id);
+    const result = await cartService.removeFromCart(productId, loggedInUser._id);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error deleting item from cart' });
@@ -117,7 +116,7 @@ router.delete('/my-cart', AuthMiddleware.verifyToken, RoleMiddleware.isUser, asy
 
 router.get('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const userId = Number(req.params.id);
+    const userId = req.params.id;
     const result = await cartService.getCartByUserId(userId);
     res.json(result);
   } catch (error) {
@@ -127,7 +126,7 @@ router.get('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (re
 
 router.get('/:id/summary', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
     try {
-      const userId = Number(req.params.id);
+      const userId = req.params.id;
       const result = await cartService.calculateCartSummary(userId);
       res.json(result);
     } catch (error) {
@@ -139,8 +138,7 @@ router.get('/:id/summary', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, a
 router.post('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
     const { userId, productId, quantity } = req.body;
-    const product = { id: productId } as Product;
-    const result = await cartService.createCart(product, quantity , userId);
+    const result = await cartService.createCart(productId, quantity , userId);
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Error creating cart' });
@@ -149,7 +147,7 @@ router.post('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req:
 
 router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const userId = Number(req.params.id);
+    const userId = req.params.id;
     const { productId, amount } = req.body;
 
     const result = await cartService.updateItemQuantity(userId, productId, amount);
@@ -161,8 +159,8 @@ router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (re
 
 router.delete('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const productId = Number(req.body.productId);
-    const userId = Number(req.params.id);
+    const productId = req.body.productId;
+    const userId = req.params.id;
     const result = await cartService.removeFromCart(productId, userId);
     res.json(result);
   } catch (error) {

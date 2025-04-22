@@ -18,10 +18,11 @@ router.get('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: 
 
 router.get('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const categoryId = Number(req.params.id);
+    const categoryId = req.params.id;
     const result = await categoryService.getCategoryById(categoryId);
     res.json(result);
   } catch (error) {
+    
     res.status(500).json({ message: 'Error fetching category' });
   }
 });
@@ -40,7 +41,7 @@ router.post('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req:
 
 router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const categoryId = Number(req.params.id);
+    const categoryId = req.params.id;
     const updatedInfo = req.body;
     const result = await categoryService.updateCategory(categoryId, updatedInfo);
     res.json(result);
@@ -52,7 +53,7 @@ router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (re
 
 router.delete('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
   try {
-    const categoryId = Number(req.params.id);
+    const categoryId = req.params.id;
     const result = await categoryService.deleteCategory(categoryId);
     res.json(result);
   } catch (error) {

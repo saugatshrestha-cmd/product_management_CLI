@@ -16,7 +16,7 @@ export class OrderService {
     this.productService = new ProductService();
   }
 
-  async createOrder(userId: number): Promise<{ message: string }> {
+  async createOrder(userId: string): Promise<{ message: string }> {
     const cart = await this.cartService.getCartByUserId(userId);
 
     if ('message' in cart) {
@@ -49,7 +49,7 @@ export class OrderService {
       return await this.orderRepo.getAll();
     }
 
-  async getOrderByUserId(userId: number): Promise<{ message: string } | Order[]> {
+  async getOrderByUserId(userId: string): Promise<{ message: string } | Order[]> {
     const userOrders = await this.orderRepo.getOrdersByUserId(userId);
 
     if (userOrders.length === 0) {
@@ -59,7 +59,7 @@ export class OrderService {
     return userOrders;
   }
 
-  async updateOrderStatus(orderId: number, updatedInfo: Partial<Order>): Promise<{ message: string }> {
+  async updateOrderStatus(orderId: string, updatedInfo: Partial<Order>): Promise<{ message: string }> {
     const order = await this.orderRepo.findOrderById(orderId);
 
     if (!order) {
@@ -70,7 +70,7 @@ export class OrderService {
     return { message: "Order status updated successfully" };
   }
 
-  async cancelOrder(orderId: number, userId: number): Promise<{ message: string }> {
+  async cancelOrder(orderId: string, userId: string): Promise<{ message: string }> {
     const order = await this.orderRepo.findOrderById(orderId);
     if (!order) return { message: "Order not found" };
   
@@ -92,14 +92,14 @@ export class OrderService {
     return { message: "Order cancelled successfully" };
   }
 
-  async deleteOrder(orderId: number): Promise<{ message: string }> {
+  async deleteOrder(orderId: string): Promise<{ message: string }> {
     const order = await this.orderRepo.findOrderById(orderId);
     if (!order) return { message: "Order not found" };
   
     if (order.isDeleted) return { message: "Order already deleted" };
 
-    if (order.status !== Status.PENDING) {
-      return { message: `Cannot delete order. Only 'Pending' orders can be deleted.` };
+    if (order.status !== Status.PENDING && order.status !== Status.CANCELLED) {
+      return { message: `Cannot delete order. Only 'Pending' or 'Cancelled' orders can be deleted.` };
     }
   
     await this.orderRepo.updateOrder(orderId, {

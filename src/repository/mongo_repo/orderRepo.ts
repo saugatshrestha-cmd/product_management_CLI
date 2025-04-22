@@ -1,32 +1,27 @@
 import { OrderModel } from '../../models/orderModel';
-import { Order } from '../../types/orderTypes';
+import { Order, OrderInput } from '../../types/orderTypes';
 
 export class OrderRepository {
-
-  private async getNewId(): Promise<number> {
-    const lastOrder = await OrderModel.findOne().sort({ id: -1 });
-    return lastOrder ? lastOrder.id + 1 : 1;
-  }
 
   async getAll(): Promise<Order[]> {
     return await OrderModel.find({ isDeleted: false });
   }
 
-  async getOrdersByUserId(userId: number): Promise<Order[]> {
+  async getOrdersByUserId(userId: string): Promise<Order[]> {
     return await OrderModel.find({ userId, isDeleted: false });
   }
 
-  async findOrderById(orderId: number): Promise<Order | null> {
-    return await OrderModel.findOne({ id: orderId, isDeleted: false });
+  async findOrderById(orderId: string): Promise<Order | null> {
+    return await OrderModel.findOne({ _id: orderId, isDeleted: false });
   }
 
-  async addOrder(orderData: Omit<Order, 'id'>): Promise<Order> {
-    const newId = await this.getNewId();
-    const newOrder = new OrderModel({ id: newId, ...orderData });
-    return await newOrder.save();
+  async addOrder(orderData: OrderInput): Promise<void> {
+    const newOrder = new OrderModel(orderData );
+    await newOrder.save();
+    return;
   }
 
-  async updateOrder(orderId: number, updatedInfo: Partial<Order>): Promise<void> {
-      await OrderModel.updateOne({ id: orderId }, updatedInfo);
+  async updateOrder(orderId: string, updatedInfo: Partial<Order>): Promise<void> {
+      await OrderModel.updateOne({ _id: orderId }, updatedInfo);
     }
 }

@@ -3,35 +3,30 @@ import { Category } from '../../types/categoryTypes';
 
 export class CategoryRepository {
 
-  private async getNewId(): Promise<number> {
-    const lastUser = await CategoryModel.findOne().sort({ id: -1 });
-    return lastUser ? lastUser.id + 1 : 1;
-  }
-
   async getAll(): Promise<Category[]> {
     return await CategoryModel.find();
   }
 
-  async findById(categoryId: number): Promise<Category | null> {
-    return await CategoryModel.findOne({ id: categoryId });
+  async findById(categoryId: string): Promise<Category | null> {
+    return await CategoryModel.findOne({ _id: categoryId });
   }
 
   async findByName(name: string): Promise<Category | null> {
     return await CategoryModel.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
   }
 
-  async addCategory(categoryData: Omit<Category, 'id'>): Promise<void> {
-    const newId = await this.getNewId();
-    const newCategory = new CategoryModel({ id: newId, ...categoryData });
+  async addCategory(categoryData: Category): Promise<void> {
+    const newCategory = new CategoryModel(categoryData );
     await newCategory.save();
+    return;
   }
 
-  async updateCategory(categoryId: number, updatedInfo: Partial<Category>): Promise<void> {
-    await CategoryModel.updateOne({ id: categoryId }, updatedInfo);
+  async updateCategory(categoryId: string, updatedInfo: Partial<Category>): Promise<void> {
+    await CategoryModel.updateOne({ _id: categoryId }, updatedInfo);
   }
 
-  async deleteCategoryById(categoryId: number): Promise<boolean> {
-    const result = await CategoryModel.deleteOne({ id: categoryId });
+  async deleteCategoryById(categoryId: string): Promise<boolean> {
+    const result = await CategoryModel.deleteOne({ _id: categoryId });
     return result.deletedCount === 1;
   }
 }

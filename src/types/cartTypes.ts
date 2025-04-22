@@ -1,13 +1,18 @@
 import { ID } from "./commonTypes";
 
 export interface CartItem{
-    productId: number,
+    productId: string,
     quantity: number,
-    price : number
 }
 
 export interface Cart{
-    id: ID,
-    userId: number,
+    _id: string;
+    userId: string,
+    items: CartItem[]
+}
+
+export interface CartInput{
+    _id?: string;
+    userId: string,
     items: CartItem[]
 }

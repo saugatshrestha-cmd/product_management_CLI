@@ -12,7 +12,7 @@ export class AuthController {
     const { email, password } = req.body;
     const result = await this.authService.login(email, password);
 
-    if (!result.user) {
+    if (!result.token) {
       return res.status(401).json({ message: result.message });
     }
 
@@ -30,8 +30,7 @@ export class AuthController {
     }
 
     res.status(201).json({
-      message: result.message,
-      token: result.token
+      message: result.message
     });
   };
 }

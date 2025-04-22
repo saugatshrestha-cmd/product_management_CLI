@@ -18,4 +18,24 @@ export class RoleMiddleware {
     }
     next();
   }
+
+  static isSeller(req: Request, res: Response, next: NextFunction): void {
+    const loggedInUser = (req as any).user;
+    if (loggedInUser.role !== 'seller') {
+      res.status(403).json({ message: 'Access denied. Sellers only.' });
+      return;
+    }
+    next();
+  }
+
+  static hasRole(...allowedRoles: string[]) {
+    return (req: Request, res: Response, next: NextFunction): void => {
+      const loggedInUser = (req as any).user;
+      if (!allowedRoles.includes(loggedInUser?.role)) {
+        res.status(403).json({ message: 'Access denied. Insufficient role.' });
+        return;
+      }
+      next();
+    };
+  }
 }

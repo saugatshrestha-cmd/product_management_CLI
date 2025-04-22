@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import { AuthRequest } from '../types/authTypes';
 
 export class AuthMiddleware {
-  static verifyToken(req: Request, res: Response, next: NextFunction): void {
+  static verifyToken(req: AuthRequest, res: Response, next: NextFunction): void {
     const authHeader = req.headers['authorization'];
     const token = authHeader?.split(' ')[1];
 
@@ -12,8 +13,11 @@ export class AuthMiddleware {
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-      (req as any).user = decoded;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload; 
+      req.user = {
+        _id: decoded._id,
+        role: decoded.role
+      };
       next();
     } catch (err) {
       res.status(401).json({ message: 'Invalid or expired token.' });

@@ -1,10 +1,9 @@
-import { ID } from "./commonTypes";
 import { Role } from "./enumTypes";
+import { ID } from "./commonTypes";
 
-export interface User {
+export interface Seller {
     _id: string;
-    firstName: string;
-    lastName: string;
+    storeName: string;
     email: string;
     password: string;
     phone: number;

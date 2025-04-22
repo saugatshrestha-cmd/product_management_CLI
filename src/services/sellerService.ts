@@ -1,0 +1,93 @@
+import { SellerRepository } from '../repository/mongo_repo/sellerRepo';
+import { Seller } from '../types/sellerTypes';
+import { PasswordManager } from '../utils/passwordUtils';
+import { Role } from '../types/enumTypes';
+
+export class SellerService {
+  private SellerRepository: SellerRepository;
+  private passwordManager: PasswordManager;
+
+  constructor() {
+    this.SellerRepository = new SellerRepository();
+    this.passwordManager = new PasswordManager();
+  }
+
+  async getSellerById(sellerId: string) {
+    const seller = await this.SellerRepository.findById(sellerId);
+    return seller || { message: "Seller not found" };
+  }
+
+  async getAllSellers(): Promise<Seller[]> {
+    return await this.SellerRepository.getAll();
+  }
+
+  async createSeller(sellerData: Seller): Promise<{ message: string }> {
+    const exists = await this.SellerRepository.findByEmail(sellerData.email);
+    if (exists) return { message: "Email already registered" };
+  
+    const salt = this.passwordManager.createSalt();
+    const hashed = this.passwordManager.hashPassword(sellerData.password, salt);
+    const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
+  
+    const finalSeller = { ...sellerData, password: combined, role: Role.SELLER };
+    await this.SellerRepository.addSeller(finalSeller);
+  
+    return { message: "Seller created successfully" };
+  }  
+  
+
+  async updateSeller(sellerId: string, updatedInfo: Seller): Promise<{ message: string }> {
+    const seller = await this.SellerRepository.findById(sellerId);
+    if (!seller) {
+      return { message: "Seller not found" };
+    }
+
+    if (updatedInfo.email || updatedInfo.password) {
+      return { message: "Email and password cannot be updated." };
+    }
+
+    const { storeName, phone, address } = updatedInfo;
+
+    const updatedSellerInfo = {
+      storeName,
+      phone,
+      address,
+    };
+
+    await this.SellerRepository.updateSeller(sellerId, updatedSellerInfo);
+    return { message: "Seller updated successfully" };
+  }
+
+  async updateEmail(sellerId: string, newEmail: string): Promise<{ message: string }> {
+    const seller = await this.SellerRepository.findById(sellerId);
+    if (!seller) {
+      return { message: "Seller not found" };
+    }
+
+    if (await this.SellerRepository.findByEmail(newEmail)) {
+      return { message: "Email already in use" };
+    }
+
+    await this.SellerRepository.updateSeller(sellerId, { ...seller, email: newEmail });
+    return { message: "Email updated successfully" };
+  }
+
+  async updatePassword(sellerId: string, newPassword: string): Promise<{ message: string }> {
+    const seller = await this.SellerRepository.findById(sellerId);
+    if (!seller) {
+      return { message: "Seller not found" };
+    }
+
+    const newSalt = this.passwordManager.createSalt();
+    const hashed = this.passwordManager.hashPassword(newPassword, newSalt);
+    const combined = this.passwordManager.combineSaltAndHash(newSalt, hashed);
+
+    await this.SellerRepository.updateSeller(sellerId, { ...seller, password: combined });
+    return { message: "Password updated successfully" };
+  }
+
+  async deleteSeller(sellerId: string): Promise<{ message: string }> {
+    const success = await this.SellerRepository.deleteSellerById(sellerId);
+    return { message: success ? "Seller deleted successfully" : "Seller not found" };
+  }
+}

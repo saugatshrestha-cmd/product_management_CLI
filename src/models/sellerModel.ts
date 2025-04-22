@@ -1,12 +1,8 @@
 import mongoose from 'mongoose';
 import { Role } from '../types/enumTypes';
 
-const userSchema = new mongoose.Schema({
-  firstName: { 
-    type: String, 
-    required: true 
-  },
-  lastName: { 
+const sellerSchema = new mongoose.Schema({
+  storeName: { 
     type: String, 
     required: true 
   },
@@ -35,4 +31,4 @@ const userSchema = new mongoose.Schema({
 });
 
 
-export const UserModel = mongoose.model('User', userSchema);
+export const SellerModel = mongoose.model('Seller', sellerSchema);
