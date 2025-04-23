@@ -1,124 +1,23 @@
-import express, { Request, Response } from 'express';
-import { OrderService } from '../../services/orderService';
+import express from 'express';
+import { OrderController } from '../../controller/orderController';
 import { AuthMiddleware } from '../../middleware/authMiddleware';
 import { RoleMiddleware } from '../../middleware/roleMiddleware';
 
 const router = express.Router();
-const orderService = new OrderService();
 
 router.use(AuthMiddleware.verifyToken);
 
-router.get('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
-  try {
-    const orders = await orderService.getAllOrders();
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching orders' });
-  }
-});
+// 🔒 User routes
+router.get('/my', RoleMiddleware.hasRole('user'), OrderController.getUserOrders);
+router.post('/', RoleMiddleware.hasRole('user'), OrderController.createUserOrder);
+router.put('/cancel', RoleMiddleware.hasRole('user'), OrderController.cancelUserOrder);
 
-router.get('/my-orders', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response): Promise<void> => {
-  try {
-    const loggedInUser = (req as any).user;
-    if (!loggedInUser?._id) {
-      res.status(400).json({ message: 'No userId in token' });
-      return;
-    }
-
-    const result = await orderService.getOrderByUserId(loggedInUser._id);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching user orders' });
-  }
-});
-
-router.post('/my-orders', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response): Promise<void> => {
-  try {
-    const loggedInUser = (req as any).user;
-    if (!loggedInUser?._id) {
-      res.status(400).json({ message: 'No userId in token' });
-      return;
-    }
-
-    const result = await orderService.createOrder(loggedInUser._id);
-    res.json(result);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error creating order' });
-  }
-});
-
-router.put('/my-orders/cancel', AuthMiddleware.verifyToken, RoleMiddleware.isUser, async (req: Request, res: Response) => {
-  try {
-    const loggedInUser = (req as any).user;
-    if (!loggedInUser?._id) {
-      res.status(400).json({ message: 'No userId in token' });
-      return;
-    }
-    const orderId = req.body.orderId;
-
-    const result = await orderService.cancelOrder(orderId, loggedInUser._id);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ message: 'Error cancelling order' });
-  }
-});
-
-
-router.get('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
-  try {
-    const userId = req.params.id;
-    const result = await orderService.getOrderByUserId(userId);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching order' });
-  }
-});
-
-
-router.post('/', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
-  try {
-    const userId = req.body.userId;
-    const result = await orderService.createOrder(userId);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating order' });
-  }
-});
-
-router.put('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
-    try {
-      const orderId = req.params.id;
-      const updatedInfo = req.body;
-      const result = await orderService.updateOrderStatus(orderId, updatedInfo);
-      res.json(result);
-    } catch (error) {
-      res.status(500).json({ message: 'Error creating order' });
-    }
-  });
-
-router.put('/:id/cancel', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
-  try {
-    const orderId = req.params.id;
-    const userId = req.body.userId;
-
-    const result = await orderService.cancelOrder(orderId, userId);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ message: 'Error cancelling order' });
-  }
-});
-
-router.delete('/:id', AuthMiddleware.verifyToken, RoleMiddleware.isAdmin, async (req: Request, res: Response) => {
-  try {
-    const orderId = req.params.id;
-    const result = await orderService.deleteOrder(orderId);
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting order' });
-  }
-});
-
-
+// 🔐 Admin routes
+router.get('/', RoleMiddleware.hasRole('admin'), OrderController.getAllOrders);
+router.get('/:id', RoleMiddleware.hasRole('admin'), OrderController.getOrderByUserId);
+router.post('/', RoleMiddleware.hasRole('admin'), OrderController.createOrderByAdmin);
+router.put('/:id', RoleMiddleware.hasRole('admin'), OrderController.updateOrderStatus);
+router.put('/:id/cancel', RoleMiddleware.hasRole('admin'), OrderController.cancelOrderByAdmin);
+router.delete('/:id', RoleMiddleware.hasRole('admin'), OrderController.deleteOrder);
 
 export default router;

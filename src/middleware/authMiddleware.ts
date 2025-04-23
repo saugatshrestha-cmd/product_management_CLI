@@ -4,8 +4,7 @@ import { AuthRequest } from '../types/authTypes';
 
 export class AuthMiddleware {
   static verifyToken(req: AuthRequest, res: Response, next: NextFunction): void {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader?.split(' ')[1];
+    const token = req.cookies?.token;
 
     if (!token) {
       res.status(401).json({ message: 'Access denied. No token provided.' });

@@ -19,13 +19,14 @@ export class AuthService {
     async login(email: string, password: string): Promise<{ token?: string; message: string }> {
         // Check if it's a user
         const user = await this.userRepository.findByEmail(email);
+        const expiresIn = process.env.JWT_EXPIRES_IN;
         if (user && this.passwordManager.verifyPassword(password, user.password)) {
           const token = jwt.sign(
             { _id: user._id, role: user.role },
             process.env.JWT_SECRET as string,
-            { expiresIn: '1d' }
+            { expiresIn: '1h' }
           );
-          return { token, message: 'Login successful as user' };
+          return { token, message: 'Login successful' };
         }
     
         // Check if it's a seller
@@ -34,7 +35,7 @@ export class AuthService {
           const token = jwt.sign(
             { _id: seller._id, role: seller.role },
             process.env.JWT_SECRET as string,
-            { expiresIn: '1d' }
+            { expiresIn: '1h' }
           );
           return { token, message: 'Login successful as seller' };
         }

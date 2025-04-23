@@ -16,7 +16,14 @@ export class AuthController {
       return res.status(401).json({ message: result.message });
     }
 
-    res.status(200).json({
+    res.cookie('token', result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 3600000,
+    });
+
+    res.status(200).json({ 
       message: result.message,
       token: result.token
     });
@@ -32,5 +39,14 @@ export class AuthController {
     res.status(201).json({
       message: result.message
     });
+  };
+
+  logout = async (req: Request, res: Response) => {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
   };
 }
