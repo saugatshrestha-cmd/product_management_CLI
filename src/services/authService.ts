@@ -1,25 +1,23 @@
+import { injectable, inject } from "tsyringe";
 import jwt from 'jsonwebtoken';
-import { UserRepository } from '../repository/mongo_repo/userRepo';
-import { SellerRepository } from '../repository/mongo_repo/sellerRepo';
+import { UserService } from "./userService";
+import { SellerService } from "./sellerService";
 import { PasswordManager } from '../utils/passwordUtils';
 import { User } from '../types/userTypes';
 import { Role } from '../types/enumTypes';
 
+@injectable()
 export class AuthService {
-    private userRepository: UserRepository;
-    private sellerRepository: SellerRepository;
-    private passwordManager: PasswordManager;
 
-    constructor() {
-    this.userRepository = new UserRepository();
-    this.sellerRepository = new SellerRepository();
-    this.passwordManager = new PasswordManager();
-    }
+    constructor(
+      @inject("UserService") private userService: UserService,
+      @inject("SellerService") private sellerService: SellerService,
+      @inject("PasswordManager") private passwordManager: PasswordManager
+    ) {}
 
     async login(email: string, password: string): Promise<{ token?: string; message: string }> {
         // Check if it's a user
-        const user = await this.userRepository.findByEmail(email);
-        const expiresIn = process.env.JWT_EXPIRES_IN;
+        const user = await this.userService.findByEmail(email);
         if (user && this.passwordManager.verifyPassword(password, user.password)) {
           const token = jwt.sign(
             { _id: user._id, role: user.role },
@@ -30,7 +28,7 @@ export class AuthService {
         }
     
         // Check if it's a seller
-        const seller = await this.sellerRepository.findByEmail(email);
+        const seller = await this.sellerService.findByEmail(email);
         if (seller && this.passwordManager.verifyPassword(password, seller.password)) {
           const token = jwt.sign(
             { _id: seller._id, role: seller.role },
@@ -44,7 +42,7 @@ export class AuthService {
     }
 
     async register(userData: User) {
-    const exists = await this.userRepository.findByEmail(userData.email);
+    const exists = await this.userService.findByEmail(userData.email);
     if (exists) return { message: 'Email already registered' };
 
     const salt = this.passwordManager.createSalt();
@@ -52,9 +50,9 @@ export class AuthService {
     const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
 
     const finalUser = { ...userData, password: combined, role: Role.USER};
-    await this.userRepository.addUser(finalUser);
+    await this.userService.addUser(finalUser);
 
-    const user = await this.userRepository.getAll()
+    const user = await this.userService.getAllUsers()
         .then(users => users.find(u => u.email === userData.email));
     if (!user) return { message: 'User creation failed' };
 

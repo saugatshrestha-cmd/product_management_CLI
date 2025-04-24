@@ -1,31 +1,14 @@
+import { container } from "../../config/diContainer";
 import express from 'express';
 import { AuthController } from '../../controller/authController';
 
 const router = express.Router();
-const authController = new AuthController();
+const controller = container.resolve(AuthController);
 
-router.post('/login', async (req, res) => {
-  try {
-    await authController.login(req, res);
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
+router.post('/login', controller.login.bind(controller));
 
-router.post('/register', async (req, res) => {
-  try {
-    await authController.register(req, res);
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
+router.post('/register', controller.register.bind(controller));
 
-router.post('/logout', async (req, res) => {
-  try {
-    await authController.logout(req, res);
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
+router.post('/logout', controller.logout.bind(controller));
 
 export default router;

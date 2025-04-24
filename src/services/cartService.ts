@@ -1,48 +1,44 @@
+import { injectable, inject } from "tsyringe";
 import { Product } from '../types/productTypes';
 import { CartRepository } from '../repository/mongo_repo/cartRepo';
 import { ProductService } from './productService';
 import { Cart } from '../types/cartTypes';
 
+@injectable()
 export class CartService {
-  private cartRepo: CartRepository;
-  private productService: ProductService;
 
-  constructor() {
-    this.cartRepo = new CartRepository();
-    this.productService = new ProductService();
-  }
+  constructor(
+    @inject("CartRepository") private cartRepo: CartRepository,
+    @inject("ProductService") private productService: ProductService
+  ) {}
 
   private isProduct(product: any): product is Product {
-    return product && typeof product._id === 'object';
+    return product && typeof product._id === 'object' && product.sellerId;
   }
 
   async createCart(productId: string, quantity: number, userId: string): Promise<{ message: string }> {
     const product = await this.productService.getProductById(productId);
 
-    // If the product is not found, return a message indicating failure
     if (!this.isProduct(product)) {
       return { message: "Product not found" };
     }
 
-    // Check if the product is already in the user's cart
     const userCart = await this.cartRepo.findCartByUserId(userId);
 
     if (!userCart) {
-      // If no cart exists, create a new one
       await this.cartRepo.addCart({
         userId,
-        items: [{ productId: product._id, quantity}],
+        items: [{ productId: product._id, quantity, sellerId: product.sellerId }],
       });
     } else {
-      // If cart exists, add a new item
-      const userCartItemIndex = userCart.items.findIndex(
-        cartItem => cartItem.productId === product._id
+      const productInCart = userCart.items.find(
+        item => item.productId.toString() === product._id.toString()
       );
-
-      if (userCartItemIndex === -1) {
-        userCart.items.push({ productId: product._id, quantity});
+      if (productInCart) {
+        return { message: 'Product is already in the cart' };
       }
-
+      
+      userCart.items.push({ productId: product._id, quantity, sellerId: product.sellerId });
       await this.cartRepo.updateCart(userId, userCart.items);
     }
 

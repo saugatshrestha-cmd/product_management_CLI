@@ -1,5 +1,3 @@
-import { ID } from "./commonTypes";
-
 export interface Product {
     _id: string;
     name: string;

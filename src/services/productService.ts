@@ -1,15 +1,15 @@
+import { injectable, inject } from "tsyringe";
 import { ProductRepository } from '../repository/mongo_repo/productRepo';
 import { CategoryService } from './categoryService';
 import { Product, ProductInput } from '../types/productTypes';
 
+@injectable()
 export class ProductService {
-  private productRepository: ProductRepository;
-  private categoryService: CategoryService;
 
-  constructor() {
-    this.productRepository = new ProductRepository();
-    this.categoryService = new CategoryService();
-  }
+  constructor(
+    @inject("ProductRepository") private productRepository: ProductRepository,
+    @inject("CategoryService") private categoryService: CategoryService
+  ) {}
 
 
   async createProduct(productData: ProductInput): Promise<{ message: string }> {

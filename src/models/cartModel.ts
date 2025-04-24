@@ -8,6 +8,10 @@ const cartItemSchema = new mongoose.Schema({
     quantity: {
         type: Number,
         required: true
+    },
+    sellerId: {
+        type: String,
+        required: true
     }
 });
 

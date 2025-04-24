@@ -1,6 +1,8 @@
+import { injectable } from "tsyringe";
 import { ProductModel } from '../../models/productModel';
 import { Product, ProductInput } from '../../types/productTypes';
 
+@injectable()
 export class ProductRepository {
 
   async getAll(): Promise<Product[]> {

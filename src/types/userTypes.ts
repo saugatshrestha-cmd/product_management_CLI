@@ -1,4 +1,3 @@
-import { ID } from "./commonTypes";
 import { Role } from "./enumTypes";
 
 export interface User {

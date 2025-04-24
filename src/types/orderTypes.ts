@@ -1,6 +1,4 @@
-import { CartItem } from "./cartTypes";
-import { ID } from "./commonTypes";
-import { Status } from "./enumTypes";
+import { OrderItemStatus, Status } from "./enumTypes";
 
 export interface Order{
     _id: string;
@@ -8,7 +6,7 @@ export interface Order{
     total: number,
     timestamp: Date,
     status: Status,
-    items: CartItem[],
+    items: OrderItem[],
     cancelledAt ?: Date | null,
     isDeleted?: boolean,
     deletedAt?: Date | null;
@@ -20,8 +18,34 @@ export interface OrderInput{
     total: number,
     timestamp: Date,
     status: Status,
-    items: CartItem[],
+    items: OrderItemInput[],
     cancelledAt ?: Date | null,
     isDeleted?: boolean,
     deletedAt?: Date | null;
+}
+
+export interface OrderItem {
+    _id: string;
+    productId: string;
+    quantity: number;
+    sellerId: string;
+    price: number;
+    status: OrderItemStatus; // The status of each order item
+}
+
+export interface OrderItemInput {
+    _id?: string;
+    productId: string;
+    quantity: number;
+    sellerId: string;
+    price: number;
+    status: OrderItemStatus; // The status of each order item
+}
+
+export interface SellerOrder {
+    _id: string;
+    userId: string;
+    timestamp: Date;
+    isDeleted?: boolean;
+    items: OrderItem[];
 }

@@ -1,6 +1,8 @@
+import { injectable } from "tsyringe";
 import { SellerModel } from '../../models/sellerModel';
 import { Seller } from '../../types/sellerTypes';
 
+@injectable()
 export class SellerRepository {
 
     async getAll(): Promise<Seller[]> {

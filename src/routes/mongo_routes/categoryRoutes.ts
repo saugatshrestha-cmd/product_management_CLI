@@ -1,17 +1,19 @@
+import { container } from "../../config/diContainer";
 import express from 'express';
 import { AuthMiddleware } from '../../middleware/authMiddleware';
 import { RoleMiddleware } from '../../middleware/roleMiddleware';
 import { CategoryController } from '../../controller/categoryController';
 
 const router = express.Router();
+const controller = container.resolve(CategoryController);
 
 router.use(AuthMiddleware.verifyToken);
 router.use(RoleMiddleware.hasRole('admin'));
 
-router.get('/', CategoryController.getAllCategories);
-router.get('/:id', CategoryController.getCategoryById);
-router.post('/', CategoryController.createCategory);
-router.put('/:id', CategoryController.updateCategory);
-router.delete('/:id', CategoryController.deleteCategory);
+router.get('/', controller.getAllCategories.bind(controller));
+router.get('/:id', controller.getCategoryById.bind(controller));
+router.post('/', controller.createCategory.bind(controller));
+router.put('/:id', controller.updateCategory.bind(controller));
+router.delete('/:id', controller.deleteCategory.bind(controller));
 
 export default router;

@@ -1,6 +1,8 @@
+import { injectable } from "tsyringe";
 import { CategoryModel } from '../../models/categoryModel';
 import { Category } from '../../types/categoryTypes';
 
+@injectable()
 export class CategoryRepository {
 
   async getAll(): Promise<Category[]> {

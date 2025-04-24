@@ -1,5 +1,7 @@
+import { injectable } from "tsyringe";
 import crypto from 'crypto';
 
+@injectable()
 export class PasswordManager {
   createSalt(): string {
     return crypto.randomBytes(16).toString('hex');

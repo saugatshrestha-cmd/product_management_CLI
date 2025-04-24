@@ -1,15 +1,15 @@
+import { injectable, inject } from "tsyringe";
 import { UserRepository } from '../repository/mongo_repo/userRepo';
 import { User } from '../types/userTypes';
 import { PasswordManager } from '../utils/passwordUtils';
+import { Role } from "../types/enumTypes";
 
+@injectable()
 export class UserService {
-  private userRepository: UserRepository;
-  private passwordManager: PasswordManager;
-
-  constructor() {
-    this.userRepository = new UserRepository();
-    this.passwordManager = new PasswordManager();
-  }
+  constructor(
+    @inject("UserRepository") private userRepository: UserRepository,
+    @inject("PasswordManager") private passwordManager: PasswordManager
+  ) {}
 
   async getUserById(userId: string) {
     const user = await this.userRepository.findById(userId);
@@ -20,6 +20,14 @@ export class UserService {
     return await this.userRepository.getAll();
   }
 
+  async findByEmail(email: string): Promise<User | null> {
+    return await this.userRepository.findByEmail(email);
+  }
+
+  async addUser(user: User): Promise<void> {
+    await this.userRepository.addUser(user);
+  }
+
   async createAdmin(adminData: User): Promise<{ message: string }> {
     const exists = await this.userRepository.findByEmail(adminData.email);
     if (exists) return { message: "Email already registered" };
@@ -28,7 +36,7 @@ export class UserService {
     const hashed = this.passwordManager.hashPassword(adminData.password, salt);
     const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
   
-    const finalUser = { ...adminData, password: combined };
+    const finalUser = { ...adminData, password: combined, role: Role.ADMIN };
     await this.userRepository.addUser(finalUser);
   
     return { message: "Admin created successfully" };

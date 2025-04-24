@@ -1,6 +1,8 @@
+import { injectable } from "tsyringe";
 import { CartModel } from '../../models/cartModel';
 import { Cart, CartItem, CartInput } from '../../types/cartTypes';
 
+@injectable()
 export class CartRepository {
 
   async getAll(): Promise<Cart[]> {

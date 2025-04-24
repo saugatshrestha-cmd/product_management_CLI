@@ -1,19 +1,28 @@
 import { Request, Response } from 'express';
 import { AuthService } from '../services/authService';
+import { injectable, inject } from "tsyringe";
 
+@injectable()
 export class AuthController {
-  private authService: AuthService;
 
-  constructor() {
-    this.authService = new AuthService();
-  }
+  constructor(
+              @inject("AuthService") private authService: AuthService
+          ) {}
 
-  login = async (req: Request, res: Response) => {
+  async login(req: Request, res: Response): Promise<void> {
     const { email, password } = req.body;
+
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+    
     const result = await this.authService.login(email, password);
 
     if (!result.token) {
-      return res.status(401).json({ message: result.message });
+      res.status(401).json({ message: result.message });
+      return;
     }
 
     res.cookie('token', result.token, {
@@ -29,11 +38,12 @@ export class AuthController {
     });
   };
 
-  register = async (req: Request, res: Response) => {
+  async register(req: Request, res: Response): Promise<void> {
     const result = await this.authService.register(req.body);
 
     if (!result.user) {
-      return res.status(400).json({ message: result.message });
+      res.status(400).json({ message: result.message });
+      return;
     }
 
     res.status(201).json({
@@ -41,7 +51,7 @@ export class AuthController {
     });
   };
 
-  logout = async (req: Request, res: Response) => {
+  async logout(req: Request, res: Response): Promise<void> {
     res.clearCookie('token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

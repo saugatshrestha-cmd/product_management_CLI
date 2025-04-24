@@ -1,12 +1,13 @@
+import { injectable, inject } from "tsyringe";
 import { CategoryRepository } from "../repository/mongo_repo/categoryRepo";
 import { Category } from "../types/categoryTypes";
 
+@injectable()
 export class CategoryService {
-  private categoryRepository: CategoryRepository;
 
-  constructor() {
-    this.categoryRepository = new CategoryRepository();
-  }
+  constructor(
+    @inject("CategoryRepository") private categoryRepository: CategoryRepository
+  ) {}
 
   async createCategory(categoryData: Category): Promise<{ message: string }> {
     const { name, description } = categoryData;

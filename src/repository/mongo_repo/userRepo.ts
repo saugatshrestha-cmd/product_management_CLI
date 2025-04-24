@@ -1,6 +1,8 @@
+import { injectable } from "tsyringe";
 import { UserModel } from '../../models/userModel';
 import { User } from '../../types/userTypes';
 
+@injectable()
 export class UserRepository {
 
   async getAll(): Promise<User[]> {

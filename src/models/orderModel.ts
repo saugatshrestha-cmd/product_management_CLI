@@ -44,6 +44,15 @@ const orderSchema = new mongoose.Schema({
         price: {
             type: Number,
             required: true
+        },
+        sellerId: {
+            type: String,
+            required: true
+        },
+        status: {
+            type: String,
+            enum: Object.values(Status),
+            required: true
         }
     }]
 });

@@ -1,30 +1,31 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/userService';
-import { UserModel } from '../models/userModel';
 import { AuthRequest } from '../types/authTypes';
+import { injectable, inject } from "tsyringe";
 
-const userService = new UserService();
-
-
+@injectable()
 export class AdminController {
-    static async createAdmin(req: Request, res: Response): Promise<void>{
+    constructor(
+                @inject("UserService") private userService: UserService
+            ) {}
+    async createAdmin(req: Request, res: Response): Promise<void>{
         try{
             const newAdmin = req.body;
-            const result = await userService.createAdmin(newAdmin);
+            const result = await this.userService.createAdmin(newAdmin);
             res.json(result);
         } catch {
-            res.status(500).json({ message: "Error creating seller" })
+            res.status(500).json({ message: "Error creating admin" })
         }
     }
 
-    static async getProfile(req: AuthRequest, res: Response): Promise<void> {
+    async getProfile(req: AuthRequest, res: Response): Promise<void> {
         try {
             const userId = req.user?._id;
             if (!userId){
                 res.status(400).json({ message: "No id in token" });
                 return;
             }
-            const user = await UserModel.findOne({ _id: userId }).select("-password");
+            const user = await this.userService.getUserById(userId);
             if (!user){
                 res.status(404).json({ message: "User not found" });
                 return;
@@ -35,7 +36,7 @@ export class AdminController {
         }
     }
 
-    static async updateProfile(req: AuthRequest, res: Response): Promise<void> {
+    async updateProfile(req: AuthRequest, res: Response): Promise<void> {
         try {
             const userId = req.user?._id;
             if (!userId){
@@ -44,14 +45,14 @@ export class AdminController {
             }
 
             const updatedInfo = req.body;
-            const result = await userService.updateUser(userId, updatedInfo);
+            const result = await this.userService.updateUser(userId, updatedInfo);
             res.json(result);
         } catch {
             res.status(500).json({ message: "Error updating profile" });
         }
     }
 
-    static async updateEmail(req: AuthRequest, res: Response): Promise<void> {
+    async updateEmail(req: AuthRequest, res: Response): Promise<void> {
         try {
             const userId = req.user?._id;
             if (!userId){
@@ -59,14 +60,14 @@ export class AdminController {
                 return;
             }
 
-            const result = await userService.updateEmail(userId, req.body);
+            const result = await this.userService.updateEmail(userId, req.body);
             res.json(result);
         } catch {
             res.status(500).json({ message: "Error updating email" });
         }
     }
 
-    static async updatePassword(req: AuthRequest, res: Response): Promise<void> {
+    async updatePassword(req: AuthRequest, res: Response): Promise<void> {
         try {
             const userId = req.user?._id;
             if (!userId){
@@ -74,17 +75,17 @@ export class AdminController {
                 return;
             }
 
-            const result = await userService.updatePassword(userId, req.body);
+            const result = await this.userService.updatePassword(userId, req.body);
             res.json(result);
         } catch {
             res.status(500).json({ message: "Error updating password" });
         }
     }
 
-    static async deleteAdmin(req: Request, res: Response): Promise<void> {
+    async deleteAdmin(req: Request, res: Response): Promise<void> {
         try {
             const userId = req.params.id;
-            const result = await userService.deleteUser(userId);
+            const result = await this.userService.deleteUser(userId);
             res.json(result);
         } catch {
             res.status(500).json({ message: 'Error deleting user' });
