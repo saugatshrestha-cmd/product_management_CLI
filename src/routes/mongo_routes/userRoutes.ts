@@ -1,8 +1,8 @@
-import { container } from "../../config/diContainer";
+import { container } from "@config/diContainer";
 import express from 'express';
-import { UserController } from '../../controller/userController';
-import { AuthMiddleware } from '../../middleware/authMiddleware';
-import { RoleMiddleware } from '../../middleware/roleMiddleware';
+import { UserController } from '@controller/userController';
+import { AuthMiddleware } from '@middleware/authMiddleware';
+import { RoleMiddleware } from '@middleware/roleMiddleware';
 
 const router = express.Router();
 const controller = container.resolve(UserController);

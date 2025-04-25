@@ -1,10 +1,10 @@
 import { injectable, inject } from "tsyringe";
-import { OrderRepository } from '../repository/mongo_repo/orderRepo';
-import { CartService } from './cartService';
-import { ProductService } from './productService';
-import { Order, OrderItemInput, SellerOrder } from '../types/orderTypes';
-import { Status, OrderItemStatus } from '../types/enumTypes';
-import { CartItem } from '../types/cartTypes';
+import { OrderRepository } from '@repository/orderRepo';
+import { CartService } from '@services/cartService';
+import { ProductService } from '@services/productService';
+import { Order, OrderItemInput, SellerOrder } from '@mytypes/orderTypes';
+import { Status, OrderItemStatus } from '@mytypes/enumTypes';
+import { CartItem } from '@mytypes/cartTypes';
 
 @injectable()
 export class OrderService {
@@ -82,7 +82,6 @@ export class OrderService {
         _id: order._id,
         userId: order.userId,
         timestamp: order.timestamp,
-        isDeleted: order.isDeleted,
         items: order.items.filter(item => item.sellerId === sellerId)
       }))
       .filter(order => order.items.length > 0); // Only keep orders where this seller has products
@@ -92,6 +91,24 @@ export class OrderService {
     }
   
     return filteredOrders;
+  }
+
+  private updateOverallOrderStatus(itemStatuses: OrderItemStatus[]): Status {
+    const allDelivered = itemStatuses.every(s => s === OrderItemStatus.DELIVERED);
+    const allShippedOrDelivered = itemStatuses.every(
+      s => s === OrderItemStatus.SHIPPED || s === OrderItemStatus.DELIVERED
+    );
+    const allCancelled = itemStatuses.every(s => s === OrderItemStatus.CANCELLED)
+    const someDelivered = itemStatuses.includes(OrderItemStatus.DELIVERED);
+    const someShipped = itemStatuses.includes(OrderItemStatus.SHIPPED);
+  
+    if (allDelivered) return Status.DELIVERED;
+    if (allCancelled) return Status.CANCELLED;
+    if (someDelivered) return Status.PARTIALLYDELIVERED;
+    if (someShipped && !allShippedOrDelivered) return Status.PARTIALLYSHIPPED;
+    if (allShippedOrDelivered) return Status.SHIPPED;
+  
+    return Status.PENDING;
   }
 
   async updateOrderItemStatus(
@@ -114,17 +131,32 @@ export class OrderService {
     if (!itemToUpdate) {
       return { message: `Item not found or you don't have permission to update this item.` };
     }
-    
-    // Update the status of the specific item
+
+    if (newStatus === OrderItemStatus.CANCELLED && itemToUpdate.status !== OrderItemStatus.PENDING) {
+      return { message: `Only items with status 'PENDING' can be cancelled.` };
+    }
+  
+    if (newStatus === OrderItemStatus.CANCELLED) {
+      await this.productService.increaseQuantity(itemToUpdate.productId, itemToUpdate.quantity);
+    }
+  
+    await this.orderRepo.updateOrderItemStatus(orderId, itemId, sellerId, newStatus);
+
     const updatedItems = order.items.map(item => {
       if (item._id.toString() === itemId) {
         return { ...item, status: newStatus };
       }
       return item;
     });
-    
-    // Update the order with the modified items array
+
     await this.orderRepo.updateOrderItemStatus(orderId, itemId, sellerId, newStatus);
+
+    const itemStatuses = updatedItems.map(item => item.status);
+    const newOrderStatus = this.updateOverallOrderStatus(itemStatuses);
+
+    if (newOrderStatus !== order.status) {
+      await this.orderRepo.updateOrder(orderId, { status: newOrderStatus });
+    }
     
     return { message: `Item status updated to ${newStatus} successfully` };
   }

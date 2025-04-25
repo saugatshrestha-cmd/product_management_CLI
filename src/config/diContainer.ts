@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { container } from "tsyringe";
 
-import { PasswordManager } from "../utils/passwordUtils";
+import { PasswordManager } from "@utils/passwordUtils";
 
 import { UserRepository } from "../repository/mongo_repo/userRepo";
 import { ProductRepository } from "../repository/mongo_repo/productRepo";

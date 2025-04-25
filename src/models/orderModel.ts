@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Status } from '../types/enumTypes';
+import { Status } from '@mytypes/enumTypes';
 
 const orderSchema = new mongoose.Schema({
     userId: {

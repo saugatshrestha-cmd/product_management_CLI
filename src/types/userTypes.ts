@@ -1,4 +1,4 @@
-import { Role } from "./enumTypes";
+import { Role } from "@mytypes/enumTypes";
 
 export interface User {
     _id: string;

@@ -1,6 +1,6 @@
 import { injectable, inject } from "tsyringe";
-import { CategoryRepository } from "../repository/mongo_repo/categoryRepo";
-import { Category } from "../types/categoryTypes";
+import { CategoryRepository } from "@repository/categoryRepo";
+import { Category } from "@mytypes/categoryTypes";
 
 @injectable()
 export class CategoryService {

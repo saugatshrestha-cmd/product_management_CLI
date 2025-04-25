@@ -1,8 +1,8 @@
 import { injectable, inject } from "tsyringe";
-import { UserRepository } from '../repository/mongo_repo/userRepo';
-import { User } from '../types/userTypes';
-import { PasswordManager } from '../utils/passwordUtils';
-import { Role } from "../types/enumTypes";
+import { UserRepository } from '@repository/userRepo';
+import { User } from '@mytypes/userTypes';
+import { PasswordManager } from '@utils/passwordUtils';
+import { Role } from "@mytypes/enumTypes";
 
 @injectable()
 export class UserService {

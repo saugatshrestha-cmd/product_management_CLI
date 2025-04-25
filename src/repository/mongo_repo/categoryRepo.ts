@@ -1,6 +1,6 @@
 import { injectable } from "tsyringe";
-import { CategoryModel } from '../../models/categoryModel';
-import { Category } from '../../types/categoryTypes';
+import { CategoryModel } from '@models/categoryModel';
+import { Category } from '@mytypes/categoryTypes';
 
 @injectable()
 export class CategoryRepository {

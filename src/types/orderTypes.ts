@@ -1,4 +1,4 @@
-import { OrderItemStatus, Status } from "./enumTypes";
+import { OrderItemStatus, Status } from "@mytypes/enumTypes";
 
 export interface Order{
     _id: string;

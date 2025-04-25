@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { CartService } from '../services/cartService';
-import { AuthRequest } from '../types/authTypes';
+import { CartService } from '@services/cartService';
+import { AuthRequest } from '@mytypes/authTypes';
 import { injectable, inject } from "tsyringe";
 
 

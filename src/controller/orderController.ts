@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
-import { OrderService } from '../services/orderService';
-import { OrderItemStatus } from '../types/enumTypes';
-import { AuthRequest } from '../types/authTypes';
+import { OrderService } from '@services/orderService';
+import { AuthRequest } from '@mytypes/authTypes';
 import { injectable, inject } from "tsyringe";
 
 @injectable()

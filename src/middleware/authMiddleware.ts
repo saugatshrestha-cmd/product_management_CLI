@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { AuthRequest } from '../types/authTypes';
+import { AuthRequest } from '@mytypes/authTypes';
 
 export class AuthMiddleware {
   static verifyToken(req: AuthRequest, res: Response, next: NextFunction): void {

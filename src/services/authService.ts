@@ -1,10 +1,10 @@
 import { injectable, inject } from "tsyringe";
 import jwt from 'jsonwebtoken';
-import { UserService } from "./userService";
-import { SellerService } from "./sellerService";
-import { PasswordManager } from '../utils/passwordUtils';
-import { User } from '../types/userTypes';
-import { Role } from '../types/enumTypes';
+import { UserService } from "@services/userService";
+import { SellerService } from "@services/sellerService";
+import { PasswordManager } from '@utils/passwordUtils';
+import { User } from '@mytypes/userTypes';
+import { Role } from '@mytypes/enumTypes';
 
 @injectable()
 export class AuthService {

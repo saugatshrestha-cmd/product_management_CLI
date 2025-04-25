@@ -1,6 +1,6 @@
 import { injectable } from "tsyringe";
-import { UserModel } from '../../models/userModel';
-import { User } from '../../types/userTypes';
+import { UserModel } from '@models/userModel';
+import { User } from '@mytypes/userTypes';
 
 @injectable()
 export class UserRepository {

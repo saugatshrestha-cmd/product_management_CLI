@@ -1,6 +1,6 @@
 import { injectable } from "tsyringe";
-import { SellerModel } from '../../models/sellerModel';
-import { Seller } from '../../types/sellerTypes';
+import { SellerModel } from '@models/sellerModel';
+import { Seller } from '@mytypes/sellerTypes';
 
 @injectable()
 export class SellerRepository {

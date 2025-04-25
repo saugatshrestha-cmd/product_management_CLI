@@ -1,7 +1,7 @@
 import { injectable } from "tsyringe";
-import { OrderModel } from '../../models/orderModel';
-import { Order, OrderInput } from '../../types/orderTypes';
-import { OrderItemStatus } from "../../types/enumTypes";
+import { OrderModel } from '@models/orderModel';
+import { Order, OrderInput } from '@mytypes/orderTypes';
+import { OrderItemStatus } from "@mytypes/enumTypes";
 
 @injectable()
 export class OrderRepository {
@@ -30,13 +30,12 @@ export class OrderRepository {
 
   async updateOrder(orderId: string, updatedInfo: Partial<Order>): Promise<void> {
       const result = await OrderModel.updateOne({ _id: orderId }, { $set: updatedInfo });
-      console.log("Update Result:", result);
     }
   
-    async updateOrderItemStatus(orderId: string, itemId: string, sellerId: string, newStatus: OrderItemStatus): Promise<void> {
-      await OrderModel.updateOne(
-        { _id: orderId, 'items._id': itemId, 'items.sellerId': sellerId },
-        { $set: { 'items.$.status': newStatus } }
-      );
-    }
+  async updateOrderItemStatus(orderId: string, itemId: string, sellerId: string, newStatus: OrderItemStatus): Promise<void> {
+    await OrderModel.updateOne(
+      { _id: orderId, 'items._id': itemId, 'items.sellerId': sellerId },
+      { $set: { 'items.$.status': newStatus } }
+    );
+  }
 }

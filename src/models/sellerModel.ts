@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Role } from '../types/enumTypes';
+import { Role } from '@mytypes/enumTypes';
 
 const sellerSchema = new mongoose.Schema({
   storeName: { 

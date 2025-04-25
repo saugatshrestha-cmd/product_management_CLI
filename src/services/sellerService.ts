@@ -1,8 +1,8 @@
 import { injectable, inject } from "tsyringe";
-import { SellerRepository } from '../repository/mongo_repo/sellerRepo';
-import { Seller } from '../types/sellerTypes';
-import { PasswordManager } from '../utils/passwordUtils';
-import { Role } from '../types/enumTypes';
+import { SellerRepository } from '@repository/sellerRepo';
+import { Seller } from '@mytypes/sellerTypes';
+import { PasswordManager } from '@utils/passwordUtils';
+import { Role } from '@mytypes/enumTypes';
 
 @injectable()
 export class SellerService {

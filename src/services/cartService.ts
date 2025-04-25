@@ -1,8 +1,8 @@
 import { injectable, inject } from "tsyringe";
-import { Product } from '../types/productTypes';
-import { CartRepository } from '../repository/mongo_repo/cartRepo';
-import { ProductService } from './productService';
-import { Cart } from '../types/cartTypes';
+import { Product } from '@mytypes/productTypes';
+import { CartRepository } from '@repository/cartRepo';
+import { ProductService } from '@services/productService';
+import { Cart } from '@mytypes/cartTypes';
 
 @injectable()
 export class CartService {
