@@ -9,7 +9,7 @@ const controller = container.resolve(OrderController);
 
 router.use(AuthMiddleware.verifyToken);
 
-// 🔒 User routes
+// User routes
 router.get('/user', RoleMiddleware.hasRole('user'), controller.getUserOrders.bind(controller));
 router.post('/', RoleMiddleware.hasRole('user'), controller.createUserOrder.bind(controller));
 router.put('/cancel', RoleMiddleware.hasRole('user'), controller.cancelUserOrder.bind(controller));
@@ -17,11 +17,10 @@ router.put('/cancel', RoleMiddleware.hasRole('user'), controller.cancelUserOrder
 router.get('/seller', RoleMiddleware.hasRole('seller'), controller.getSellerOrders.bind(controller));
 router.put('/seller', RoleMiddleware.hasRole('seller'), controller.updateOrderItemStatus.bind(controller));
 
-// 🔐 Admin routes
+// Admin routes
 router.get('/', RoleMiddleware.hasRole('admin'), controller.getAllOrders.bind(controller));
 router.get('/:id', RoleMiddleware.hasRole('admin'), controller.getOrderByUserId.bind(controller));
 router.post('/', RoleMiddleware.hasRole('admin'), controller.createOrderByAdmin.bind(controller));
-router.put('/:id', RoleMiddleware.hasRole('admin'), controller.updateOrderStatus.bind(controller));
 router.put('/:id/cancel', RoleMiddleware.hasRole('admin'), controller.cancelOrderByAdmin.bind(controller));
 router.delete('/:id', RoleMiddleware.hasRole('admin'), controller.deleteOrder.bind(controller));
 

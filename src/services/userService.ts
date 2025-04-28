@@ -76,7 +76,7 @@ export class UserService {
       return { message: "Email already in use" };
     }
 
-    await this.userRepository.updateUser(userId, { ...user, email: newEmail });
+    await this.userRepository.updateUser(userId, { email: newEmail });
     return { message: "Email updated successfully" };
   }
 
@@ -90,7 +90,7 @@ export class UserService {
     const hashed = this.passwordManager.hashPassword(newPassword, newSalt);
     const combined = this.passwordManager.combineSaltAndHash(newSalt, hashed);
 
-    await this.userRepository.updateUser(userId, { ...user, password: combined });
+    await this.userRepository.updateUser(userId, { password: combined });
     return { message: "Password updated successfully" };
   }
 

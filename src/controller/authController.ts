@@ -52,6 +52,13 @@ export class AuthController {
   };
 
   async logout(req: Request, res: Response): Promise<void> {
+    const token = req.cookies?.token;
+
+    if (!token) {
+      res.status(400).json({ message: 'No active session to logout' });
+      return;
+    }
+    
     res.clearCookie('token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

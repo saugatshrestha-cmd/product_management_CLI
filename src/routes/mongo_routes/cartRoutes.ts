@@ -20,8 +20,6 @@ router.get('/summary', RoleMiddleware.hasRole('user'), controller.getMyCartSumma
 router.get('/', RoleMiddleware.hasRole('admin'), controller.getAllCarts.bind(controller));
 router.get('/:id', RoleMiddleware.hasRole('admin'), controller.getCartByUserId.bind(controller));
 router.get('/:id/summary', RoleMiddleware.hasRole('admin'), controller.getSummaryByUserId.bind(controller));
-router.post('/', RoleMiddleware.hasRole('admin'), controller.createCartByAdmin.bind(controller));
-router.put('/:id', RoleMiddleware.hasRole('admin'), controller.updateCartByAdmin.bind(controller));
 router.delete('/:id', RoleMiddleware.hasRole('admin'), controller.deleteCartByAdmin.bind(controller));
 
 

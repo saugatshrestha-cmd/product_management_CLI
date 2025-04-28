@@ -19,5 +19,6 @@ routes.use('/categories', categoryRoutes);
 routes.use('/auth', authRoutes);
 routes.use('/admin', adminRoutes);
 routes.use('/sellers', sellerRoutes);
+//health endpoint server is up server is down
 
 export default routes;

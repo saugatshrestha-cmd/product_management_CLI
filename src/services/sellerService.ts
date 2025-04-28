@@ -72,7 +72,7 @@ export class SellerService {
       return { message: "Email already in use" };
     }
 
-    await this.sellerRepository.updateSeller(sellerId, { ...seller, email: newEmail });
+    await this.sellerRepository.updateSeller(sellerId, { email: newEmail });
     return { message: "Email updated successfully" };
   }
 
@@ -86,7 +86,7 @@ export class SellerService {
     const hashed = this.passwordManager.hashPassword(newPassword, newSalt);
     const combined = this.passwordManager.combineSaltAndHash(newSalt, hashed);
 
-    await this.sellerRepository.updateSeller(sellerId, { ...seller, password: combined });
+    await this.sellerRepository.updateSeller(sellerId, { password: combined });
     return { message: "Password updated successfully" };
   }
 
