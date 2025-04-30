@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { CategoryService } from '@services/categoryService';
 import { injectable, inject } from "tsyringe";
+import { handleSuccess, handleError } from '@utils/apiResponse';
 
 
 @injectable()
@@ -9,51 +10,52 @@ export class CategoryController {
                 @inject("CategoryService") private categoryService: CategoryService
             ) {}
 
-    async createCategory(req: Request, res: Response): Promise<void> {
+    async createCategory(req: Request, res: Response, next: NextFunction): Promise<void> {
         try{
             const newCategory = req.body;
             const result = await this.categoryService.createCategory(newCategory);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: "Error creating category" })
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
-    async getAllCategories(req: Request, res: Response): Promise<void> {
+    async getAllCategories(req: Request, res: Response, next: NextFunction): Promise<void> {
             try {
-                const users = await this.categoryService.getAllCategories();
-                res.json(users);
-            } catch {
-                res.status(500).json({ message: 'Error fetching users' });
+                const result = await this.categoryService.getAllCategories();
+                handleSuccess(res, result);
+            } catch(error) {
+                handleError(next, error);
             }
         }
     
-        async getCategoryById(req: Request, res: Response): Promise<void> {
+        async getCategoryById(req: Request, res: Response, next: NextFunction): Promise<void> {
             try {
-                const userId = req.params.id;
-                const result = await this.categoryService.getCategoryById(userId);
-                res.json(result);
-            } catch {
-                res.status(500).json({ message: 'Error fetching user' });
+                const categoryId = req.params.id;
+                const result = await this.categoryService.getCategoryById(categoryId);
+                handleSuccess(res, result);
+            } catch(error) {
+                handleError(next, error);
             }
         }
     
-        async updateCategory(req: Request, res: Response): Promise<void> {
+        async updateCategory(req: Request, res: Response, next: NextFunction): Promise<void> {
             try {
-                const userId = req.params.id;
-                const result = await this.categoryService.updateCategory(userId, req.body);
-                res.json(result);
-            } catch {
-                res.status(500).json({ message: 'Error updating user' });
+                const categoryId = req.params.id;
+                const updatedInfo = req.body;
+                const result = await this.categoryService.updateCategory(categoryId, updatedInfo);
+                handleSuccess(res, result);
+            } catch(error) {
+                handleError(next, error);
             }
         }
     
-        async deleteCategory(req: Request, res: Response): Promise<void> {
+        async deleteCategory(req: Request, res: Response, next: NextFunction): Promise<void> {
             try {
-                const userId = req.params.id;
-                const result = await this.categoryService.deleteCategory(userId);
-                res.json(result);
-            } catch {
-                res.status(500).json({ message: 'Error deleting user' });
+                const categoryId = req.params.id;
+                const result = await this.categoryService.deleteCategory(categoryId);
+                handleSuccess(res, result);
+            } catch(error) {
+                handleError(next, error);
             }
         }
 }

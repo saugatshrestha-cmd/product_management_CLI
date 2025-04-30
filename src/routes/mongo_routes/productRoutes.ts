@@ -14,6 +14,7 @@ router.use(AuthMiddleware.verifyToken);
 router.get('/seller', RoleMiddleware.hasRole('seller'), controller.getProductBySeller.bind(controller));
 router.post('/', new Validator(createProductSchema).validate(), RoleMiddleware.hasRole('seller'), controller.createProduct.bind(controller));
 router.put('/seller', RoleMiddleware.hasRole('seller'), new Validator(updateProductSchema).validate(), controller.updateProduct.bind(controller));
+router.delete('/seller/:id', RoleMiddleware.hasRole('seller'), new Validator(updateProductSchema).validate(), controller.deleteProduct.bind(controller));
 
 router.get('/', RoleMiddleware.hasRole('admin'), controller.getAllProducts.bind(controller));
 router.get('/:id', RoleMiddleware.hasRole('admin'), controller.getProductById.bind(controller));

@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { SellerService } from '@services/sellerService';
 import { AuthRequest } from '@mytypes/authTypes';
 import { injectable, inject } from "tsyringe";
-
+import { handleSuccess, handleError } from '@utils/apiResponse';
 
 @injectable()
 export class SellerController {
@@ -10,136 +10,114 @@ export class SellerController {
             @inject("SellerService") private sellerService: SellerService
         ) {}
 
-    async createSeller(req: Request, res: Response): Promise<void>{
+    async createSeller(req: Request, res: Response, next: NextFunction): Promise<void>{
         try{
             const newSeller = req.body;
             const result = await this.sellerService.createSeller(newSeller);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: "Error creating seller" })
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async getProfile(req: AuthRequest, res: Response): Promise<void> {
+    async getProfile(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
-            const sellerId = req.user?._id;
-            if (!sellerId){
-                res.status(400).json({ message: "No id in token" });
-                return;
-            }
-            const seller = await this.sellerService.getSellerById(sellerId);
-            if (!seller){
-                res.status(404).json({ message: "Seller not found" });
-                return;
-            }
-            res.json(seller);
-        } catch {
-            res.status(500).json({ message: "Error fetching seller" });
+            const sellerId = req.user?._id as string;
+            const result = await this.sellerService.getSellerById(sellerId);
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async updateProfile(req: AuthRequest, res: Response): Promise<void> {
+    async updateProfile(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
-            const sellerId = req.user?._id;
-            if (!sellerId){
-                res.status(400).json({ message: "No id in token" });
-                return;
-            }
-
+            const sellerId = req.user?._id as string;
             const updatedInfo = req.body;
             const result = await this.sellerService.updateSeller(sellerId, updatedInfo);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: "Error updating profile" });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async updateEmail(req: AuthRequest, res: Response): Promise<void> {
+    async updateEmail(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
-            const sellerId = req.user?._id;
-            if (!sellerId){
-                res.status(400).json({ message: "No id in token" });
-                return;
-            }
-
-            const result = await this.sellerService.updateEmail(sellerId, req.body);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: "Error updating email" });
+            const sellerId = req.user?._id as string;
+            const result = await this.sellerService.updateEmail(sellerId, req.body.email);
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);;
         }
     }
 
-    async updatePassword(req: AuthRequest, res: Response): Promise<void> {
+    async updatePassword(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
-            const sellerId = req.user?._id;
-            if (!sellerId){
-                res.status(400).json({ message: "No id in token" });
-                return;
-            }
-
-            const result = await this.sellerService.updatePassword(sellerId, req.body);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: "Error updating password" });
+            const sellerId = req.user?._id as string;
+            const result = await this.sellerService.updatePassword(sellerId, req.body.password);
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async getAllSellers(req: Request, res: Response): Promise<void> {
+    async getAllSellers(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const sellers = await this.sellerService.getAllSellers();
-            res.json(sellers);
-        } catch {
-            res.status(500).json({ message: 'Error fetching sellers' });
+            const result = await this.sellerService.getAllSellers();
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async getSellerById(req: Request, res: Response): Promise<void> {
+    async getSellerById(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.params.id;
             const result = await this.sellerService.getSellerById(sellerId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error fetching seller' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async adminUpdateSeller(req: Request, res: Response): Promise<void> {
+    async adminUpdateSeller(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.params.id;
-            const result = await this.sellerService.updateSeller(sellerId, req.body);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error updating seller' });
+            const updatedSellerInfo = req.body;
+            const result = await this.sellerService.updateSeller(sellerId, updatedSellerInfo);
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async adminUpdateEmail(req: Request, res: Response): Promise<void> {
+    async adminUpdateEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.params.id;
-            const result = await this.sellerService.updateEmail(sellerId, req.body);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error updating email' });
+            const result = await this.sellerService.updateEmail(sellerId, req.body.email);
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async adminUpdatePassword(req: Request, res: Response): Promise<void> {
+    async adminUpdatePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.params.id;
-            const result = await this.sellerService.updatePassword(sellerId, req.body);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error updating password' });
+            const result = await this.sellerService.updatePassword(sellerId, req.body.password);
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async deleteSeller(req: Request, res: Response): Promise<void> {
+    async deleteSeller(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.params.id;
             const result = await this.sellerService.deleteSeller(sellerId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error deleting seller' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 }

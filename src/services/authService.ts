@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { UserService } from "@services/userService";
 import { SellerService } from "@services/sellerService";
 import { PasswordManager } from '@utils/passwordUtils';
+import { AppError } from "@utils/errorHandler";
 import { User } from '@mytypes/userTypes';
 import { Role } from '@mytypes/enumTypes';
 
@@ -38,7 +39,7 @@ export class AuthService {
           return { token, message: 'Login successful as seller' };
         }
     
-        return { message: 'Invalid credentials' };
+        throw AppError.unauthorized("Invalid credentials");
     }
 
     async register(userData: User) {

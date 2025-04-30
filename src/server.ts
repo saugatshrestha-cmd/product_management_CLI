@@ -2,6 +2,7 @@ import "reflect-metadata";
 import express from 'express';
 import mongoose from 'mongoose';
 import routes from './routes/mongo_routes';
+import { errorMiddleware } from "@middleware/errorMiddleware";
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 
@@ -15,7 +16,8 @@ const MONGO_URI = process.env.MONGO_URI || '';
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("", routes)
+app.use("", routes);
+app.use(errorMiddleware);
 
 mongoose.connect(MONGO_URI)
     .then(() => {

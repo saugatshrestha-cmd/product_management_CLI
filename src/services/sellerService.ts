@@ -1,6 +1,7 @@
 import { injectable, inject } from "tsyringe";
 import { SellerRepository } from '@repository/sellerRepo';
 import { Seller } from '@mytypes/sellerTypes';
+import { AppError } from "@utils/errorHandler";
 import { PasswordManager } from '@utils/passwordUtils';
 import { Role } from '@mytypes/enumTypes';
 
@@ -14,7 +15,10 @@ export class SellerService {
 
   async getSellerById(sellerId: string) {
     const seller = await this.sellerRepository.findById(sellerId);
-    return seller || { message: "Seller not found" };
+    if (!seller) {
+      throw AppError.notFound("Seller not found", sellerId);
+    }
+    return seller;
   }
 
   async getAllSellers(): Promise<Seller[]> {
@@ -27,7 +31,7 @@ export class SellerService {
 
   async createSeller(sellerData: Seller): Promise<{ message: string }> {
     const exists = await this.sellerRepository.findByEmail(sellerData.email);
-    if (exists) return { message: "Email already registered" };
+    if (exists) throw AppError.conflict("Email already registered");
   
     const salt = this.passwordManager.createSalt();
     const hashed = this.passwordManager.hashPassword(sellerData.password, salt);
@@ -43,11 +47,11 @@ export class SellerService {
   async updateSeller(sellerId: string, updatedInfo: Seller): Promise<{ message: string }> {
     const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
-      return { message: "Seller not found" };
+      throw AppError.notFound("Seller not found", sellerId);
     }
 
     if (updatedInfo.email || updatedInfo.password) {
-      return { message: "Email and password cannot be updated." };
+      throw AppError.badRequest("Email and password must be updated via dedicated endpoints");
     }
 
     const { storeName, phone, address } = updatedInfo;
@@ -65,11 +69,11 @@ export class SellerService {
   async updateEmail(sellerId: string, newEmail: string): Promise<{ message: string }> {
     const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
-      return { message: "Seller not found" };
+      throw AppError.notFound("Seller not found", sellerId);
     }
 
     if (await this.sellerRepository.findByEmail(newEmail)) {
-      return { message: "Email already in use" };
+      throw AppError.conflict("Email already in use");
     }
 
     await this.sellerRepository.updateSeller(sellerId, { email: newEmail });
@@ -79,7 +83,7 @@ export class SellerService {
   async updatePassword(sellerId: string, newPassword: string): Promise<{ message: string }> {
     const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
-      return { message: "Seller not found" };
+      throw AppError.notFound("Seller not found", sellerId);
     }
 
     const newSalt = this.passwordManager.createSalt();
@@ -91,7 +95,14 @@ export class SellerService {
   }
 
   async deleteSeller(sellerId: string): Promise<{ message: string }> {
+    const seller = await this.sellerRepository.findById(sellerId);
+    if (!seller) {
+      throw AppError.notFound('Seller', sellerId);
+    }
     const success = await this.sellerRepository.deleteSellerById(sellerId);
-    return { message: success ? "Seller deleted successfully" : "Seller not found" };
+    if (!success) {
+      throw AppError.internal('Failed to delete seller');
+    }  
+    return { message: "Seller deleted successfully" };
   }
 }

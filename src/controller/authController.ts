@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '@services/authService';
 import { injectable, inject } from "tsyringe";
+import { handleSuccess, handleError } from '@utils/apiResponse';
 
 @injectable()
 export class AuthController {

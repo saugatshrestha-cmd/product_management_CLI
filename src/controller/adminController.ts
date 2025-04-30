@@ -1,94 +1,72 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { UserService } from '@services/userService';
 import { AuthRequest } from '@mytypes/authTypes';
 import { injectable, inject } from "tsyringe";
+import { handleSuccess, handleError } from '@utils/apiResponse';
 
 @injectable()
 export class AdminController {
     constructor(
                 @inject("UserService") private userService: UserService
             ) {}
-    async createAdmin(req: Request, res: Response): Promise<void>{
+    async createAdmin(req: Request, res: Response, next: NextFunction): Promise<void>{
         try{
             const newAdmin = req.body;
             const result = await this.userService.createAdmin(newAdmin);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: "Error creating admin" })
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async getProfile(req: AuthRequest, res: Response): Promise<void> {
+    async getProfile(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
-            const userId = req.user?._id;
-            if (!userId){
-                res.status(400).json({ message: "No id in token" });
-                return;
-            }
+            const userId = req.user?._id as string;
             const user = await this.userService.getUserById(userId);
-            if (!user){
-                res.status(404).json({ message: "User not found" });
-                return;
-            }
-            res.json(user);
-        } catch {
-            res.status(500).json({ message: "Error fetching user" });
+            handleSuccess(res, user);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async updateProfile(req: AuthRequest, res: Response): Promise<void> {
+    async updateProfile(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
-            const userId = req.user?._id;
-            if (!userId){
-                res.status(400).json({ message: "No id in token" });
-                return;
-            }
-
+            const userId = req.user?._id as string;
             const updatedInfo = req.body;
             const result = await this.userService.updateUser(userId, updatedInfo);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: "Error updating profile" });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async updateEmail(req: AuthRequest, res: Response): Promise<void> {
+    async updateEmail(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
-            const userId = req.user?._id;
-            if (!userId){
-                res.status(400).json({ message: "No id in token" });
-                return;
-            }
-
-            const result = await this.userService.updateEmail(userId, req.body);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: "Error updating email" });
+            const userId = req.user?._id as string;
+            const result = await this.userService.updateEmail(userId, req.body.email);
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async updatePassword(req: AuthRequest, res: Response): Promise<void> {
+    async updatePassword(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
-            const userId = req.user?._id;
-            if (!userId){
-                res.status(400).json({ message: "No id in token" });
-                return;
-            }
-
-            const result = await this.userService.updatePassword(userId, req.body);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: "Error updating password" });
+            const userId = req.user?._id as string;
+            const result = await this.userService.updatePassword(userId, req.body.password);
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async deleteAdmin(req: Request, res: Response): Promise<void> {
+    async deleteAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const userId = req.params.id;
             const result = await this.userService.deleteUser(userId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error deleting user' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 }

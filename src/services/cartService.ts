@@ -1,6 +1,7 @@
 import { injectable, inject } from "tsyringe";
 import { Product } from '@mytypes/productTypes';
 import { CartRepository } from '@repository/cartRepo';
+import { AppError } from "@utils/errorHandler";
 import { ProductService } from '@services/productService';
 import { Cart } from '@mytypes/cartTypes';
 
@@ -23,6 +24,10 @@ export class CartService {
       return { message: "Product not found" };
     }
 
+    if (quantity > product.quantity) {
+      throw AppError.badRequest("Requested quantity exceeds available stock");
+    }
+
     const userCart = await this.cartRepo.findCartByUserId(userId);
 
     if (!userCart) {
@@ -35,7 +40,7 @@ export class CartService {
         item => item.productId.toString() === product._id.toString()
       );
       if (productInCart) {
-        return { message: 'Product is already in the cart' };
+        throw AppError.conflict("Product already in cart");
       }
       
       userCart.items.push({ productId: product._id, quantity, sellerId: product.sellerId });
@@ -130,6 +135,9 @@ export class CartService {
 
   async getCartByUserId(userId: string): Promise<any> {
     const userCart = await this.cartRepo.findCartByUserId(userId);
-    return userCart || { message: `Cart not found for userId: ${userId}` };
+    if (!userCart) {
+      throw AppError.notFound("Cart not found", userId);
+    }
+    return userCart;
   }
 }

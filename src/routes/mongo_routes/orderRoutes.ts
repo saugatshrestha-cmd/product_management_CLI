@@ -20,7 +20,6 @@ router.put('/seller', RoleMiddleware.hasRole('seller'), controller.updateOrderIt
 // Admin routes
 router.get('/', RoleMiddleware.hasRole('admin'), controller.getAllOrders.bind(controller));
 router.get('/:id', RoleMiddleware.hasRole('admin'), controller.getOrderByUserId.bind(controller));
-router.post('/', RoleMiddleware.hasRole('admin'), controller.createOrderByAdmin.bind(controller));
 router.put('/:id/cancel', RoleMiddleware.hasRole('admin'), controller.cancelOrderByAdmin.bind(controller));
 router.delete('/:id', RoleMiddleware.hasRole('admin'), controller.deleteOrder.bind(controller));
 

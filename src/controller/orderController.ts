@@ -1,149 +1,115 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { OrderService } from '@services/orderService';
 import { AuthRequest } from '@mytypes/authTypes';
 import { injectable, inject } from "tsyringe";
+import { handleSuccess, handleError } from '@utils/apiResponse';
 
 @injectable()
 export class OrderController {
     constructor(
                 @inject("OrderService") private orderService: OrderService
             ) {}
-    async getUserOrders(req: AuthRequest, res: Response): Promise<void> {
-        const userId = req.user?._id;
-        if (!userId){
-            res.status(400).json({ message: "No id in token" });
-            return;
-        }
-
+    async getUserOrders(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        const userId = req.user?._id as string;
         try {
             const result = await this.orderService.getOrderByUserId(userId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error fetching user orders' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async updateOrderItemStatus(req: AuthRequest, res: Response): Promise<void> {
-        const sellerId = req.user?._id;
-        if (!sellerId){
-            res.status(400).json({ message: "No id in token" });
-            return;
-        }
+    async updateOrderItemStatus(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        const sellerId = req.user?._id as string;
         const { orderId, itemId } = req.body;
         const newStatus = req.body.status;
         try {
             const result = await this.orderService.updateOrderItemStatus(orderId, itemId, sellerId, newStatus);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error updating order item status'})
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async getSellerOrders(req: AuthRequest, res: Response): Promise<void> {
-        const sellerId = req.user?._id;
-        if (!sellerId){
-            res.status(400).json({ message: "No id in token" });
-            return;
-        }
-
+    async getSellerOrders(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        const sellerId = req.user?._id as string;
         try {
             const result = await this.orderService.getOrderBySellerId(sellerId);
-            res.json(result);
-        } catch (error){
-            console.log(error)
-            res.status(500).json({ message: 'Error fetching seller orders' });
+            handleSuccess(res, result);
+        } catch(error){
+            handleError(next, error);
         }
     }
 
-    async createUserOrder(req: AuthRequest, res: Response): Promise<void> {
-        const userId = req.user?._id;
-        if (!userId){
-            res.status(400).json({ message: "No id in token" });
-            return;
-        }
-
+    async createUserOrder(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        const userId = req.user?._id as string;
         try {
             const result = await this.orderService.createOrder(userId);
-            res.json(result);
-        } catch (error) {
-            res.status(500).json({ message: 'Error creating order' });
+            handleSuccess(res, result);
+        } catch(error){
+            handleError(next, error);
         }
     }
 
-    async cancelUserOrder(req: AuthRequest, res: Response): Promise<void> {
-        const userId = req.user?._id;
-        if (!userId){
-            res.status(400).json({ message: "No id in token" });
-            return;
-        }
-
+    async cancelUserOrder(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        const userId = req.user?._id as string;
         const { orderId } = req.body;
         try {
             const result = await this.orderService.cancelOrder(orderId, userId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error cancelling order' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async getAllOrders(req: Request, res: Response): Promise<void> {
+    async getAllOrders(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const orders = await this.orderService.getAllOrders();
             res.json(orders);
-        } catch {
-            res.status(500).json({ message: 'Error fetching orders' });
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async getOrderByUserId(req: Request, res: Response): Promise<void> {
+    async getOrderByUserId(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const userId = req.params.id;
             const result = await this.orderService.getOrderByUserId(userId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error fetching order' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async createOrderByAdmin(req: Request, res: Response): Promise<void> {
-        try {
-            const userId = req.body.userId;
-            const result = await this.orderService.createOrder(userId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error creating order' });
-        }
-    }
-
-    async updateOrderStatus(req: Request, res: Response): Promise<void> {
+    async updateOrderStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const orderId = req.params.id;
             const updatedInfo = req.body;
             const result = await this.orderService.updateOrderStatus(orderId, updatedInfo);
-            res.json(result);
-            } catch {
-            res.status(500).json({ message: 'Error updating order status' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async cancelOrderByAdmin(req: Request, res: Response): Promise<void> {
+    async cancelOrderByAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const orderId = req.params.id;
             const userId = req.body.userId;
             const result = await this.orderService.cancelOrder(orderId, userId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error cancelling order' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async deleteOrder(req: Request, res: Response): Promise<void> {
+    async deleteOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const orderId = req.params.id;
             const result = await this.orderService.deleteOrder(orderId);
-            res.json(result);
-        } catch {
-        res.status(500).json({ message: 'Error deleting order' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 }

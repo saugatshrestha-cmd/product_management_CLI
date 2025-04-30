@@ -1,7 +1,8 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { CartService } from '@services/cartService';
 import { AuthRequest } from '@mytypes/authTypes';
 import { injectable, inject } from "tsyringe";
+import { handleSuccess, handleError } from '@utils/apiResponse';
 
 
 @injectable()
@@ -9,144 +10,108 @@ export class CartController {
     constructor(
                 @inject("CartService") private cartService: CartService
             ) {}
-    async getAllCarts(req: Request, res: Response): Promise<void> {
+    async getAllCarts(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const carts = await this.cartService.getAllCarts();
-            res.json(carts);
-        } catch {
-            res.status(500).json({ message: 'Error fetching carts' });
+            handleSuccess(res, carts);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async getMyCart(req: AuthRequest, res: Response): Promise<void> {
-        const userId = req.user?._id;
-        if (!userId){
-            res.status(400).json({ message: "No id in token" });
-            return;
-        }
+    async getMyCart(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        const userId = req.user?._id as string;
+
         try {
             const cart = await this.cartService.getCartByUserId(userId);
-            if (!cart){
-                res.status(404).json({ message: 'Cart not found' });
-                return;
-            }
-            res.json(cart);
-        } catch {
-            res.status(500).json({ message: 'Error fetching cart' });
+            handleSuccess(res, cart);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async createMyCart(req: AuthRequest, res: Response): Promise<void> {
-        const userId = req.user?._id;
-        if (!userId){
-            res.status(400).json({ message: "No id in token" });
-            return;
-        }
+    async createMyCart(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        const userId = req.user?._id as string;
         const { productId, quantity } = req.body;
         try {
             const result = await this.cartService.createCart(productId, quantity, userId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error creating cart' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async updateMyCart(req: AuthRequest, res: Response): Promise<void> {
-        const userId = req.user?._id;
-        if (!userId){
-            res.status(400).json({ message: "No id in token" });
-            return;
-        }
+    async updateMyCart(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        const userId = req.user?._id as string;
         const { productId, amount } = req.body;
         try {
             const result = await this.cartService.updateItemQuantity(userId, productId, amount);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error updating cart' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async removeFromMyCart(req: AuthRequest, res: Response): Promise<void> {
-        const userId = req.user?._id;
-        if (!userId){
-            res.status(400).json({ message: "No id in token" });
-            return;
-        }
+    async removeFromMyCart(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        const userId = req.user?._id as string;
         const { productId } = req.body;
         try {
             const result = await this.cartService.removeFromCart(productId, userId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error removing item' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async getMyCartSummary(req: AuthRequest, res: Response): Promise<void> {
-        const userId = req.user?._id;
-        if (!userId){
-            res.status(400).json({ message: "No id in token" });
-            return;
-        }
+    async getMyCartSummary(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        const userId = req.user?._id as string;
         try {
             const summary = await this.cartService.calculateCartSummary(userId);
-            if (!summary){
-                res.status(404).json({ message: 'Summary not found' });
-            }
-            res.json(summary);
-        } catch {
-            res.status(500).json({ message: 'Error calculating summary' });
+            handleSuccess(res, summary);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async getCartByUserId(req: Request, res: Response): Promise<void> {
+    async getCartByUserId(req: Request, res: Response, next: NextFunction): Promise<void> {
         const userId = req.params.id;
         try {
             const result = await this.cartService.getCartByUserId(userId);
-            res.json(result);
-        } catch {
-        res.status(500).json({ message: 'Error fetching cart' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async getSummaryByUserId(req: Request, res: Response): Promise<void> {
+    async getSummaryByUserId(req: Request, res: Response, next: NextFunction): Promise<void> {
         const userId = req.params.id;
         try {
             const result = await this.cartService.calculateCartSummary(userId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error calculating summary' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async createCartByAdmin(req: Request, res: Response): Promise<void> {
-        const { userId, productId, quantity } = req.body;
-        try {
-            const result = await this.cartService.createCart(productId, quantity, userId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error creating cart' });
-        }
-    }
-
-    async updateCartByAdmin(req: Request, res: Response): Promise<void> {
+    async updateCartByAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
         const userId = req.params.id;
         const { productId, amount } = req.body;
         try {
             const result = await this.cartService.updateItemQuantity(userId, productId, amount);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error updating cart' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 
-    async deleteCartByAdmin(req: Request, res: Response): Promise<void> {
+    async deleteCartByAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
         const userId = req.params.id;
         const { productId } = req.body;
         try {
             const result = await this.cartService.removeFromCart(productId, userId);
-            res.json(result);
-        } catch {
-            res.status(500).json({ message: 'Error deleting cart' });
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
         }
     }
 }

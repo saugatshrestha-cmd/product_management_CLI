@@ -1,6 +1,7 @@
 import { injectable, inject } from "tsyringe";
 import { ProductRepository } from '@repository/productRepo';
 import { CategoryService } from '@services/categoryService';
+import { AppError } from "@utils/errorHandler";
 import { Product, ProductInput } from '@mytypes/productTypes';
 
 @injectable()
@@ -18,11 +19,11 @@ export class ProductService {
 
     const existingProduct = await this.productRepository.getAll();
     if (existingProduct.some(product => product.name.toLowerCase() === name.toLowerCase())) {
-      return { message: "Product already exists." };
+      throw AppError.conflict("Product already exist");
     }
 
     if (categoryId && !(await this.categoryService.getCategoryById(categoryId))) {
-      return { message: "Invalid category ID. Category does not exist." };
+      throw AppError.notFound("Category does not exist", categoryId);
     }
     
 
@@ -32,7 +33,10 @@ export class ProductService {
 
   async getProductById(productId: string): Promise<Product | { message: string }> {
     const product = await this.productRepository.findById(productId);
-    return product || { message: "Product not found" };
+    if (!product) {
+      throw AppError.notFound("Product not found", productId);
+    }
+    return product;
   }
 
   async getAllProducts(): Promise<Product[]> {
@@ -46,11 +50,11 @@ export class ProductService {
   async updateProduct(productId: string, updatedInfo: Partial<Product>): Promise<{ message: string }> {
     const product = await this.productRepository.findById(productId);
     if (!product) {
-      return { message: "Product not found" };
+      throw AppError.notFound("Product not found", productId);
     }
 
     if (updatedInfo.categoryId && !(await this.categoryService.getCategoryById(updatedInfo.categoryId))) {
-      return { message: "Invalid category ID. Category does not exist." };
+      throw AppError.notFound("Category does not exist", updatedInfo.categoryId);
     }
 
     await this.productRepository.updateProduct(productId, updatedInfo);
@@ -60,7 +64,7 @@ export class ProductService {
   async updateQuantity(productId: string, newQuantity: number): Promise<{ message: string }> {
     const product = await this.productRepository.findById(productId);
     if (!product) {
-      return { message: "Product not found" };
+      throw AppError.notFound("Product not found", productId);
     }
 
     product.quantity = Math.max(0, product.quantity + newQuantity);
@@ -71,7 +75,7 @@ export class ProductService {
   async decreaseQuantity(productId: string, newQuantity: number): Promise<{ message: string }> {
     const product = await this.productRepository.findById(productId);
     if (!product) {
-      return { message: "Product not found" };
+      throw AppError.notFound("Product not found", productId);
     }
 
     product.quantity = Math.max(0, product.quantity - newQuantity);
@@ -82,7 +86,7 @@ export class ProductService {
   async increaseQuantity(productId: string, newQuantity: number): Promise<{ message: string }> {
     const product = await this.productRepository.findById(productId);
     if (!product) {
-      return { message: "Product not found" };
+      throw AppError.notFound("Product not found", productId);
     }
 
     product.quantity = Math.max(0, product.quantity + newQuantity);
@@ -91,7 +95,14 @@ export class ProductService {
   }
 
   async deleteProduct(productId: string): Promise<{ message: string }> {
+    const product = await this.productRepository.findById(productId);
+    if (!product) {
+      throw AppError.notFound('Product', productId);
+    }
     const success = await this.productRepository.deleteProductById(productId);
-    return { message: success ? "Product deleted successfully" : "Product not found" };
+    if (!success) {
+      throw AppError.internal('Failed to delete product');
+    }
+    return { message: "Product deleted successfully" };;
   }
 }

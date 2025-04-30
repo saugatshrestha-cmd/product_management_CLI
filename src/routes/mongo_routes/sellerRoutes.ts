@@ -12,7 +12,7 @@ const controller = container.resolve(SellerController);
 router.use(AuthMiddleware.verifyToken);
 
 // seller routes
-router.get('/', RoleMiddleware.hasRole('seller'), controller.getProfile.bind(controller));
+router.get('/view', RoleMiddleware.hasRole('seller'), controller.getProfile.bind(controller));
 router.post('/', new Validator(createSellerSchema).validate(), controller.createSeller.bind(controller));
 router.put('/update', RoleMiddleware.hasRole('seller'), new Validator(updateSellerSchema).validate(), controller.updateProfile.bind(controller));
 router.put('/change-email', RoleMiddleware.hasRole('seller'), new Validator(updateSellerEmailSchema).validate(), controller.updateEmail.bind(controller));

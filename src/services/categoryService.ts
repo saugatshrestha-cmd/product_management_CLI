@@ -1,5 +1,6 @@
 import { injectable, inject } from "tsyringe";
 import { CategoryRepository } from "@repository/categoryRepo";
+import { AppError } from "@utils/errorHandler";
 import { Category } from "@mytypes/categoryTypes";
 
 @injectable()
@@ -13,7 +14,7 @@ export class CategoryService {
     const { name, description } = categoryData;
 
     if (await this.categoryRepository.findByName(name)) {
-      return { message: "Category already exists" };
+      throw AppError.conflict( "Category already exists" )
     }
 
     await this.categoryRepository.addCategory(categoryData);
@@ -22,7 +23,10 @@ export class CategoryService {
 
   async getCategoryById(categoryId: string): Promise<Category | { message: string }> {
     const category = await this.categoryRepository.findById(categoryId);
-    return category || { message: "Category not found" };
+    if (!category) {
+      throw AppError.notFound("Category not found", categoryId);
+    }
+    return category;
   }
 
   async getAllCategories(): Promise<Category[]> {
@@ -32,11 +36,11 @@ export class CategoryService {
   async updateCategory(categoryId: string, updatedInfo: Partial<Category>): Promise<{ message: string }> {
     const category = await this.categoryRepository.findById(categoryId);
     if (!category) {
-      return { message: "Category not found" };
+      throw AppError.notFound("Category not found", categoryId);
     }
 
     if (updatedInfo.name && await this.categoryRepository.findByName(updatedInfo.name)) {
-      return { message: "Category name already exists" };
+      throw AppError.conflict( "Category already exists" );
     }
 
     await this.categoryRepository.updateCategory(categoryId, updatedInfo);
@@ -44,7 +48,14 @@ export class CategoryService {
   }
 
   async deleteCategory(categoryId: string): Promise<{ message: string }> {
+    const category = await this.categoryRepository.findById(categoryId);
+    if (!category) {
+      throw AppError.notFound("Category not found", categoryId);
+    }
     const success = await this.categoryRepository.deleteCategoryById(categoryId);
-    return { message: success ? "Category deleted successfully" : "Category not found" };
+    if (!success) {
+      throw AppError.internal("Failed to delete category");
+    }  
+    return { message: "Category deleted successfully" };
   }
 }

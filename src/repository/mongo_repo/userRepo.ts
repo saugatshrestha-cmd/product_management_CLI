@@ -6,7 +6,7 @@ import { User } from '@mytypes/userTypes';
 export class UserRepository {
 
   async getAll(): Promise<User[]> {
-    return await UserModel.find().select('-password');
+    return await UserModel.find({ role: { $ne: 'admin' } }).select('-password');
   }
 
   async findById(userId: string): Promise<User | null> {

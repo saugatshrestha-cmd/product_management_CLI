@@ -3,6 +3,7 @@ import { OrderRepository } from '@repository/orderRepo';
 import { CartService } from '@services/cartService';
 import { ProductService } from '@services/productService';
 import { Order, OrderItemInput, SellerOrder } from '@mytypes/orderTypes';
+import { AppError } from "@utils/errorHandler";
 import { Status, OrderItemStatus } from '@mytypes/enumTypes';
 import { CartItem } from '@mytypes/cartTypes';
 
@@ -31,7 +32,7 @@ export class OrderService {
       (cart.items as CartItem[]).map(async (item) => {
         const product = await this.productService.getProductById(item.productId);
         if ('message' in product) {
-          throw new Error(`Product not found or error: ${product.message}`);
+          throw AppError.notFound(`Product not found or error: ${product.message}`);
         }
         return {
           productId: item.productId,
@@ -68,7 +69,7 @@ export class OrderService {
     const userOrders = await this.orderRepo.getOrdersByUserId(userId);
 
     if (userOrders.length === 0) {
-      return { message: `No orders found for userId: ${userId}` };
+      throw AppError.notFound(`No orders found for userId: ${userId}` );
     }
 
     return userOrders;
@@ -87,7 +88,7 @@ export class OrderService {
       .filter(order => order.items.length > 0); // Only keep orders where this seller has products
   
     if (filteredOrders.length === 0) {
-      return { message: `No orders found for sellerId: ${sellerId}` };
+      throw AppError.notFound( `No orders found for sellerId: ${sellerId}` );
     }
   
     return filteredOrders;
@@ -129,7 +130,7 @@ export class OrderService {
     );
     
     if (!itemToUpdate) {
-      return { message: `Item not found or you don't have permission to update this item.` };
+      throw AppError.notFound(`Item not found.` );
     }
 
     if (newStatus === OrderItemStatus.CANCELLED && itemToUpdate.status !== OrderItemStatus.PENDING) {
@@ -167,7 +168,7 @@ export class OrderService {
     const order = await this.orderRepo.findOrderById(orderId);
 
     if (!order) {
-      return { message: `Order with id ${orderId} not found.` };
+      throw AppError.notFound(`Order with id ${orderId} not found.`);
     }
     await this.orderRepo.updateOrder(orderId, updatedInfo);
 
@@ -176,7 +177,7 @@ export class OrderService {
 
   async cancelOrder(orderId: string, userId: string): Promise<{ message: string }> {
     const order = await this.orderRepo.findOrderById(orderId);
-    if (!order) return { message: "Order not found" };
+    if (!order) throw AppError.notFound( "Order not found" );
   
     if (order.userId !== userId) return { message: "Unauthorized to cancel this order" };
   
@@ -198,7 +199,7 @@ export class OrderService {
 
   async deleteOrder(orderId: string): Promise<{ message: string }> {
     const order = await this.orderRepo.findOrderById(orderId);
-    if (!order) return { message: "Order not found" };
+    if (!order) throw AppError.notFound("Order not found" );
   
     if (order.isDeleted) return { message: "Order already deleted" };
 

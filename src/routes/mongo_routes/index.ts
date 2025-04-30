@@ -11,6 +11,14 @@ import sellerRoutes from './sellerRoutes';
 
 const routes = Router();
 
+routes.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'UP',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
 routes.use('/products', productRoutes);
 routes.use('/users', userRoutes);
 routes.use('/orders', orderRoutes);
@@ -19,6 +27,5 @@ routes.use('/categories', categoryRoutes);
 routes.use('/auth', authRoutes);
 routes.use('/admin', adminRoutes);
 routes.use('/sellers', sellerRoutes);
-//health endpoint server is up server is down
 
 export default routes;

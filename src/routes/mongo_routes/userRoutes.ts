@@ -13,7 +13,7 @@ router.use(AuthMiddleware.verifyToken);
 
 
 // User routes
-router.get('/', RoleMiddleware.hasRole('user'), controller.getProfile.bind(controller));
+router.get('/view', RoleMiddleware.hasRole('user'), controller.getProfile.bind(controller));
 router.put('/update', new Validator(updateUserSchema).validate(), RoleMiddleware.hasRole('user'), controller.updateProfile.bind(controller));
 router.put('/change-email', new Validator(updateUserEmailSchema).validate(), RoleMiddleware.hasRole('user'), controller.updateEmail.bind(controller));
 router.put('/change-password', new Validator(updateUserPasswordSchema).validate(), RoleMiddleware.hasRole('user'), controller.updatePassword.bind(controller));

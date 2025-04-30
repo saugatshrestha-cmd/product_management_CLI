@@ -1,5 +1,6 @@
 import { injectable, inject } from "tsyringe";
 import { UserRepository } from '@repository/userRepo';
+import { AppError } from "@utils/errorHandler";
 import { User } from '@mytypes/userTypes';
 import { PasswordManager } from '@utils/passwordUtils';
 import { Role } from "@mytypes/enumTypes";
@@ -13,7 +14,10 @@ export class UserService {
 
   async getUserById(userId: string) {
     const user = await this.userRepository.findById(userId);
-    return user || { message: "User not found" };
+    if (!user) {
+      throw AppError.notFound('User', userId);
+    }
+    return user;
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -30,7 +34,7 @@ export class UserService {
 
   async createAdmin(adminData: User): Promise<{ message: string }> {
     const exists = await this.userRepository.findByEmail(adminData.email);
-    if (exists) return { message: "Email already registered" };
+    if (exists) throw AppError.conflict("Email already registered");
   
     const salt = this.passwordManager.createSalt();
     const hashed = this.passwordManager.hashPassword(adminData.password, salt);
@@ -46,11 +50,11 @@ export class UserService {
   async updateUser(userId: string, updatedInfo: User): Promise<{ message: string }> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      return { message: "User not found" };
+      throw AppError.notFound('User', userId);
     }
 
     if (updatedInfo.email || updatedInfo.password) {
-      return { message: "Email and password cannot be updated." };
+      throw AppError.badRequest("Email and password cannot be updated here.");
     }
 
     const { firstName, lastName, phone, address } = updatedInfo;
@@ -69,11 +73,11 @@ export class UserService {
   async updateEmail(userId: string, newEmail: string): Promise<{ message: string }> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      return { message: "User not found" };
+      throw AppError.notFound('User', userId);
     }
 
     if (await this.userRepository.findByEmail(newEmail)) {
-      return { message: "Email already in use" };
+      throw AppError.conflict("Email already in use");
     }
 
     await this.userRepository.updateUser(userId, { email: newEmail });
@@ -83,9 +87,8 @@ export class UserService {
   async updatePassword(userId: string, newPassword: string): Promise<{ message: string }> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      return { message: "User not found" };
+      throw AppError.notFound('User', userId);
     }
-
     const newSalt = this.passwordManager.createSalt();
     const hashed = this.passwordManager.hashPassword(newPassword, newSalt);
     const combined = this.passwordManager.combineSaltAndHash(newSalt, hashed);
@@ -95,7 +98,14 @@ export class UserService {
   }
 
   async deleteUser(userId: string): Promise<{ message: string }> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw AppError.notFound('User', userId);
+    }
     const success = await this.userRepository.deleteUserById(userId);
-    return { message: success ? "User deleted successfully" : "User not found" };
+    if (!success) {
+      throw AppError.internal('Failed to delete user');
+    }
+    return { message: "User deleted successfully" };;
   }
 }
