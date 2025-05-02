@@ -1,3 +1,5 @@
+import { ProductStatus } from "./enumTypes";
+
 export interface Product {
     _id: string;
     name: string;
@@ -6,6 +8,9 @@ export interface Product {
     quantity: number;
     categoryId: string;
     sellerId: string;
+    status: ProductStatus;
+    isDeleted?: boolean;
+    deletedAt?: Date | null;
 }
 
 export interface ProductInput {
@@ -15,4 +20,7 @@ export interface ProductInput {
     quantity: number;
     categoryId: string;
     sellerId: string;
+    status: ProductStatus;
+    isDeleted?: boolean;
+    deletedAt?: Date | null;
 }

@@ -11,7 +11,7 @@ export class OrderRepository {
   }
 
   async getOrdersByUserId(userId: string): Promise<Order[]> {
-    return await OrderModel.find({ userId, isDeleted: false });
+    return await OrderModel.find({ userId, isDeleted: false }).select('-isDeleted -deletedAt');
   }
 
   async getOrderBySellerId(sellerId: string): Promise<Order[]> {

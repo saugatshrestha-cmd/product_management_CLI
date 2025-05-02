@@ -61,6 +61,16 @@ export class SellerController {
         }
     }
 
+    async deleteSeller(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const sellerId = req.user?._id as string;
+            const result = await this.sellerService.deleteSeller(sellerId);
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
+        }
+    }
+
     async getAllSellers(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const result = await this.sellerService.getAllSellers();
@@ -111,7 +121,7 @@ export class SellerController {
         }
     }
 
-    async deleteSeller(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async adminDeleteSeller(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.params.id;
             const result = await this.sellerService.deleteSeller(sellerId);

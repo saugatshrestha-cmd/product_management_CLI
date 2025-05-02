@@ -13,7 +13,7 @@ router.use(AuthMiddleware.verifyToken);
 
 
 router.get('/', controller.getProfile.bind(controller));
-router.post('/', RoleMiddleware.hasRole('admin'), new Validator(createUserSchema).validate(), controller.createAdmin.bind(controller));
+router.post('/', new Validator(createUserSchema).validate(), controller.createAdmin.bind(controller));
 router.put('/update', RoleMiddleware.hasRole('admin'), new Validator(updateUserSchema).validate(), controller.updateProfile.bind(controller));
 router.put('/change-email', RoleMiddleware.hasRole('admin'), new Validator(updateUserEmailSchema).validate(), controller.updateEmail.bind(controller));
 router.put('/change-password', RoleMiddleware.hasRole('admin'), new Validator(updateUserPasswordSchema).validate(), controller.updatePassword.bind(controller));

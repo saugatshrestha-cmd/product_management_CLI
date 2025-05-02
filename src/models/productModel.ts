@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { ProductStatus } from '@mytypes/enumTypes';
 
 const productSchema = new mongoose.Schema({
     name: { 
@@ -23,6 +24,20 @@ const productSchema = new mongoose.Schema({
     sellerId: { 
         type: String, 
         required: true 
+    },
+    status: {
+        type: String,
+        enum: Object.values(ProductStatus),
+        default: 'active',
+        required: true
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false,
+    },
+    deletedAt: {
+        type: Date,
+        required: false,
     }
 });
 

@@ -10,11 +10,11 @@ export class ProductRepository {
   }
 
   async findById(productId: string): Promise<Product | null> {
-    return await ProductModel.findOne({ _id: productId });
+    return await ProductModel.findOne({ _id: productId, isDeleted: false }).select('-isDeleted -deletedAt');
   }
 
   async findByName(name: string): Promise<Product | null> {
-    return await ProductModel.findOne({ name });
+    return await ProductModel.findOne({ name, isDeleted: false });
   }
 
   async addProduct(productData: ProductInput): Promise<void> {
@@ -26,13 +26,11 @@ export class ProductRepository {
     await ProductModel.updateOne({ _id: productId }, updatedInfo);
   }
 
-  async getBySellerId(sellerId: string): Promise<Product[]> {
-    return ProductModel.find({ sellerId });
+  async updateMany(filter: object, update: object): Promise<void> {
+    await ProductModel.updateMany(filter, update);
   }
-  
 
-  async deleteProductById(productId: string): Promise<boolean> {
-    const result = await ProductModel.deleteOne({ _id: productId });
-    return result.deletedCount === 1;
+  async getBySellerId(sellerId: string): Promise<Product[]> {
+    return ProductModel.find({ sellerId, isDeleted: false });
   }
 }

@@ -31,6 +31,14 @@ const userSchema = new mongoose.Schema({
     enum: Object.values(Role),
     default: 'user',
     required: true
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+  deletedAt: {
+    type: Date,
+    required: false,
   }
 });
 

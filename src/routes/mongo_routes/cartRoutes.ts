@@ -8,19 +8,12 @@ const router = express.Router();
 const controller = container.resolve(CartController);
 
 router.use(AuthMiddleware.verifyToken);
+router.use(RoleMiddleware.hasRole('customer'));
 
-// User routes
-router.get('/user', RoleMiddleware.hasRole('user'), controller.getMyCart.bind(controller));
-router.post('/', RoleMiddleware.hasRole('user'), controller.createMyCart.bind(controller));
-router.put('/update', RoleMiddleware.hasRole('user'), controller.updateMyCart.bind(controller));
-router.delete('/', RoleMiddleware.hasRole('user'), controller.removeFromMyCart.bind(controller));
-router.get('/summary', RoleMiddleware.hasRole('user'), controller.getMyCartSummary.bind(controller));
-
-// Admin routes
-router.get('/', RoleMiddleware.hasRole('admin'), controller.getAllCarts.bind(controller));
-router.get('/:id', RoleMiddleware.hasRole('admin'), controller.getCartByUserId.bind(controller));
-router.get('/:id/summary', RoleMiddleware.hasRole('admin'), controller.getSummaryByUserId.bind(controller));
-router.delete('/:id', RoleMiddleware.hasRole('admin'), controller.deleteCartByAdmin.bind(controller));
-
+router.get('/user', controller.getMyCart.bind(controller));
+router.post('/', controller.createMyCart.bind(controller));
+router.put('/update', controller.updateMyCart.bind(controller));
+router.delete('/', controller.removeFromMyCart.bind(controller));
+router.get('/summary', controller.getMyCartSummary.bind(controller));
 
 export default router;

@@ -10,11 +10,11 @@ export class SellerRepository {
     }
 
     async findById(sellerId: string): Promise<Seller | null> {
-    return await SellerModel.findOne({ _id: sellerId }).select('-password');
+    return await SellerModel.findOne({ _id: sellerId, isDeleted: false }).select('-password -isDeleted -deletedAt');
     }
 
     async findByEmail(email: string): Promise<Seller | null> {
-    return await SellerModel.findOne({ email });
+    return await SellerModel.findOne({ email, isDeleted: false });
     }
 
     async addSeller(sellerData: Seller): Promise<void> {
@@ -25,9 +25,4 @@ export class SellerRepository {
     async updateSeller(sellerId: string, updatedInfo: Partial<Seller>): Promise<void> {
     await SellerModel.updateOne({ _id: sellerId }, updatedInfo);
     }
-
-    async deleteSellerById(sellerId: string): Promise<boolean> {
-    const result = await SellerModel.deleteOne({ _id: sellerId });
-    return result.deletedCount === 1;
-    }
-}
+}   

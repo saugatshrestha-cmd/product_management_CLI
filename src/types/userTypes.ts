@@ -9,4 +9,6 @@ export interface User {
     phone: number;
     address: string;
     role: Role;
+    isDeleted?: boolean,
+    deletedAt?: Date | null;
 }

@@ -2,6 +2,7 @@ import { injectable, inject } from "tsyringe";
 import { ProductRepository } from '@repository/productRepo';
 import { CategoryService } from '@services/categoryService';
 import { AppError } from "@utils/errorHandler";
+import { ProductStatus } from "@mytypes/enumTypes";
 import { Product, ProductInput } from '@mytypes/productTypes';
 
 @injectable()
@@ -27,7 +28,7 @@ export class ProductService {
     }
     
 
-    await this.productRepository.addProduct({ name, description, price, categoryId, quantity, sellerId });
+    await this.productRepository.addProduct({ name, description, price, categoryId, quantity, sellerId, status: ProductStatus.ACTIVE });
     return { message: "Product added successfully" };
   }
 
@@ -99,10 +100,24 @@ export class ProductService {
     if (!product) {
       throw AppError.notFound('Product', productId);
     }
-    const success = await this.productRepository.deleteProductById(productId);
-    if (!success) {
-      throw AppError.internal('Failed to delete product');
-    }
+    if (product.isDeleted) return { message: "Product already deleted" };
+    await this.productRepository.updateProduct(productId, {
+      isDeleted: true,
+      deletedAt: new Date()
+    });
     return { message: "Product deleted successfully" };;
+  }
+
+  async deleteProductsBySellerId(sellerId: string): Promise<{ message: string }> {
+    const products = await this.productRepository.getBySellerId(sellerId);
+    if (!products || products.length === 0) {
+      throw AppError.notFound("Products not found for this seller");
+    }
+    await this.productRepository.updateMany(
+      { sellerId, isDeleted: false }, 
+      { $set: { isDeleted: true, deletedAt: new Date() } }
+    );
+  
+    return { message: "Product deleted successfully" };
   }
 }

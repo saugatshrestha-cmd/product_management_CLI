@@ -1,5 +1,6 @@
 import { injectable, inject } from "tsyringe";
 import { SellerRepository } from '@repository/sellerRepo';
+import { ProductService } from "@services/productService";
 import { Seller } from '@mytypes/sellerTypes';
 import { AppError } from "@utils/errorHandler";
 import { PasswordManager } from '@utils/passwordUtils';
@@ -10,7 +11,8 @@ export class SellerService {
 
   constructor(
     @inject("SellerRepository") private sellerRepository: SellerRepository,
-    @inject("PasswordManager") private passwordManager: PasswordManager
+    @inject("PasswordManager") private passwordManager: PasswordManager,
+    @inject("ProductService") private productService: ProductService
   ) {}
 
   async getSellerById(sellerId: string) {
@@ -96,13 +98,15 @@ export class SellerService {
 
   async deleteSeller(sellerId: string): Promise<{ message: string }> {
     const seller = await this.sellerRepository.findById(sellerId);
-    if (!seller) {
-      throw AppError.notFound('Seller', sellerId);
+    if (!seller || seller.isDeleted) {
+      throw AppError.notFound("Seller not found or already deleted", sellerId);
     }
-    const success = await this.sellerRepository.deleteSellerById(sellerId);
-    if (!success) {
-      throw AppError.internal('Failed to delete seller');
-    }  
-    return { message: "Seller deleted successfully" };
+    await this.productService.deleteProductsBySellerId(sellerId);
+    await this.sellerRepository.updateSeller(sellerId, {
+      isDeleted: true,
+      deletedAt: new Date()
+    });
+
+    return { message: "Seller and their products deleted successfully" };
   }
 }

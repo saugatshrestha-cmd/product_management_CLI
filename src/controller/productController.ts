@@ -47,6 +47,7 @@ export class ProductController {
 
     async deleteProduct(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
+            const sellerId = req.user?._id as string;
             const productId = req.params.id;
             const result = await this.productService.deleteProduct(productId);
             handleSuccess(res, result);

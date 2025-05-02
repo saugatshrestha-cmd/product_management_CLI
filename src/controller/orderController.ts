@@ -62,6 +62,17 @@ export class OrderController {
         }
     }
 
+    async deleteUserOrder(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const userId = req.user?._id as string;
+            const orderId = req.params.id;
+            const result = await this.orderService.deleteOrder(orderId, userId);
+            handleSuccess(res, result);
+        } catch(error) {
+            handleError(next, error);
+        }
+    }
+
     async getAllOrders(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const orders = await this.orderService.getAllOrders();
@@ -95,8 +106,7 @@ export class OrderController {
     async cancelOrderByAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const orderId = req.params.id;
-            const userId = req.body.userId;
-            const result = await this.orderService.cancelOrder(orderId, userId);
+            const result = await this.orderService.cancelOrderAdmin(orderId);
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -106,7 +116,7 @@ export class OrderController {
     async deleteOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const orderId = req.params.id;
-            const result = await this.orderService.deleteOrder(orderId);
+            const result = await this.orderService.deleteOrderAdmin(orderId);
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);

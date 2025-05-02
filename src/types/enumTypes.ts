@@ -16,6 +16,12 @@ export enum Status {
 
 export enum Role {
     ADMIN = 'admin',
-    USER = 'user',
+    CUSTOMER = 'customer',
     SELLER = 'seller'
+}
+
+export enum ProductStatus{
+    ACTIVE = 'active',
+    ARCHIVED = 'archived',
+    DELETED = 'deleted'
 }

@@ -10,11 +10,11 @@ export class UserRepository {
   }
 
   async findById(userId: string): Promise<User | null> {
-    return await UserModel.findOne({ _id: userId }).select('-password');
+    return await UserModel.findOne({ _id: userId, isDeleted: false }).select('-password -isDeleted -deletedAt');
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return await UserModel.findOne({ email });
+    return await UserModel.findOne({ email, isDeleted: false });
   }
 
   async addUser(userData: User): Promise<void> {
@@ -26,8 +26,4 @@ export class UserRepository {
     await UserModel.updateOne({ _id: userId }, updatedInfo);
   }
 
-  async deleteUserById(userId: string): Promise<boolean> {
-    const result = await UserModel.deleteOne({ _id: userId });
-    return result.deletedCount === 1;
-  }
 }

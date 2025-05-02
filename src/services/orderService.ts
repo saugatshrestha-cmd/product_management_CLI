@@ -197,15 +197,69 @@ export class OrderService {
     return { message: "Order cancelled successfully" };
   }
 
-  async deleteOrder(orderId: string): Promise<{ message: string }> {
+  async cancelOrderAdmin(orderId: string): Promise<{ message: string }> {
+    const order = await this.orderRepo.findOrderById(orderId);
+    if (!order) throw AppError.notFound( "Order not found" );
+  
+    if (order.status !== Status.PENDING && order.status !== Status.SHIPPED) return { message: "Only pending and shipped orders can be cancelled" };
+  
+    // Restock items
+    for (const item of order.items) {
+      await this.productService.increaseQuantity(item.productId, item.quantity);
+    }
+  
+    // Update order
+    await this.orderRepo.updateOrder(orderId, {
+      status: Status.CANCELLED,
+      cancelledAt: new Date(),
+    });
+  
+    return { message: "Order cancelled successfully" };
+  }
+  
+  async deleteOrder(orderId: string, userId: string): Promise<{ message: string }> {
+    const order = await this.orderRepo.findOrderById(orderId);
+    if (!order) throw AppError.notFound("Order not found" );
+
+    if (order.userId !== userId) return { message: "Unauthorized to cancel this order" };
+  
+    if (order.isDeleted) return { message: "Order already deleted" };
+
+    if (order.status !== Status.PENDING && order.status !== Status.CANCELLED && order.status !== Status.DELIVERED) {
+      return { message: `Cannot delete order. Only 'Pending' or 'Cancelled' orders can be deleted.` };
+    }
+  
+    await this.orderRepo.updateOrder(orderId, {
+      isDeleted: true,
+      deletedAt: new Date()
+    });
+  
+    return { message: "Order deleted successfully" };
+  }
+
+  // async deleteOrderByUserId(userId: string): Promise<{ message: string }> {
+  //   const orders = await this.orderRepo.getOrdersByUserId(userId);
+  //   if (!orders) throw AppError.notFound("Order not found" );
+  //   if (orders.status !== Status.PENDING) return { message: "Only pending orders can be cancelled" };
+
+  //   await Promise.all(
+  //     orders.map(order =>
+  //       this.orderRepo.updateOrder(order._id, {
+  //         isDeleted: true,
+  //         deletedAt: new Date(),
+  //       })
+  //     )
+  //   );
+
+  
+  //   return { message: "Order deleted successfully" };
+  // }
+
+  async deleteOrderAdmin(orderId: string): Promise<{ message: string }> {
     const order = await this.orderRepo.findOrderById(orderId);
     if (!order) throw AppError.notFound("Order not found" );
   
     if (order.isDeleted) return { message: "Order already deleted" };
-
-    if (order.status !== Status.PENDING && order.status !== Status.CANCELLED) {
-      return { message: `Cannot delete order. Only 'Pending' or 'Cancelled' orders can be deleted.` };
-    }
   
     await this.orderRepo.updateOrder(orderId, {
       isDeleted: true,

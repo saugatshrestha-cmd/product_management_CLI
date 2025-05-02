@@ -50,7 +50,7 @@ export class AuthService {
     const hashed = this.passwordManager.hashPassword(userData.password, salt);
     const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
 
-    const finalUser = { ...userData, password: combined, role: Role.USER};
+    const finalUser = { ...userData, password: combined, role: Role.CUSTOMER};
     await this.userService.addUser(finalUser);
 
     const user = await this.userService.getAllUsers()

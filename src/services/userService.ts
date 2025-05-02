@@ -1,5 +1,7 @@
 import { injectable, inject } from "tsyringe";
 import { UserRepository } from '@repository/userRepo';
+import { OrderService } from "./orderService";
+import { CartService } from "./cartService";
 import { AppError } from "@utils/errorHandler";
 import { User } from '@mytypes/userTypes';
 import { PasswordManager } from '@utils/passwordUtils';
@@ -9,7 +11,9 @@ import { Role } from "@mytypes/enumTypes";
 export class UserService {
   constructor(
     @inject("UserRepository") private userRepository: UserRepository,
-    @inject("PasswordManager") private passwordManager: PasswordManager
+    @inject("PasswordManager") private passwordManager: PasswordManager,
+    @inject("OrderService") private orderService: OrderService,
+    @inject("CartService") private cartService: CartService
   ) {}
 
   async getUserById(userId: string) {
@@ -102,10 +106,12 @@ export class UserService {
     if (!user) {
       throw AppError.notFound('User', userId);
     }
-    const success = await this.userRepository.deleteUserById(userId);
-    if (!success) {
-      throw AppError.internal('Failed to delete user');
-    }
+    // await this.orderService.deleteOrderByUserId(userId);
+    await this.cartService.removeCartByUserId(userId);
+    await this.userRepository.updateUser(userId, {
+      isDeleted: true,
+      deletedAt: new Date()
+    });
     return { message: "User deleted successfully" };;
   }
 }

@@ -25,8 +25,16 @@ const sellerSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: Object.values(Role),
-    default: 'user',
+    default: 'seller',
     required: true
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+  deletedAt: {
+    type: Date,
+    required: false,
   }
 });
 

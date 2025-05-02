@@ -8,4 +8,6 @@ export interface Seller {
     phone: number;
     address: string;
     role: Role;
+    isDeleted?: boolean,
+    deletedAt?: Date | null;
 }
