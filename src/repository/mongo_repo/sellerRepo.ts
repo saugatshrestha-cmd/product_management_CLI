@@ -1,9 +1,10 @@
 import { injectable } from "tsyringe";
 import { SellerModel } from '@models/sellerModel';
 import { Seller } from '@mytypes/sellerTypes';
+import { SellerRepo } from "@mytypes/repoTypes";
 
 @injectable()
-export class SellerRepository {
+export class SellerRepository implements SellerRepo {
 
     async getAll(): Promise<Seller[]> {
     return await SellerModel.find().select('-password');
@@ -17,12 +18,12 @@ export class SellerRepository {
     return await SellerModel.findOne({ email, isDeleted: false });
     }
 
-    async addSeller(sellerData: Seller): Promise<void> {
+    async add(sellerData: Seller): Promise<void> {
         const newSeller = new SellerModel(sellerData );
         await newSeller.save();
     }
 
-    async updateSeller(sellerId: string, updatedInfo: Partial<Seller>): Promise<void> {
+    async update(sellerId: string, updatedInfo: Partial<Seller>): Promise<void> {
     await SellerModel.updateOne({ _id: sellerId }, updatedInfo);
     }
 }   

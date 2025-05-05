@@ -5,15 +5,18 @@ import { Seller } from '@mytypes/sellerTypes';
 import { AppError } from "@utils/errorHandler";
 import { PasswordManager } from '@utils/passwordUtils';
 import { Role } from '@mytypes/enumTypes';
+import { RepositoryFactory } from "@repository/baseRepo";
 
 @injectable()
 export class SellerService {
-
+  private sellerRepository: SellerRepository;
   constructor(
-    @inject("SellerRepository") private sellerRepository: SellerRepository,
+    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory,
     @inject("PasswordManager") private passwordManager: PasswordManager,
     @inject("ProductService") private productService: ProductService
-  ) {}
+  ) {
+    this.sellerRepository = this.repositoryFactory.getSellerRepository();
+  }
 
   async getSellerById(sellerId: string) {
     const seller = await this.sellerRepository.findById(sellerId);
@@ -40,7 +43,7 @@ export class SellerService {
     const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
   
     const finalSeller = { ...sellerData, password: combined, role: Role.SELLER };
-    await this.sellerRepository.addSeller(finalSeller);
+    await this.sellerRepository.add(finalSeller);
   
     return { message: "Seller created successfully" };
   }  
@@ -64,7 +67,7 @@ export class SellerService {
       address,
     };
 
-    await this.sellerRepository.updateSeller(sellerId, updatedSellerInfo);
+    await this.sellerRepository.update(sellerId, updatedSellerInfo);
     return { message: "Seller updated successfully" };
   }
 
@@ -78,7 +81,7 @@ export class SellerService {
       throw AppError.conflict("Email already in use");
     }
 
-    await this.sellerRepository.updateSeller(sellerId, { email: newEmail });
+    await this.sellerRepository.update(sellerId, { email: newEmail });
     return { message: "Email updated successfully" };
   }
 
@@ -92,7 +95,7 @@ export class SellerService {
     const hashed = this.passwordManager.hashPassword(newPassword, newSalt);
     const combined = this.passwordManager.combineSaltAndHash(newSalt, hashed);
 
-    await this.sellerRepository.updateSeller(sellerId, { password: combined });
+    await this.sellerRepository.update(sellerId, { password: combined });
     return { message: "Password updated successfully" };
   }
 
@@ -102,7 +105,7 @@ export class SellerService {
       throw AppError.notFound("Seller not found or already deleted", sellerId);
     }
     await this.productService.deleteProductsBySellerId(sellerId);
-    await this.sellerRepository.updateSeller(sellerId, {
+    await this.sellerRepository.update(sellerId, {
       isDeleted: true,
       deletedAt: new Date()
     });

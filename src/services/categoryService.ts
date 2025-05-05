@@ -2,13 +2,16 @@ import { injectable, inject } from "tsyringe";
 import { CategoryRepository } from "@repository/categoryRepo";
 import { AppError } from "@utils/errorHandler";
 import { Category } from "@mytypes/categoryTypes";
+import { RepositoryFactory } from "@repository/baseRepo";
 
 @injectable()
 export class CategoryService {
-
+  private categoryRepository: CategoryRepository;
   constructor(
-    @inject("CategoryRepository") private categoryRepository: CategoryRepository
-  ) {}
+    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory
+  ) {
+    this.categoryRepository = this.repositoryFactory.getCategoryRepository();
+  }
 
   async createCategory(categoryData: Category): Promise<{ message: string }> {
     const { name, description } = categoryData;
@@ -17,7 +20,7 @@ export class CategoryService {
       throw AppError.conflict( "Category already exists" )
     }
 
-    await this.categoryRepository.addCategory(categoryData);
+    await this.categoryRepository.add(categoryData);
     return { message: "Category added successfully" };
   }
 
@@ -43,7 +46,7 @@ export class CategoryService {
       throw AppError.conflict( "Category already exists" );
     }
 
-    await this.categoryRepository.updateCategory(categoryId, updatedInfo);
+    await this.categoryRepository.update(categoryId, updatedInfo);
     return { message: "Category updated successfully" };
   }
 

@@ -4,14 +4,17 @@ import { CategoryService } from '@services/categoryService';
 import { AppError } from "@utils/errorHandler";
 import { ProductStatus } from "@mytypes/enumTypes";
 import { Product, ProductInput } from '@mytypes/productTypes';
+import { RepositoryFactory } from "@repository/baseRepo";
 
 @injectable()
 export class ProductService {
-
+  private productRepository: ProductRepository;
   constructor(
-    @inject("ProductRepository") private productRepository: ProductRepository,
+    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory,
     @inject("CategoryService") private categoryService: CategoryService
-  ) {}
+  ) {
+    this.productRepository = this.repositoryFactory.getProductRepository();
+  }
 
 
   async createProduct(productData: ProductInput): Promise<{ message: string }> {
@@ -28,7 +31,7 @@ export class ProductService {
     }
     
 
-    await this.productRepository.addProduct({ name, description, price, categoryId, quantity, sellerId, status: ProductStatus.ACTIVE });
+    await this.productRepository.add({ name, description, price, categoryId, quantity, sellerId, status: ProductStatus.ACTIVE });
     return { message: "Product added successfully" };
   }
 
@@ -58,7 +61,7 @@ export class ProductService {
       throw AppError.notFound("Category does not exist", updatedInfo.categoryId);
     }
 
-    await this.productRepository.updateProduct(productId, updatedInfo);
+    await this.productRepository.update(productId, updatedInfo);
     return { message: "Product updated successfully" };
   }
 
@@ -69,7 +72,7 @@ export class ProductService {
     }
 
     product.quantity = Math.max(0, product.quantity + newQuantity);
-    await this.productRepository.updateProduct(productId, { quantity: product.quantity });
+    await this.productRepository.update(productId, { quantity: product.quantity });
     return { message: "Product quantity updated successfully" };
   }
 
@@ -80,7 +83,7 @@ export class ProductService {
     }
 
     product.quantity = Math.max(0, product.quantity - newQuantity);
-    await this.productRepository.updateProduct(productId, { quantity: product.quantity });
+    await this.productRepository.update(productId, { quantity: product.quantity });
     return { message: "Product quantity decreased successfully" };
   }
 
@@ -91,7 +94,7 @@ export class ProductService {
     }
 
     product.quantity = Math.max(0, product.quantity + newQuantity);
-    await this.productRepository.updateProduct(productId, { quantity: product.quantity });
+    await this.productRepository.update(productId, { quantity: product.quantity });
     return { message: "Product quantity decreased successfully" };
   }
 
@@ -100,9 +103,9 @@ export class ProductService {
     if (!product) {
       throw AppError.notFound('Product', productId);
     }
-    if (product.isDeleted) return { message: "Product already deleted" };
-    await this.productRepository.updateProduct(productId, {
-      isDeleted: true,
+    if (product.status === ProductStatus.DELETED) return { message: "Product already deleted" };
+    await this.productRepository.update(productId, {
+      status: ProductStatus.DELETED,
       deletedAt: new Date()
     });
     return { message: "Product deleted successfully" };;
@@ -114,8 +117,8 @@ export class ProductService {
       throw AppError.notFound("Products not found for this seller");
     }
     await this.productRepository.updateMany(
-      { sellerId, isDeleted: false }, 
-      { $set: { isDeleted: true, deletedAt: new Date() } }
+      { sellerId }, 
+      { $set: { status: ProductStatus.DELETED, deletedAt: new Date() } }
     );
   
     return { message: "Product deleted successfully" };

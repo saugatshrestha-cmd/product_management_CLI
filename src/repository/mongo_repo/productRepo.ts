@@ -1,28 +1,30 @@
 import { injectable } from "tsyringe";
 import { ProductModel } from '@models/productModel';
 import { Product, ProductInput } from '@mytypes/productTypes';
+import { ProductStatus } from "@mytypes/enumTypes";
+import { ProductRepo } from "@mytypes/repoTypes";
 
 @injectable()
-export class ProductRepository {
+export class ProductRepository implements ProductRepo {
 
   async getAll(): Promise<Product[]> {
     return await ProductModel.find();
   }
 
   async findById(productId: string): Promise<Product | null> {
-    return await ProductModel.findOne({ _id: productId, isDeleted: false }).select('-isDeleted -deletedAt');
+    return await ProductModel.findOne({ _id: productId, status: { $ne: ProductStatus.DELETED } }).select('-deletedAt');
   }
 
   async findByName(name: string): Promise<Product | null> {
-    return await ProductModel.findOne({ name, isDeleted: false });
+    return await ProductModel.findOne({ name, status: { $ne: ProductStatus.DELETED } });
   }
 
-  async addProduct(productData: ProductInput): Promise<void> {
+  async add(productData: ProductInput): Promise<void> {
     const newProduct = new ProductModel(productData);
     await newProduct.save();
   }
 
-  async updateProduct(productId: string, updatedInfo: Partial<Product>): Promise<void> {
+  async update(productId: string, updatedInfo: Partial<Product>): Promise<void> {
     await ProductModel.updateOne({ _id: productId }, updatedInfo);
   }
 
@@ -31,6 +33,6 @@ export class ProductRepository {
   }
 
   async getBySellerId(sellerId: string): Promise<Product[]> {
-    return ProductModel.find({ sellerId, isDeleted: false });
+    return ProductModel.find({ sellerId, status: { $ne: ProductStatus.DELETED } });
   }
 }

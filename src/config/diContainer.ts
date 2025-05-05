@@ -3,32 +3,34 @@ import { container } from "tsyringe";
 
 import { PasswordManager } from "@utils/passwordUtils";
 
-import { UserRepository } from "../repository/mongo_repo/userRepo";
-import { ProductRepository } from "../repository/mongo_repo/productRepo";
-import { CategoryRepository } from "../repository/mongo_repo/categoryRepo";
-import { OrderRepository } from "../repository/mongo_repo/orderRepo";
-import { SellerRepository } from "../repository/mongo_repo/sellerRepo";
-import { CartRepository } from "../repository/mongo_repo/cartRepo";
+import { RepositoryFactory } from "@repository/baseRepo";
+import { UserRepository } from "@repository/userRepo";
+import { ProductRepository } from "@repository/productRepo";
+import { CategoryRepository } from "@repository/categoryRepo";
+import { OrderRepository } from "@repository/orderRepo";
+import { SellerRepository } from "@repository/sellerRepo";
+import { CartRepository } from "@repository/cartRepo";
 
-import { UserService } from "../services/userService";
-import { ProductService } from "../services/productService";
-import { CategoryService } from "../services/categoryService";
-import { OrderService } from "../services/orderService";
-import { SellerService } from "../services/sellerService";
-import { CartService } from "../services/cartService";
-import { AuthService } from "../services/authService";
+import { UserService } from "@services/userService";
+import { ProductService } from "@services/productService";
+import { CategoryService } from "@services/categoryService";
+import { OrderService } from "@services/orderService";
+import { SellerService } from "@services/sellerService";
+import { CartService } from "@services/cartService";
+import { AuthService } from "@services/authService";
 
-import { UserController } from "../controller/userController";
-import { ProductController } from "../controller/productController";
-import { CategoryController } from "../controller/categoryController";
-import { OrderController } from "../controller/orderController";
-import { SellerController } from "../controller/sellerController";
-import { CartController } from "../controller/cartController";
-import { AuthController } from "../controller/authController";
-import { AdminController } from "../controller/adminController";
+import { UserController } from "@controller/userController";
+import { ProductController } from "@controller/productController";
+import { CategoryController } from "@controller/categoryController";
+import { OrderController } from "@controller/orderController";
+import { SellerController } from "@controller/sellerController";
+import { CartController } from "@controller/cartController";
+import { AuthController } from "@controller/authController";
+import { AdminController } from "@controller/adminController";
 
 container.register("PasswordManager", { useClass: PasswordManager });
 
+container.register(RepositoryFactory, { useClass: RepositoryFactory });
 container.register("UserRepository", { useClass: UserRepository });
 container.register("ProductRepository", { useClass: ProductRepository });
 container.register("CategoryRepository", { useClass: CategoryRepository});

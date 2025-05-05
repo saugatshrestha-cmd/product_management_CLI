@@ -3,6 +3,7 @@ import { UserService } from '@services/userService';
 import { AuthRequest } from '@mytypes/authTypes';
 import { injectable, inject } from "tsyringe";
 import { handleSuccess, handleError } from '@utils/apiResponse';
+import { logger } from '@utils/logger';
 
 @injectable()
 export class AdminController {
@@ -13,8 +14,13 @@ export class AdminController {
         try{
             const newAdmin = req.body;
             const result = await this.userService.createAdmin(newAdmin);
+            logger.info('Admin registered successfully');
             handleSuccess(res, result);
-        } catch(error) {
+        } catch(error: any) {
+            logger.error('Registration error', {
+                error: error.message,
+                email: req.body.email,
+            });
             handleError(next, error);
         }
     }
@@ -23,6 +29,7 @@ export class AdminController {
         try {
             const userId = req.user?._id as string;
             const user = await this.userService.getUserById(userId);
+            logger.info('Admin registered successfully');
             handleSuccess(res, user);
         } catch(error) {
             handleError(next, error);

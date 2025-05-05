@@ -4,14 +4,17 @@ import { CartRepository } from '@repository/cartRepo';
 import { AppError } from "@utils/errorHandler";
 import { ProductService } from '@services/productService';
 import { Cart } from '@mytypes/cartTypes';
+import { RepositoryFactory } from "@repository/baseRepo";
 
 @injectable()
 export class CartService {
-
+  private cartRepository: CartRepository;
   constructor(
-    @inject("CartRepository") private cartRepo: CartRepository,
+    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory,
     @inject("ProductService") private productService: ProductService
-  ) {}
+  ) {
+    this.cartRepository = this.repositoryFactory.getCartRepository();
+  }
 
   private isProduct(product: any): product is Product {
     return product && typeof product._id === 'object' && product.sellerId;
@@ -25,9 +28,9 @@ export class CartService {
     if (quantity > product.quantity) {
       throw AppError.badRequest("Requested quantity exceeds available stock");
     }
-    const userCart = await this.cartRepo.findCartByUserId(userId);
+    const userCart = await this.cartRepository.findCartByUserId(userId);
     if (!userCart) {
-      await this.cartRepo.addCart({
+      await this.cartRepository.add({
         userId,
         items: [{ productId: product._id, quantity, sellerId: product.sellerId }],
       });
@@ -39,7 +42,7 @@ export class CartService {
         throw AppError.conflict("Product already in cart");
       }
       userCart.items.push({ productId: product._id, quantity, sellerId: product.sellerId });
-      await this.cartRepo.updateCart(userId, userCart.items);
+      await this.cartRepository.updateCart(userId, userCart.items);
     }
     return { message: 'Product added to cart successfully' };
   }
@@ -48,7 +51,7 @@ export class CartService {
     if (quantity <= 0) {
       return { message: "Amount must be greater than zero" }; // You can adjust the condition to allow only positive numbers.
     }
-    const cart = await this.cartRepo.findCartByUserId(userId);
+    const cart = await this.cartRepository.findCartByUserId(userId);
     if (!cart) {
       throw AppError.notFound("Cart not found", userId);
     }
@@ -57,32 +60,32 @@ export class CartService {
       return { message: "Product not in cart" };
     }
     cart.items[itemIndex].quantity = quantity;
-    await this.cartRepo.updateCart(userId, cart.items);
+    await this.cartRepository.updateCart(userId, cart.items);
     return { message: "Product quantity updated successfully" };
   }      
 
   async removeFromCart(productId: string, userId: string): Promise<{ message: string }> {
-    const userCart = await this.cartRepo.findCartByUserId(userId);
+    const userCart = await this.cartRepository.findCartByUserId(userId);
     if (!userCart) {
       throw AppError.notFound("Cart not found", userId);
     }
     const itemIndex = userCart.items.findIndex(item => item.productId === productId);
     if (itemIndex !== -1) {
       userCart.items.splice(itemIndex, 1);
-      await this.cartRepo.updateCart(userId, userCart.items);
+      await this.cartRepository.updateCart(userId, userCart.items);
     }
     return { message: 'Product removed from cart successfully' };
   }
 
   async removeCartByUserId(userId: string): Promise<{ message: string }> {
-    const removed = await this.cartRepo.removeCartByUserId(userId);
+    const removed = await this.cartRepository.removeCartByUserId(userId);
     return removed
       ? { message: 'Cart removed successfully' }
       : { message: `Cart not found for userId: ${userId}` };
   }
 
   async calculateCartSummary(userId: string): Promise<any> {
-    const userCart = await this.cartRepo.findCartByUserId(userId);
+    const userCart = await this.cartRepository.findCartByUserId(userId);
     if (!userCart) {
       throw AppError.notFound("Cart not found", userId);
     }
@@ -105,10 +108,10 @@ export class CartService {
   }
 
   async getAllCarts(): Promise<Cart[]> {
-    return await this.cartRepo.getAll();
+    return await this.cartRepository.getAll();
   }
   async getCartByUserId(userId: string): Promise<any> {
-    const userCart = await this.cartRepo.findCartByUserId(userId);
+    const userCart = await this.cartRepository.findCartByUserId(userId);
     if (!userCart) {
       throw AppError.notFound("Cart not found", userId);
     }

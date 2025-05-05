@@ -28,12 +28,8 @@ const productSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: Object.values(ProductStatus),
-        default: 'active',
+        default: ProductStatus.ACTIVE,
         required: true
-    },
-    isDeleted: {
-        type: Boolean,
-        default: false,
     },
     deletedAt: {
         type: Date,

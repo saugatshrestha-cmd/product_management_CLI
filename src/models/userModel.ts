@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { Role } from '@mytypes/enumTypes';
 
 const userSchema = new mongoose.Schema({
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: Object.values(Role),
-    default: 'user',
+    default: Role.CUSTOMER,
     required: true
   },
   isDeleted: {

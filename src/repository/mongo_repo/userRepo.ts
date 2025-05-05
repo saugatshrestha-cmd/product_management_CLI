@@ -1,9 +1,10 @@
 import { injectable } from "tsyringe";
 import { UserModel } from '@models/userModel';
 import { User } from '@mytypes/userTypes';
+import { UserRepo } from "@mytypes/repoTypes";
 
 @injectable()
-export class UserRepository {
+export class UserRepository implements UserRepo {
 
   async getAll(): Promise<User[]> {
     return await UserModel.find({ role: { $ne: 'admin' } }).select('-password');
@@ -17,12 +18,12 @@ export class UserRepository {
     return await UserModel.findOne({ email, isDeleted: false });
   }
 
-  async addUser(userData: User): Promise<void> {
+  async add(userData: User): Promise<void> {
     const newUser = new UserModel(userData);
     await newUser.save();
   }
 
-  async updateUser(userId: string, updatedInfo: Partial<User>): Promise<void> {
+  async update(userId: string, updatedInfo: Partial<User>): Promise<void> {
     await UserModel.updateOne({ _id: userId }, updatedInfo);
   }
 

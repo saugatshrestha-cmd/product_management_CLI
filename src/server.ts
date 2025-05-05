@@ -5,6 +5,7 @@ import routes from './routes/mongo_routes';
 import { errorMiddleware } from "@middleware/errorMiddleware";
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import { logger } from '@utils/logger';
 
 dotenv.config();
 
@@ -16,16 +17,26 @@ const MONGO_URI = process.env.MONGO_URI || '';
 app.use(express.json());
 app.use(cookieParser());
 
+app.use((req, res, next) => {
+    logger.info(`${req.method} ${req.path}`, {
+        ip: req.ip,
+        userAgent: req.get('User-Agent')
+    });
+    next();
+});
+
 app.use("", routes);
 app.use(errorMiddleware);
 
 mongoose.connect(MONGO_URI)
     .then(() => {
-        console.log('Connected to MongoDB');
+        logger.info('Successfully connected to MongoDB');
         app.listen(PORT, () => {
-        console.log(`API server running at http://localhost:${PORT}`);
+            logger.info(`Server started on port ${PORT}`);
         });
     })
     .catch((error) => {
-        console.error(' MongoDB connection failed:', error);
+        logger.error('MongoDB connection failed', {
+            error: error.message
+        });;
     });

@@ -37,8 +37,9 @@ export class ProductController {
     async updateProduct(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.user?._id as string;
+            const productId = req.params.id;
             const updatedInfo = req.body
-            const result = await this.productService.updateProduct(sellerId, updatedInfo);
+            const result = await this.productService.updateProduct(productId, updatedInfo);
             handleSuccess(res, result);
         } catch(error){
             handleError(next, error);

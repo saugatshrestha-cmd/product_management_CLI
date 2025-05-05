@@ -6,15 +6,19 @@ import { AppError } from "@utils/errorHandler";
 import { User } from '@mytypes/userTypes';
 import { PasswordManager } from '@utils/passwordUtils';
 import { Role } from "@mytypes/enumTypes";
+import { RepositoryFactory } from "@repository/baseRepo";
 
 @injectable()
 export class UserService {
+  private userRepository: UserRepository;
   constructor(
-    @inject("UserRepository") private userRepository: UserRepository,
+    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory,
     @inject("PasswordManager") private passwordManager: PasswordManager,
     @inject("OrderService") private orderService: OrderService,
     @inject("CartService") private cartService: CartService
-  ) {}
+  ) {
+    this.userRepository = this.repositoryFactory.getUserRepository();
+  }
 
   async getUserById(userId: string) {
     const user = await this.userRepository.findById(userId);
@@ -33,7 +37,7 @@ export class UserService {
   }
 
   async addUser(user: User): Promise<void> {
-    await this.userRepository.addUser(user);
+    await this.userRepository.add(user);
   }
 
   async createAdmin(adminData: User): Promise<{ message: string }> {
@@ -45,7 +49,7 @@ export class UserService {
     const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
   
     const finalUser = { ...adminData, password: combined, role: Role.ADMIN };
-    await this.userRepository.addUser(finalUser);
+    await this.userRepository.add(finalUser);
   
     return { message: "Admin created successfully" };
   }  
@@ -70,7 +74,7 @@ export class UserService {
       address,
     };
 
-    await this.userRepository.updateUser(userId, updatedUserInfo);
+    await this.userRepository.update(userId, updatedUserInfo);
     return { message: "User updated successfully" };
   }
 
@@ -84,7 +88,7 @@ export class UserService {
       throw AppError.conflict("Email already in use");
     }
 
-    await this.userRepository.updateUser(userId, { email: newEmail });
+    await this.userRepository.update(userId, { email: newEmail });
     return { message: "Email updated successfully" };
   }
 
@@ -97,7 +101,7 @@ export class UserService {
     const hashed = this.passwordManager.hashPassword(newPassword, newSalt);
     const combined = this.passwordManager.combineSaltAndHash(newSalt, hashed);
 
-    await this.userRepository.updateUser(userId, { password: combined });
+    await this.userRepository.update(userId, { password: combined });
     return { message: "Password updated successfully" };
   }
 
@@ -108,7 +112,7 @@ export class UserService {
     }
     // await this.orderService.deleteOrderByUserId(userId);
     await this.cartService.removeCartByUserId(userId);
-    await this.userRepository.updateUser(userId, {
+    await this.userRepository.update(userId, {
       isDeleted: true,
       deletedAt: new Date()
     });

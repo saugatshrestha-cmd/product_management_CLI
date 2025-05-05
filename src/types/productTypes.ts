@@ -9,7 +9,6 @@ export interface Product {
     categoryId: string;
     sellerId: string;
     status: ProductStatus;
-    isDeleted?: boolean;
     deletedAt?: Date | null;
 }
 
@@ -21,6 +20,5 @@ export interface ProductInput {
     categoryId: string;
     sellerId: string;
     status: ProductStatus;
-    isDeleted?: boolean;
     deletedAt?: Date | null;
 }

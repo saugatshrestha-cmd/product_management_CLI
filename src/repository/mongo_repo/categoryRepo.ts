@@ -1,9 +1,10 @@
 import { injectable } from "tsyringe";
 import { CategoryModel } from '@models/categoryModel';
 import { Category } from '@mytypes/categoryTypes';
+import { CategoryRepo } from "@mytypes/repoTypes";
 
 @injectable()
-export class CategoryRepository {
+export class CategoryRepository implements CategoryRepo {
 
   async getAll(): Promise<Category[]> {
     return await CategoryModel.find();
@@ -17,13 +18,13 @@ export class CategoryRepository {
     return await CategoryModel.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
   }
 
-  async addCategory(categoryData: Category): Promise<void> {
+  async add(categoryData: Category): Promise<void> {
     const newCategory = new CategoryModel(categoryData );
     await newCategory.save();
     return;
   }
 
-  async updateCategory(categoryId: string, updatedInfo: Partial<Category>): Promise<void> {
+  async update(categoryId: string, updatedInfo: Partial<Category>): Promise<void> {
     await CategoryModel.updateOne({ _id: categoryId }, updatedInfo);
   }
 

@@ -9,12 +9,12 @@ import { Role } from '@mytypes/enumTypes';
 
 @injectable()
 export class AuthService {
-
     constructor(
       @inject("UserService") private userService: UserService,
       @inject("SellerService") private sellerService: SellerService,
       @inject("PasswordManager") private passwordManager: PasswordManager
-    ) {}
+    ) {
+    }
 
     async login(email: string, password: string): Promise<{ token?: string; message: string }> {
         // Check if it's a user

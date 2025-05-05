@@ -28,6 +28,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2",
     "reflect-metadata": "^0.2.2",
-    "tsyringe": "^4.10.0"
+    "tsyringe": "^4.10.0",
+    "winston": "^3.17.0",
+    "winston-mongodb": "^6.0.0"
   }
 }

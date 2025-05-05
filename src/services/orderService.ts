@@ -6,15 +6,18 @@ import { Order, OrderItemInput, SellerOrder } from '@mytypes/orderTypes';
 import { AppError } from "@utils/errorHandler";
 import { Status, OrderItemStatus } from '@mytypes/enumTypes';
 import { CartItem } from '@mytypes/cartTypes';
+import { RepositoryFactory } from "@repository/baseRepo";
 
 @injectable()
 export class OrderService {
-
+  private orderRepository: OrderRepository;
   constructor(
-    @inject("OrderRepository") private orderRepo: OrderRepository,
+    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory,
     @inject("CartService") private cartService: CartService,
     @inject("ProductService") private productService: ProductService
-  ) {}
+  ) {
+    this.orderRepository = this.repositoryFactory.getOrderRepository();
+  }
 
   async createOrder(userId: string): Promise<{ message: string }> {
     const cart = await this.cartService.getCartByUserId(userId);
@@ -48,7 +51,7 @@ export class OrderService {
       await this.productService.decreaseQuantity(item.productId, item.quantity);
     }
 
-    await this.orderRepo.addOrder({
+    await this.orderRepository.add({
       userId,
       items: orderItems as OrderItemInput[],
       total: totalResult.total,
@@ -62,11 +65,11 @@ export class OrderService {
   }
 
   async getAllOrders(): Promise<Order[]> {
-      return await this.orderRepo.getAll();
+      return await this.orderRepository.getAll();
     }
 
   async getOrderByUserId(userId: string): Promise<{ message: string } | Order[]> {
-    const userOrders = await this.orderRepo.getOrdersByUserId(userId);
+    const userOrders = await this.orderRepository.getOrdersByUserId(userId);
 
     if (userOrders.length === 0) {
       throw AppError.notFound(`No orders found for userId: ${userId}` );
@@ -76,7 +79,7 @@ export class OrderService {
   }
 
   async getOrderBySellerId(sellerId: string): Promise<{ message: string } | SellerOrder[] > {
-    const allOrders = await this.orderRepo.getAll();
+    const allOrders = await this.orderRepository.getAll();
   
     const filteredOrders: SellerOrder[] = allOrders
       .map(order => ({
@@ -118,7 +121,7 @@ export class OrderService {
     sellerId: string, 
     newStatus: OrderItemStatus
   ): Promise<{ message: string }> {
-    const order = await this.orderRepo.findOrderById(orderId);
+    const order = await this.orderRepository.findById(orderId);
     
     if (!order) {
       return { message: `Order with id ${orderId} not found.` };
@@ -141,7 +144,7 @@ export class OrderService {
       await this.productService.increaseQuantity(itemToUpdate.productId, itemToUpdate.quantity);
     }
   
-    await this.orderRepo.updateOrderItemStatus(orderId, itemId, sellerId, newStatus);
+    await this.orderRepository.updateOrderItemStatus(orderId, itemId, sellerId, newStatus);
 
     const updatedItems = order.items.map(item => {
       if (item._id.toString() === itemId) {
@@ -150,13 +153,13 @@ export class OrderService {
       return item;
     });
 
-    await this.orderRepo.updateOrderItemStatus(orderId, itemId, sellerId, newStatus);
+    await this.orderRepository.updateOrderItemStatus(orderId, itemId, sellerId, newStatus);
 
     const itemStatuses = updatedItems.map(item => item.status);
     const newOrderStatus = this.updateOverallOrderStatus(itemStatuses);
 
     if (newOrderStatus !== order.status) {
-      await this.orderRepo.updateOrder(orderId, { status: newOrderStatus });
+      await this.orderRepository.update(orderId, { status: newOrderStatus });
     }
     
     return { message: `Item status updated to ${newStatus} successfully` };
@@ -165,18 +168,18 @@ export class OrderService {
   
 
   async updateOrderStatus(orderId: string, updatedInfo: Partial<Order>): Promise<{ message: string }> {
-    const order = await this.orderRepo.findOrderById(orderId);
+    const order = await this.orderRepository.findById(orderId);
 
     if (!order) {
       throw AppError.notFound(`Order with id ${orderId} not found.`);
     }
-    await this.orderRepo.updateOrder(orderId, updatedInfo);
+    await this.orderRepository.update(orderId, updatedInfo);
 
     return { message: "Order status updated successfully" };
   }
 
   async cancelOrder(orderId: string, userId: string): Promise<{ message: string }> {
-    const order = await this.orderRepo.findOrderById(orderId);
+    const order = await this.orderRepository.findById(orderId);
     if (!order) throw AppError.notFound( "Order not found" );
   
     if (order.userId !== userId) return { message: "Unauthorized to cancel this order" };
@@ -189,7 +192,7 @@ export class OrderService {
     }
   
     // Update order
-    await this.orderRepo.updateOrder(orderId, {
+    await this.orderRepository.update(orderId, {
       status: Status.CANCELLED,
       cancelledAt: new Date(),
     });
@@ -198,7 +201,7 @@ export class OrderService {
   }
 
   async cancelOrderAdmin(orderId: string): Promise<{ message: string }> {
-    const order = await this.orderRepo.findOrderById(orderId);
+    const order = await this.orderRepository.findById(orderId);
     if (!order) throw AppError.notFound( "Order not found" );
   
     if (order.status !== Status.PENDING && order.status !== Status.SHIPPED) return { message: "Only pending and shipped orders can be cancelled" };
@@ -209,7 +212,7 @@ export class OrderService {
     }
   
     // Update order
-    await this.orderRepo.updateOrder(orderId, {
+    await this.orderRepository.update(orderId, {
       status: Status.CANCELLED,
       cancelledAt: new Date(),
     });
@@ -218,7 +221,7 @@ export class OrderService {
   }
   
   async deleteOrder(orderId: string, userId: string): Promise<{ message: string }> {
-    const order = await this.orderRepo.findOrderById(orderId);
+    const order = await this.orderRepository.findById(orderId);
     if (!order) throw AppError.notFound("Order not found" );
 
     if (order.userId !== userId) return { message: "Unauthorized to cancel this order" };
@@ -229,7 +232,7 @@ export class OrderService {
       return { message: `Cannot delete order. Only 'Pending' or 'Cancelled' orders can be deleted.` };
     }
   
-    await this.orderRepo.updateOrder(orderId, {
+    await this.orderRepository.update(orderId, {
       isDeleted: true,
       deletedAt: new Date()
     });
@@ -238,13 +241,13 @@ export class OrderService {
   }
 
   // async deleteOrderByUserId(userId: string): Promise<{ message: string }> {
-  //   const orders = await this.orderRepo.getOrdersByUserId(userId);
+  //   const orders = await this.orderRepository.getOrdersByUserId(userId);
   //   if (!orders) throw AppError.notFound("Order not found" );
   //   if (orders.status !== Status.PENDING) return { message: "Only pending orders can be cancelled" };
 
   //   await Promise.all(
   //     orders.map(order =>
-  //       this.orderRepo.updateOrder(order._id, {
+  //       this.orderRepository.update(order._id, {
   //         isDeleted: true,
   //         deletedAt: new Date(),
   //       })
@@ -256,12 +259,12 @@ export class OrderService {
   // }
 
   async deleteOrderAdmin(orderId: string): Promise<{ message: string }> {
-    const order = await this.orderRepo.findOrderById(orderId);
+    const order = await this.orderRepository.findById(orderId);
     if (!order) throw AppError.notFound("Order not found" );
   
     if (order.isDeleted) return { message: "Order already deleted" };
   
-    await this.orderRepo.updateOrder(orderId, {
+    await this.orderRepository.update(orderId, {
       isDeleted: true,
       deletedAt: new Date()
     });
