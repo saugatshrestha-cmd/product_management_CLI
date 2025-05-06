@@ -14,13 +14,9 @@ export class AdminController {
         try{
             const newAdmin = req.body;
             const result = await this.userService.createAdmin(newAdmin);
-            logger.info('Admin registered successfully');
+            logger.info('Admin registered successfully', { email: req.body.email });
             handleSuccess(res, result);
-        } catch(error: any) {
-            logger.error('Registration error', {
-                error: error.message,
-                email: req.body.email,
-            });
+        } catch(error) {
             handleError(next, error);
         }
     }
@@ -29,7 +25,7 @@ export class AdminController {
         try {
             const userId = req.user?._id as string;
             const user = await this.userService.getUserById(userId);
-            logger.info('Admin registered successfully');
+            logger.info('Admin profile fetched successfully', { userId });
             handleSuccess(res, user);
         } catch(error) {
             handleError(next, error);
@@ -41,6 +37,7 @@ export class AdminController {
             const userId = req.user?._id as string;
             const updatedInfo = req.body;
             const result = await this.userService.updateUser(userId, updatedInfo);
+            logger.info('Admin profile updated successfully', { userId, updatedInfo });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -51,6 +48,7 @@ export class AdminController {
         try {
             const userId = req.user?._id as string;
             const result = await this.userService.updateEmail(userId, req.body.email);
+            logger.info('Admin email updated successfully', { userId, email: req.body.email });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -61,6 +59,7 @@ export class AdminController {
         try {
             const userId = req.user?._id as string;
             const result = await this.userService.updatePassword(userId, req.body.password);
+            logger.info('Admin password updated successfully', { userId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -71,6 +70,7 @@ export class AdminController {
         try {
             const userId = req.params.id;
             const result = await this.userService.deleteUser(userId);
+            logger.info('Admin deleted successfully', { userId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);

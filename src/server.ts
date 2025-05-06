@@ -1,29 +1,20 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import "reflect-metadata";
 import express from 'express';
 import mongoose from 'mongoose';
 import routes from './routes/mongo_routes';
 import { errorMiddleware } from "@middleware/errorMiddleware";
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { logger } from '@utils/logger';
 
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || '';
 
-
 app.use(express.json());
 app.use(cookieParser());
-
-app.use((req, res, next) => {
-    logger.info(`${req.method} ${req.path}`, {
-        ip: req.ip,
-        userAgent: req.get('User-Agent')
-    });
-    next();
-});
 
 app.use("", routes);
 app.use(errorMiddleware);

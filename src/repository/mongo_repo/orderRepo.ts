@@ -2,10 +2,10 @@ import { injectable } from "tsyringe";
 import { OrderModel } from '@models/orderModel';
 import { Order, OrderInput } from '@mytypes/orderTypes';
 import { OrderItemStatus } from "@mytypes/enumTypes";
-import { OrderRepo } from "@mytypes/repoTypes";
+import { OrderRepository } from "@mytypes/repoTypes";
 
 @injectable()
-export class OrderRepository implements OrderRepo {
+export class MongoOrderRepository implements OrderRepository {
 
   async getAll(): Promise<Order[]> {
     return await OrderModel.find({ isDeleted: false });

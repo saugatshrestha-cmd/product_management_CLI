@@ -1,22 +1,24 @@
 import { injectable, inject } from "tsyringe";
-import { CategoryRepository } from "@repository/categoryRepo";
+import { CategoryRepository } from "@mytypes/repoTypes";
 import { AppError } from "@utils/errorHandler";
 import { Category } from "@mytypes/categoryTypes";
-import { RepositoryFactory } from "@repository/baseRepo";
+import { CategoryRepositoryFactory } from "@factories/categoryFactory";
+import { logger } from "@utils/logger";
 
 @injectable()
 export class CategoryService {
   private categoryRepository: CategoryRepository;
   constructor(
-    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory
+    @inject("CategoryRepositoryFactory") private categoryRepositoryFactory: CategoryRepositoryFactory
   ) {
-    this.categoryRepository = this.repositoryFactory.getCategoryRepository();
+    this.categoryRepository = this.categoryRepositoryFactory.createRepository();
   }
 
   async createCategory(categoryData: Category): Promise<{ message: string }> {
     const { name, description } = categoryData;
 
     if (await this.categoryRepository.findByName(name)) {
+      logger.warn("Category not found");
       throw AppError.conflict( "Category already exists" )
     }
 
@@ -27,6 +29,7 @@ export class CategoryService {
   async getCategoryById(categoryId: string): Promise<Category | { message: string }> {
     const category = await this.categoryRepository.findById(categoryId);
     if (!category) {
+      logger.warn("Category not found");
       throw AppError.notFound("Category not found", categoryId);
     }
     return category;
@@ -39,6 +42,7 @@ export class CategoryService {
   async updateCategory(categoryId: string, updatedInfo: Partial<Category>): Promise<{ message: string }> {
     const category = await this.categoryRepository.findById(categoryId);
     if (!category) {
+      logger.warn("Category not found");
       throw AppError.notFound("Category not found", categoryId);
     }
 
@@ -53,6 +57,7 @@ export class CategoryService {
   async deleteCategory(categoryId: string): Promise<{ message: string }> {
     const category = await this.categoryRepository.findById(categoryId);
     if (!category) {
+      logger.warn("Category not found");
       throw AppError.notFound("Category not found", categoryId);
     }
     const success = await this.categoryRepository.deleteCategoryById(categoryId);

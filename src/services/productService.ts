@@ -1,19 +1,20 @@
 import { injectable, inject } from "tsyringe";
-import { ProductRepository } from '@repository/productRepo';
+import { ProductRepository } from '@mytypes/repoTypes';
 import { CategoryService } from '@services/categoryService';
 import { AppError } from "@utils/errorHandler";
 import { ProductStatus } from "@mytypes/enumTypes";
 import { Product, ProductInput } from '@mytypes/productTypes';
-import { RepositoryFactory } from "@repository/baseRepo";
+import { ProductRepositoryFactory } from "@factories/productFactory";
+import { logger } from "@utils/logger";
 
 @injectable()
 export class ProductService {
   private productRepository: ProductRepository;
   constructor(
-    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory,
+    @inject("ProductRepositoryFactory") private productRepositoryFactory: ProductRepositoryFactory,
     @inject("CategoryService") private categoryService: CategoryService
   ) {
-    this.productRepository = this.repositoryFactory.getProductRepository();
+    this.productRepository = this.productRepositoryFactory.createRepository();
   }
 
 
@@ -23,14 +24,15 @@ export class ProductService {
 
     const existingProduct = await this.productRepository.getAll();
     if (existingProduct.some(product => product.name.toLowerCase() === name.toLowerCase())) {
+      logger.warn("Product already exists");
       throw AppError.conflict("Product already exist");
     }
 
     if (categoryId && !(await this.categoryService.getCategoryById(categoryId))) {
+      logger.warn("Category not found");
       throw AppError.notFound("Category does not exist", categoryId);
     }
     
-
     await this.productRepository.add({ name, description, price, categoryId, quantity, sellerId, status: ProductStatus.ACTIVE });
     return { message: "Product added successfully" };
   }
@@ -38,6 +40,7 @@ export class ProductService {
   async getProductById(productId: string): Promise<Product | { message: string }> {
     const product = await this.productRepository.findById(productId);
     if (!product) {
+      logger.warn("Product not found");
       throw AppError.notFound("Product not found", productId);
     }
     return product;
@@ -54,10 +57,12 @@ export class ProductService {
   async updateProduct(productId: string, updatedInfo: Partial<Product>): Promise<{ message: string }> {
     const product = await this.productRepository.findById(productId);
     if (!product) {
+      logger.warn("Product not found");
       throw AppError.notFound("Product not found", productId);
     }
 
     if (updatedInfo.categoryId && !(await this.categoryService.getCategoryById(updatedInfo.categoryId))) {
+      logger.warn("Category not found");
       throw AppError.notFound("Category does not exist", updatedInfo.categoryId);
     }
 
@@ -68,6 +73,7 @@ export class ProductService {
   async updateQuantity(productId: string, newQuantity: number): Promise<{ message: string }> {
     const product = await this.productRepository.findById(productId);
     if (!product) {
+      logger.warn("Product not found");
       throw AppError.notFound("Product not found", productId);
     }
 
@@ -79,6 +85,7 @@ export class ProductService {
   async decreaseQuantity(productId: string, newQuantity: number): Promise<{ message: string }> {
     const product = await this.productRepository.findById(productId);
     if (!product) {
+      logger.warn("Product not found");
       throw AppError.notFound("Product not found", productId);
     }
 
@@ -90,6 +97,7 @@ export class ProductService {
   async increaseQuantity(productId: string, newQuantity: number): Promise<{ message: string }> {
     const product = await this.productRepository.findById(productId);
     if (!product) {
+      logger.warn("Product not found");
       throw AppError.notFound("Product not found", productId);
     }
 
@@ -101,6 +109,7 @@ export class ProductService {
   async deleteProduct(productId: string): Promise<{ message: string }> {
     const product = await this.productRepository.findById(productId);
     if (!product) {
+      logger.warn("Product not found");
       throw AppError.notFound('Product', productId);
     }
     if (product.status === ProductStatus.DELETED) return { message: "Product already deleted" };
@@ -114,6 +123,7 @@ export class ProductService {
   async deleteProductsBySellerId(sellerId: string): Promise<{ message: string }> {
     const products = await this.productRepository.getBySellerId(sellerId);
     if (!products || products.length === 0) {
+      logger.warn("Product not found for this seller");
       throw AppError.notFound("Products not found for this seller");
     }
     await this.productRepository.updateMany(

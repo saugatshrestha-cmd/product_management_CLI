@@ -38,18 +38,13 @@ export class AuthController {
         maxAge: 3600000,
       });
 
+      
+
       handleSuccess(res, { 
         message: result.message,
         token: result.token
       });
     } catch (error) {
-      const errorMessage = error instanceof Error 
-      ? error.message 
-      : 'Unknown error occurred';
-      logger.error('Login error', {
-        error: errorMessage,
-        email: req.body.email,
-      });
       handleError(next, error);
     }
   };
@@ -70,13 +65,6 @@ export class AuthController {
 
       handleSuccess(res, { message: result.message });
     } catch (error) {
-      const errorMessage = error instanceof Error 
-      ? error.message 
-      : 'Unknown error occurred';
-      logger.error('Registration error', {
-        error: errorMessage,
-        email: req.body.email,
-      });
       handleError(next, error);
     }
   };
@@ -100,13 +88,6 @@ export class AuthController {
 
       handleSuccess(res, { message: 'Logged out successfully' });
     } catch (error) {
-      const errorMessage = error instanceof Error 
-      ? error.message 
-      : 'Unknown error occurred';
-      logger.error('Logout error', {
-        error: errorMessage,
-        email: req.body.email,
-      });
       handleError(next, error);
     }
   }

@@ -1,10 +1,10 @@
 import { injectable } from "tsyringe";
 import { UserModel } from '@models/userModel';
 import { User } from '@mytypes/userTypes';
-import { UserRepo } from "@mytypes/repoTypes";
+import { UserRepository } from "@mytypes/repoTypes";
 
 @injectable()
-export class UserRepository implements UserRepo {
+export class MongoUserRepository implements UserRepository {
 
   async getAll(): Promise<User[]> {
     return await UserModel.find({ role: { $ne: 'admin' } }).select('-password');

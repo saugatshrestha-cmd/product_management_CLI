@@ -6,10 +6,12 @@ import { PasswordManager } from '@utils/passwordUtils';
 import { AppError } from "@utils/errorHandler";
 import { User } from '@mytypes/userTypes';
 import { Role } from '@mytypes/enumTypes';
+import { EmailService } from '@services/emailService';
 
 @injectable()
 export class AuthService {
     constructor(
+      @inject("EmailService") private emailService: EmailService,
       @inject("UserService") private userService: UserService,
       @inject("SellerService") private sellerService: SellerService,
       @inject("PasswordManager") private passwordManager: PasswordManager
@@ -27,7 +29,6 @@ export class AuthService {
           );
           return { token, message: 'Login successful' };
         }
-    
         // Check if it's a seller
         const seller = await this.sellerService.findByEmail(email);
         if (seller && this.passwordManager.verifyPassword(password, seller.password)) {
@@ -56,7 +57,14 @@ export class AuthService {
     const user = await this.userService.getAllUsers()
         .then(users => users.find(u => u.email === userData.email));
     if (!user) return { message: 'User creation failed' };
-
+      await this.emailService.sendEmail({
+          to: user.email,
+          subject: 'Welcome to Our Platform',
+          templateName: 'welcome',
+          templateData: {
+              name: user.firstName || 'Valued Customer',
+          },
+      });
     return { message: 'Registration successful', user };
     }
 }

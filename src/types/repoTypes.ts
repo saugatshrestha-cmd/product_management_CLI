@@ -13,34 +13,34 @@ export interface Repository<T> {
     update(id: string, updatedInfo: Partial<T>): Promise<void>;
 }
 
-export interface UserRepo extends Repository<User> {
+export interface UserRepository extends Repository<User> {
     findByEmail(email: string): Promise<User | null>;
 }
 
-export interface SellerRepo extends Repository<Seller> {
+export interface SellerRepository extends Repository<Seller> {
     findByEmail(email: string): Promise<Seller | null>;
 }
 
-export interface ProductRepo extends Repository<Product> {
+export interface ProductRepository extends Repository<Product> {
     findByName(name: string): Promise<Product | null>;
     updateMany(filter: object, update: object): Promise<void>;
     getBySellerId(sellerId: string): Promise<Product[]>;
     add(productData: ProductInput): Promise<void>;
 }
 
-export interface OrderRepo extends Repository<Order> {
+export interface OrderRepository extends Repository<Order> {
     getOrdersByUserId(userId: string): Promise<Order[]>;
     getOrderBySellerId(sellerId: string): Promise<Order[]>;
     add(orderData: OrderInput): Promise<void>;
     updateOrderItemStatus(orderId: string, itemId: string, sellerId: string, newStatus: OrderItemStatus): Promise<void>;
 }
 
-export interface CategoryRepo extends Repository<Category> {
+export interface CategoryRepository extends Repository<Category> {
     findByName(name: string): Promise<Category | null>;
     deleteCategoryById(categoryId: string): Promise<boolean>;
 }
 
-export interface CartRepo extends Repository<Cart> {
+export interface CartRepository extends Repository<Cart> {
     findCartByUserId(userId: string): Promise<Cart | null>;
     add(cartData: CartInput): Promise<void>;
     updateCart(userId: string, updatedItems: CartItem[]): Promise<void>;

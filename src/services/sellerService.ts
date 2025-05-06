@@ -1,26 +1,28 @@
 import { injectable, inject } from "tsyringe";
-import { SellerRepository } from '@repository/sellerRepo';
+import { SellerRepository } from '@mytypes/repoTypes';
 import { ProductService } from "@services/productService";
 import { Seller } from '@mytypes/sellerTypes';
 import { AppError } from "@utils/errorHandler";
 import { PasswordManager } from '@utils/passwordUtils';
 import { Role } from '@mytypes/enumTypes';
-import { RepositoryFactory } from "@repository/baseRepo";
+import { SellerRepositoryFactory } from "@factories/sellerFactory";
+import { logger } from "@utils/logger";
 
 @injectable()
 export class SellerService {
   private sellerRepository: SellerRepository;
   constructor(
-    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory,
+    @inject("SellerRepositoryFactory") private sellerRepositoryFactory: SellerRepositoryFactory,
     @inject("PasswordManager") private passwordManager: PasswordManager,
     @inject("ProductService") private productService: ProductService
   ) {
-    this.sellerRepository = this.repositoryFactory.getSellerRepository();
+    this.sellerRepository = this.sellerRepositoryFactory.createRepository();
   }
 
   async getSellerById(sellerId: string) {
     const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
+      logger.warn(`Seller not found: ${sellerId}`);
       throw AppError.notFound("Seller not found", sellerId);
     }
     return seller;
@@ -36,7 +38,10 @@ export class SellerService {
 
   async createSeller(sellerData: Seller): Promise<{ message: string }> {
     const exists = await this.sellerRepository.findByEmail(sellerData.email);
-    if (exists) throw AppError.conflict("Email already registered");
+    if (exists){
+      logger.warn(`Email already registered: ${sellerData.email}`);
+      throw AppError.conflict("Email already registered");
+    }
   
     const salt = this.passwordManager.createSalt();
     const hashed = this.passwordManager.hashPassword(sellerData.password, salt);
@@ -52,11 +57,13 @@ export class SellerService {
   async updateSeller(sellerId: string, updatedInfo: Seller): Promise<{ message: string }> {
     const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
+      logger.warn(`Seller not found: ${sellerId}`);
       throw AppError.notFound("Seller not found", sellerId);
     }
 
     if (updatedInfo.email || updatedInfo.password) {
-      throw AppError.badRequest("Email and password must be updated via dedicated endpoints");
+      logger.warn("Email or password cannot be updated here");
+      throw AppError.badRequest("Email or password cannot be updated here");
     }
 
     const { storeName, phone, address } = updatedInfo;
@@ -74,10 +81,12 @@ export class SellerService {
   async updateEmail(sellerId: string, newEmail: string): Promise<{ message: string }> {
     const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
+      logger.warn(`Seller not found: ${sellerId}`);
       throw AppError.notFound("Seller not found", sellerId);
     }
 
     if (await this.sellerRepository.findByEmail(newEmail)) {
+      logger.warn("Email already in use");
       throw AppError.conflict("Email already in use");
     }
 
@@ -88,6 +97,7 @@ export class SellerService {
   async updatePassword(sellerId: string, newPassword: string): Promise<{ message: string }> {
     const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
+      logger.warn(`Seller not found: ${sellerId}`);
       throw AppError.notFound("Seller not found", sellerId);
     }
 
@@ -102,6 +112,7 @@ export class SellerService {
   async deleteSeller(sellerId: string): Promise<{ message: string }> {
     const seller = await this.sellerRepository.findById(sellerId);
     if (!seller || seller.isDeleted) {
+      logger.warn(`Seller not found: ${sellerId}`);
       throw AppError.notFound("Seller not found or already deleted", sellerId);
     }
     await this.productService.deleteProductsBySellerId(sellerId);

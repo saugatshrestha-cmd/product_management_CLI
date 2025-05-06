@@ -1,22 +1,23 @@
 import { injectable, inject } from "tsyringe";
-import { OrderRepository } from '@repository/orderRepo';
+import { OrderRepository } from '@mytypes/repoTypes';
 import { CartService } from '@services/cartService';
 import { ProductService } from '@services/productService';
 import { Order, OrderItemInput, SellerOrder } from '@mytypes/orderTypes';
 import { AppError } from "@utils/errorHandler";
 import { Status, OrderItemStatus } from '@mytypes/enumTypes';
 import { CartItem } from '@mytypes/cartTypes';
-import { RepositoryFactory } from "@repository/baseRepo";
+import { OrderRepositoryFactory } from "@factories/orderFactory";
+import { logger } from "@utils/logger";
 
 @injectable()
 export class OrderService {
   private orderRepository: OrderRepository;
   constructor(
-    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory,
+    @inject("OrderRepositoryFactory") private orderRepositoryFactory: OrderRepositoryFactory,
     @inject("CartService") private cartService: CartService,
     @inject("ProductService") private productService: ProductService
   ) {
-    this.orderRepository = this.repositoryFactory.getOrderRepository();
+    this.orderRepository = this.orderRepositoryFactory.createRepository();
   }
 
   async createOrder(userId: string): Promise<{ message: string }> {

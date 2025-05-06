@@ -3,6 +3,7 @@ import { SellerService } from '@services/sellerService';
 import { AuthRequest } from '@mytypes/authTypes';
 import { injectable, inject } from "tsyringe";
 import { handleSuccess, handleError } from '@utils/apiResponse';
+import { logger } from '@utils/logger';
 
 @injectable()
 export class SellerController {
@@ -14,6 +15,7 @@ export class SellerController {
         try{
             const newSeller = req.body;
             const result = await this.sellerService.createSeller(newSeller);
+            logger.info('Seller registered successfully');
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -24,6 +26,7 @@ export class SellerController {
         try {
             const sellerId = req.user?._id as string;
             const result = await this.sellerService.getSellerById(sellerId);
+            logger.info('Seller profile fetched successfully', { sellerId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -35,6 +38,7 @@ export class SellerController {
             const sellerId = req.user?._id as string;
             const updatedInfo = req.body;
             const result = await this.sellerService.updateSeller(sellerId, updatedInfo);
+            logger.info('Seller profile updated successfully', { sellerId, updatedInfo });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -45,6 +49,7 @@ export class SellerController {
         try {
             const sellerId = req.user?._id as string;
             const result = await this.sellerService.updateEmail(sellerId, req.body.email);
+            logger.info('Seller email successfully', { email: req.body.email });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);;
@@ -55,6 +60,7 @@ export class SellerController {
         try {
             const sellerId = req.user?._id as string;
             const result = await this.sellerService.updatePassword(sellerId, req.body.password);
+            logger.info('Password updated successfully');
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -65,6 +71,7 @@ export class SellerController {
         try {
             const sellerId = req.user?._id as string;
             const result = await this.sellerService.deleteSeller(sellerId);
+            logger.info('Seller deleted successfully', { sellerId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -74,6 +81,7 @@ export class SellerController {
     async getAllSellers(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const result = await this.sellerService.getAllSellers();
+            logger.info('Sellers fetched successfully');
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -84,6 +92,7 @@ export class SellerController {
         try {
             const sellerId = req.params.id;
             const result = await this.sellerService.getSellerById(sellerId);
+            logger.info('Seller fetched successfully', { sellerId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -95,6 +104,7 @@ export class SellerController {
             const sellerId = req.params.id;
             const updatedSellerInfo = req.body;
             const result = await this.sellerService.updateSeller(sellerId, updatedSellerInfo);
+            logger.info('Seller profile updated successfully', { sellerId, updatedSellerInfo });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -105,6 +115,7 @@ export class SellerController {
         try {
             const sellerId = req.params.id;
             const result = await this.sellerService.updateEmail(sellerId, req.body.email);
+            logger.info('Seller email successfully', { email: req.body.email });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -115,6 +126,7 @@ export class SellerController {
         try {
             const sellerId = req.params.id;
             const result = await this.sellerService.updatePassword(sellerId, req.body.password);
+            logger.info('Password updated successfully');
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -125,6 +137,7 @@ export class SellerController {
         try {
             const sellerId = req.params.id;
             const result = await this.sellerService.deleteSeller(sellerId);
+            logger.info('Seller deleted successfully', { sellerId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);

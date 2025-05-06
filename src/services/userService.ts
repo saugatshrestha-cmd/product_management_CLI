@@ -1,28 +1,30 @@
 import { injectable, inject } from "tsyringe";
-import { UserRepository } from '@repository/userRepo';
+import { UserRepository } from "@mytypes/repoTypes";
 import { OrderService } from "./orderService";
 import { CartService } from "./cartService";
 import { AppError } from "@utils/errorHandler";
 import { User } from '@mytypes/userTypes';
 import { PasswordManager } from '@utils/passwordUtils';
 import { Role } from "@mytypes/enumTypes";
-import { RepositoryFactory } from "@repository/baseRepo";
+import { UserRepositoryFactory } from "@factories/userFactory";
+import { logger } from "@utils/logger";
 
 @injectable()
 export class UserService {
   private userRepository: UserRepository;
   constructor(
-    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory,
+    @inject("UserRepositoryFactory") private userRepositoryFactory: UserRepositoryFactory,
     @inject("PasswordManager") private passwordManager: PasswordManager,
     @inject("OrderService") private orderService: OrderService,
     @inject("CartService") private cartService: CartService
   ) {
-    this.userRepository = this.repositoryFactory.getUserRepository();
+    this.userRepository = this.userRepositoryFactory.createRepository();
   }
 
   async getUserById(userId: string) {
     const user = await this.userRepository.findById(userId);
     if (!user) {
+      logger.warn(`User not found: ${userId}`);
       throw AppError.notFound('User', userId);
     }
     return user;
@@ -42,7 +44,10 @@ export class UserService {
 
   async createAdmin(adminData: User): Promise<{ message: string }> {
     const exists = await this.userRepository.findByEmail(adminData.email);
-    if (exists) throw AppError.conflict("Email already registered");
+    if (exists){
+      logger.warn(`Admin creation failed, email already exists: ${adminData.email}`);
+      throw AppError.conflict("Email already registered");
+    }
   
     const salt = this.passwordManager.createSalt();
     const hashed = this.passwordManager.hashPassword(adminData.password, salt);
@@ -58,10 +63,12 @@ export class UserService {
   async updateUser(userId: string, updatedInfo: User): Promise<{ message: string }> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
+      logger.warn(`Update failed, user not found: ${userId}`);
       throw AppError.notFound('User', userId);
     }
 
     if (updatedInfo.email || updatedInfo.password) {
+      logger.warn("Email and password cannot be updated here.");
       throw AppError.badRequest("Email and password cannot be updated here.");
     }
 
@@ -81,10 +88,12 @@ export class UserService {
   async updateEmail(userId: string, newEmail: string): Promise<{ message: string }> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
+      logger.warn(`Email update failed, user not found: ${userId}`);
       throw AppError.notFound('User', userId);
     }
 
     if (await this.userRepository.findByEmail(newEmail)) {
+      logger.warn(`Email update failed, already in use: ${newEmail}`);
       throw AppError.conflict("Email already in use");
     }
 
@@ -95,6 +104,7 @@ export class UserService {
   async updatePassword(userId: string, newPassword: string): Promise<{ message: string }> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
+      logger.warn(`Password update failed, user not found: ${userId}`);
       throw AppError.notFound('User', userId);
     }
     const newSalt = this.passwordManager.createSalt();
@@ -108,6 +118,7 @@ export class UserService {
   async deleteUser(userId: string): Promise<{ message: string }> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
+      logger.warn(`Delete failed, user not found: ${userId}`);
       throw AppError.notFound('User', userId);
     }
     // await this.orderService.deleteOrderByUserId(userId);

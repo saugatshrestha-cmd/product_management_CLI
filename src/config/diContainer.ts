@@ -3,13 +3,19 @@ import { container } from "tsyringe";
 
 import { PasswordManager } from "@utils/passwordUtils";
 
-import { RepositoryFactory } from "@repository/baseRepo";
-import { UserRepository } from "@repository/userRepo";
-import { ProductRepository } from "@repository/productRepo";
-import { CategoryRepository } from "@repository/categoryRepo";
-import { OrderRepository } from "@repository/orderRepo";
-import { SellerRepository } from "@repository/sellerRepo";
-import { CartRepository } from "@repository/cartRepo";
+import { UserRepositoryFactory } from "@factories/userFactory";
+import { ProductRepositoryFactory } from "@factories/productFactory";
+import { SellerRepositoryFactory } from "@factories/sellerFactory";
+import { OrderRepositoryFactory } from "@factories/orderFactory";
+import { CartRepositoryFactory } from "@factories/cartFactory";
+import { CategoryRepositoryFactory } from "@factories/categoryFactory";
+
+import { MongoUserRepository } from "@repository/userRepo";
+import { MongoProductRepository } from "@repository/productRepo";
+import { MongoCategoryRepository } from "@repository/categoryRepo";
+import { MongoOrderRepository } from "@repository/orderRepo";
+import { MongoSellerRepository } from "@repository/sellerRepo";
+import { MongoCartRepository } from "@repository/cartRepo";
 
 import { UserService } from "@services/userService";
 import { ProductService } from "@services/productService";
@@ -18,6 +24,7 @@ import { OrderService } from "@services/orderService";
 import { SellerService } from "@services/sellerService";
 import { CartService } from "@services/cartService";
 import { AuthService } from "@services/authService";
+import { EmailService } from "@services/emailService";
 
 import { UserController } from "@controller/userController";
 import { ProductController } from "@controller/productController";
@@ -30,13 +37,19 @@ import { AdminController } from "@controller/adminController";
 
 container.register("PasswordManager", { useClass: PasswordManager });
 
-container.register(RepositoryFactory, { useClass: RepositoryFactory });
-container.register("UserRepository", { useClass: UserRepository });
-container.register("ProductRepository", { useClass: ProductRepository });
-container.register("CategoryRepository", { useClass: CategoryRepository});
-container.register("OrderRepository", { useClass: OrderRepository});
-container.register("SellerRepository", { useClass: SellerRepository});
-container.register("CartRepository", { useClass: CartRepository});
+container.register("UserRepositoryFactory", { useClass: UserRepositoryFactory });
+container.register("ProductRepositoryFactory", { useClass: ProductRepositoryFactory });
+container.register("CategoryRepositoryFactory", { useClass: CategoryRepositoryFactory});
+container.register("OrderRepositoryFactory", { useClass: OrderRepositoryFactory});
+container.register("SellerRepositoryFactory", { useClass: SellerRepositoryFactory});
+container.register("CartRepositoryFactory", { useClass: CartRepositoryFactory});
+
+container.register("MongoUserRepository", { useClass: MongoUserRepository });
+container.register("MongoProductRepository", { useClass: MongoProductRepository });
+container.register("MongoCategoryRepository", { useClass: MongoCategoryRepository});
+container.register("MongoOrderRepository", { useClass: MongoOrderRepository});
+container.register("MongoSellerRepository", { useClass: MongoSellerRepository});
+container.register("MongoCartRepository", { useClass: MongoCartRepository});
 
 
 container.register("UserService", { useClass: UserService });
@@ -46,6 +59,7 @@ container.register("OrderService", { useClass: OrderService});
 container.register("SellerService", { useClass: SellerService});
 container.register("CartService", { useClass: CartService});
 container.register("AuthService", { useClass: AuthService});
+container.register("EmailService", { useClass: EmailService});
 
 container.register("UserController", { useClass: UserController });
 container.register("ProductController", { useClass: ProductController });

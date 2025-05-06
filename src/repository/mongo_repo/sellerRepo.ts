@@ -1,10 +1,10 @@
 import { injectable } from "tsyringe";
 import { SellerModel } from '@models/sellerModel';
 import { Seller } from '@mytypes/sellerTypes';
-import { SellerRepo } from "@mytypes/repoTypes";
+import { SellerRepository } from "@mytypes/repoTypes";
 
 @injectable()
-export class SellerRepository implements SellerRepo {
+export class MongoSellerRepository implements SellerRepository {
 
     async getAll(): Promise<Seller[]> {
     return await SellerModel.find().select('-password');

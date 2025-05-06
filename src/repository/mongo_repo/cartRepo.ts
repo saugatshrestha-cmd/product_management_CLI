@@ -1,10 +1,10 @@
 import { injectable } from "tsyringe";
 import { CartModel } from '@models/cartModel';
 import { Cart, CartItem, CartInput } from '@mytypes/cartTypes';
-import { CartRepo } from "@mytypes/repoTypes";
+import { CartRepository } from "@mytypes/repoTypes";
 
 @injectable()
-export class CartRepository implements CartRepo {
+export class MongoCartRepository implements CartRepository {
 
   async getAll(): Promise<Cart[]> {
     return await CartModel.find();

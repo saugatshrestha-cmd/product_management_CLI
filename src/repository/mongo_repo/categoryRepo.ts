@@ -1,10 +1,10 @@
 import { injectable } from "tsyringe";
 import { CategoryModel } from '@models/categoryModel';
 import { Category } from '@mytypes/categoryTypes';
-import { CategoryRepo } from "@mytypes/repoTypes";
+import { CategoryRepository } from "@mytypes/repoTypes";
 
 @injectable()
-export class CategoryRepository implements CategoryRepo {
+export class MongoCategoryRepository implements CategoryRepository {
 
   async getAll(): Promise<Category[]> {
     return await CategoryModel.find();

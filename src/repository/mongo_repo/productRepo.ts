@@ -2,10 +2,10 @@ import { injectable } from "tsyringe";
 import { ProductModel } from '@models/productModel';
 import { Product, ProductInput } from '@mytypes/productTypes';
 import { ProductStatus } from "@mytypes/enumTypes";
-import { ProductRepo } from "@mytypes/repoTypes";
+import { ProductRepository } from "@mytypes/repoTypes";
 
 @injectable()
-export class ProductRepository implements ProductRepo {
+export class MongoProductRepository implements ProductRepository {
 
   async getAll(): Promise<Product[]> {
     return await ProductModel.find();

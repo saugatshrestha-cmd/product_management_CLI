@@ -1,19 +1,20 @@
 import { injectable, inject } from "tsyringe";
 import { Product } from '@mytypes/productTypes';
-import { CartRepository } from '@repository/cartRepo';
+import { CartRepository } from '@mytypes/repoTypes';
 import { AppError } from "@utils/errorHandler";
 import { ProductService } from '@services/productService';
 import { Cart } from '@mytypes/cartTypes';
-import { RepositoryFactory } from "@repository/baseRepo";
+import { CartRepositoryFactory } from "@factories/cartFactory";
+import { logger } from "@utils/logger";
 
 @injectable()
 export class CartService {
   private cartRepository: CartRepository;
   constructor(
-    @inject(RepositoryFactory) private repositoryFactory: RepositoryFactory,
+    @inject(CartRepositoryFactory) private CartRepositoryFactory: CartRepositoryFactory,
     @inject("ProductService") private productService: ProductService
   ) {
-    this.cartRepository = this.repositoryFactory.getCartRepository();
+    this.cartRepository = this.CartRepositoryFactory.createRepository();
   }
 
   private isProduct(product: any): product is Product {
@@ -23,6 +24,7 @@ export class CartService {
   async createCart(productId: string, quantity: number, userId: string): Promise<{ message: string }> {
     const product = await this.productService.getProductById(productId);
     if (!this.isProduct(product)) {
+      logger.warn("Product not found");
       return { message: "Product not found" };
     }
     if (quantity > product.quantity) {
@@ -53,6 +55,7 @@ export class CartService {
     }
     const cart = await this.cartRepository.findCartByUserId(userId);
     if (!cart) {
+      logger.warn("Cart not found");
       throw AppError.notFound("Cart not found", userId);
     }
     const itemIndex = cart.items.findIndex(item => item.productId === productId);
@@ -67,6 +70,7 @@ export class CartService {
   async removeFromCart(productId: string, userId: string): Promise<{ message: string }> {
     const userCart = await this.cartRepository.findCartByUserId(userId);
     if (!userCart) {
+      logger.warn("Cart not found");
       throw AppError.notFound("Cart not found", userId);
     }
     const itemIndex = userCart.items.findIndex(item => item.productId === productId);
@@ -87,6 +91,7 @@ export class CartService {
   async calculateCartSummary(userId: string): Promise<any> {
     const userCart = await this.cartRepository.findCartByUserId(userId);
     if (!userCart) {
+      logger.warn("Cart not found");
       throw AppError.notFound("Cart not found", userId);
     }
     let subtotal = 0;
@@ -110,9 +115,11 @@ export class CartService {
   async getAllCarts(): Promise<Cart[]> {
     return await this.cartRepository.getAll();
   }
+
   async getCartByUserId(userId: string): Promise<any> {
     const userCart = await this.cartRepository.findCartByUserId(userId);
     if (!userCart) {
+      logger.warn("Cart not found");
       throw AppError.notFound("Cart not found", userId);
     }
     return userCart;
