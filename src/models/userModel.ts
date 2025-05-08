@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { Role } from '@mytypes/enumTypes';
+import { User } from '@mytypes/userTypes';
 
 const userSchema = new mongoose.Schema({
   firstName: { 
@@ -12,7 +13,8 @@ const userSchema = new mongoose.Schema({
   },
   email: { 
     type: String, 
-    required: true
+    required: true,
+    lowercase: true
   },
   password: { 
     type: String, 
@@ -40,7 +42,9 @@ const userSchema = new mongoose.Schema({
     type: Date,
     required: false,
   }
-});
+},
+{ timestamps: true }
+);
 
 
-export const UserModel = mongoose.model('User', userSchema);
+export const UserModel = mongoose.model<User & mongoose.Document>('User', userSchema);

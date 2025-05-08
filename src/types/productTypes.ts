@@ -10,6 +10,8 @@ export interface Product {
     sellerId: string;
     status: ProductStatus;
     deletedAt?: Date | null;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface ProductInput {

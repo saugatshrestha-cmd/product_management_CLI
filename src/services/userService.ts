@@ -18,7 +18,7 @@ export class UserService {
     @inject("OrderService") private orderService: OrderService,
     @inject("CartService") private cartService: CartService
   ) {
-    this.userRepository = this.userRepositoryFactory.createRepository();
+    this.userRepository = this.userRepositoryFactory.getRepository();
   }
 
   async getUserById(userId: string) {
@@ -48,14 +48,11 @@ export class UserService {
       logger.warn(`Admin creation failed, email already exists: ${adminData.email}`);
       throw AppError.conflict("Email already registered");
     }
-  
     const salt = this.passwordManager.createSalt();
     const hashed = this.passwordManager.hashPassword(adminData.password, salt);
     const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
-  
     const finalUser = { ...adminData, password: combined, role: Role.ADMIN };
     await this.userRepository.add(finalUser);
-  
     return { message: "Admin created successfully" };
   }  
   
@@ -66,21 +63,17 @@ export class UserService {
       logger.warn(`Update failed, user not found: ${userId}`);
       throw AppError.notFound('User', userId);
     }
-
     if (updatedInfo.email || updatedInfo.password) {
       logger.warn("Email and password cannot be updated here.");
       throw AppError.badRequest("Email and password cannot be updated here.");
     }
-
     const { firstName, lastName, phone, address } = updatedInfo;
-
     const updatedUserInfo = {
       firstName,
       lastName,
       phone,
       address,
     };
-
     await this.userRepository.update(userId, updatedUserInfo);
     return { message: "User updated successfully" };
   }
@@ -91,12 +84,10 @@ export class UserService {
       logger.warn(`Email update failed, user not found: ${userId}`);
       throw AppError.notFound('User', userId);
     }
-
     if (await this.userRepository.findByEmail(newEmail)) {
       logger.warn(`Email update failed, already in use: ${newEmail}`);
       throw AppError.conflict("Email already in use");
     }
-
     await this.userRepository.update(userId, { email: newEmail });
     return { message: "Email updated successfully" };
   }
@@ -110,7 +101,6 @@ export class UserService {
     const newSalt = this.passwordManager.createSalt();
     const hashed = this.passwordManager.hashPassword(newPassword, newSalt);
     const combined = this.passwordManager.combineSaltAndHash(newSalt, hashed);
-
     await this.userRepository.update(userId, { password: combined });
     return { message: "Password updated successfully" };
   }
@@ -121,7 +111,7 @@ export class UserService {
       logger.warn(`Delete failed, user not found: ${userId}`);
       throw AppError.notFound('User', userId);
     }
-    // await this.orderService.deleteOrderByUserId(userId);
+    await this.orderService.deleteOrderByUserId(userId);
     await this.cartService.removeCartByUserId(userId);
     await this.userRepository.update(userId, {
       isDeleted: true,

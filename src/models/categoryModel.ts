@@ -1,3 +1,4 @@
+import { Category } from '@mytypes/categoryTypes';
 import mongoose from 'mongoose';
 
 const categorySchema = new mongoose.Schema({
@@ -9,6 +10,8 @@ const categorySchema = new mongoose.Schema({
         type: String,
         required: true
     }
-});
+},
+{ timestamps: true }
+);
 
-export const CategoryModel = mongoose.model('Category', categorySchema);
+export const CategoryModel = mongoose.model<Category & mongoose.Document>('Category', categorySchema);

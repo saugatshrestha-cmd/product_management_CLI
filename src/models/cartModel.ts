@@ -1,7 +1,12 @@
 import mongoose from 'mongoose';
+import { Cart } from '@mytypes/cartTypes';
 
 const cartItemSchema = new mongoose.Schema({
     productId: {
+        type: String,
+        required: true
+    },
+    productName: {
         type: String,
         required: true
     },
@@ -25,5 +30,5 @@ const cartSchema = new mongoose.Schema({
 });
 
 
-export const CartModel = mongoose.model('Cart', cartSchema);
+export const CartModel = mongoose.model<Cart & mongoose.Document>('Cart', cartSchema);
 

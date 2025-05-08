@@ -24,7 +24,8 @@ import { OrderService } from "@services/orderService";
 import { SellerService } from "@services/sellerService";
 import { CartService } from "@services/cartService";
 import { AuthService } from "@services/authService";
-import { EmailService } from "@services/emailService";
+import { EmailService } from "@services/etherealEmailService";
+import { NotificationService } from "@services/notificationService";
 
 import { UserController } from "@controller/userController";
 import { ProductController } from "@controller/productController";
@@ -51,7 +52,7 @@ container.register("MongoOrderRepository", { useClass: MongoOrderRepository});
 container.register("MongoSellerRepository", { useClass: MongoSellerRepository});
 container.register("MongoCartRepository", { useClass: MongoCartRepository});
 
-
+container.register("NotificationService", { useClass: NotificationService });
 container.register("UserService", { useClass: UserService });
 container.register("ProductService", { useClass: ProductService });
 container.register("CategoryService", { useClass: CategoryService})

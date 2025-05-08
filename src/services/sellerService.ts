@@ -16,7 +16,7 @@ export class SellerService {
     @inject("PasswordManager") private passwordManager: PasswordManager,
     @inject("ProductService") private productService: ProductService
   ) {
-    this.sellerRepository = this.sellerRepositoryFactory.createRepository();
+    this.sellerRepository = this.sellerRepositoryFactory.getRepository();
   }
 
   async getSellerById(sellerId: string) {
@@ -42,14 +42,11 @@ export class SellerService {
       logger.warn(`Email already registered: ${sellerData.email}`);
       throw AppError.conflict("Email already registered");
     }
-  
     const salt = this.passwordManager.createSalt();
     const hashed = this.passwordManager.hashPassword(sellerData.password, salt);
     const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
-  
     const finalSeller = { ...sellerData, password: combined, role: Role.SELLER };
     await this.sellerRepository.add(finalSeller);
-  
     return { message: "Seller created successfully" };
   }  
   
@@ -60,20 +57,16 @@ export class SellerService {
       logger.warn(`Seller not found: ${sellerId}`);
       throw AppError.notFound("Seller not found", sellerId);
     }
-
     if (updatedInfo.email || updatedInfo.password) {
       logger.warn("Email or password cannot be updated here");
       throw AppError.badRequest("Email or password cannot be updated here");
     }
-
     const { storeName, phone, address } = updatedInfo;
-
     const updatedSellerInfo = {
       storeName,
       phone,
       address,
     };
-
     await this.sellerRepository.update(sellerId, updatedSellerInfo);
     return { message: "Seller updated successfully" };
   }
@@ -84,12 +77,10 @@ export class SellerService {
       logger.warn(`Seller not found: ${sellerId}`);
       throw AppError.notFound("Seller not found", sellerId);
     }
-
     if (await this.sellerRepository.findByEmail(newEmail)) {
       logger.warn("Email already in use");
       throw AppError.conflict("Email already in use");
     }
-
     await this.sellerRepository.update(sellerId, { email: newEmail });
     return { message: "Email updated successfully" };
   }
@@ -100,11 +91,9 @@ export class SellerService {
       logger.warn(`Seller not found: ${sellerId}`);
       throw AppError.notFound("Seller not found", sellerId);
     }
-
     const newSalt = this.passwordManager.createSalt();
     const hashed = this.passwordManager.hashPassword(newPassword, newSalt);
     const combined = this.passwordManager.combineSaltAndHash(newSalt, hashed);
-
     await this.sellerRepository.update(sellerId, { password: combined });
     return { message: "Password updated successfully" };
   }
@@ -120,7 +109,6 @@ export class SellerService {
       isDeleted: true,
       deletedAt: new Date()
     });
-
     return { message: "Seller and their products deleted successfully" };
   }
 }

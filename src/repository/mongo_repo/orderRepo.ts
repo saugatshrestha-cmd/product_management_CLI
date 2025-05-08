@@ -23,10 +23,10 @@ export class MongoOrderRepository implements OrderRepository {
     return await OrderModel.find({ isDeleted: false })
   }
 
-  async add(orderData: OrderInput): Promise<void> {
+  async add(orderData: OrderInput): Promise<Order> {
     const newOrder = new OrderModel(orderData);
     await newOrder.save();
-    return;
+    return newOrder.toObject() as Order;
   }
 
   async update(orderId: string, updatedInfo: Partial<Order>): Promise<void> {

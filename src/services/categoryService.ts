@@ -11,17 +11,14 @@ export class CategoryService {
   constructor(
     @inject("CategoryRepositoryFactory") private categoryRepositoryFactory: CategoryRepositoryFactory
   ) {
-    this.categoryRepository = this.categoryRepositoryFactory.createRepository();
+    this.categoryRepository = this.categoryRepositoryFactory.getRepository();
   }
-
   async createCategory(categoryData: Category): Promise<{ message: string }> {
     const { name, description } = categoryData;
-
     if (await this.categoryRepository.findByName(name)) {
       logger.warn("Category not found");
       throw AppError.conflict( "Category already exists" )
     }
-
     await this.categoryRepository.add(categoryData);
     return { message: "Category added successfully" };
   }
@@ -45,11 +42,9 @@ export class CategoryService {
       logger.warn("Category not found");
       throw AppError.notFound("Category not found", categoryId);
     }
-
     if (updatedInfo.name && await this.categoryRepository.findByName(updatedInfo.name)) {
       throw AppError.conflict( "Category already exists" );
     }
-
     await this.categoryRepository.update(categoryId, updatedInfo);
     return { message: "Category updated successfully" };
   }

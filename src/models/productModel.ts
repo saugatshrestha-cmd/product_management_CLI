@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { ProductStatus } from '@mytypes/enumTypes';
+import { Product } from '@mytypes/productTypes';
 
 const productSchema = new mongoose.Schema({
     name: { 
@@ -35,6 +36,8 @@ const productSchema = new mongoose.Schema({
         type: Date,
         required: false,
     }
-});
+},
+{ timestamps: true }
+);
 
-export const ProductModel = mongoose.model('Product', productSchema);
+export const ProductModel = mongoose.model<Product & mongoose.Document>('Product', productSchema);

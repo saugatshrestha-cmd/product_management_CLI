@@ -18,9 +18,10 @@ export class MongoSellerRepository implements SellerRepository {
     return await SellerModel.findOne({ email, isDeleted: false });
     }
 
-    async add(sellerData: Seller): Promise<void> {
+    async add(sellerData: Seller): Promise<Seller> {
         const newSeller = new SellerModel(sellerData );
         await newSeller.save();
+        return newSeller.toObject();
     }
 
     async update(sellerId: string, updatedInfo: Partial<Seller>): Promise<void> {

@@ -18,9 +18,10 @@ export class MongoCartRepository implements CartRepository {
     return await CartModel.findOne({ userId });
   }
 
-  async add(cartData: CartInput): Promise<void> {
+  async add(cartData: CartInput): Promise<Cart> {
     const newCart = new CartModel(cartData);
     await newCart.save();
+    return newCart.toObject();
   }
 
   async update(id: string, updatedInfo: Partial<Cart>): Promise<void> {

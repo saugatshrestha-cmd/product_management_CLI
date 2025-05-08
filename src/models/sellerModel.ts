@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Role } from '@mytypes/enumTypes';
+import { Seller } from '@mytypes/sellerTypes';
 
 const sellerSchema = new mongoose.Schema({
   storeName: { 
@@ -8,7 +9,8 @@ const sellerSchema = new mongoose.Schema({
   },
   email: { 
     type: String, 
-    required: true
+    required: true,
+    lowercase: true
   },
   password: { 
     type: String, 
@@ -36,7 +38,9 @@ const sellerSchema = new mongoose.Schema({
     type: Date,
     required: false,
   }
-});
+},
+{ timestamps: true }
+);
 
 
-export const SellerModel = mongoose.model('Seller', sellerSchema);
+export const SellerModel = mongoose.model<Seller & mongoose.Document>('Seller', sellerSchema);

@@ -14,7 +14,7 @@ export class CartService {
     @inject(CartRepositoryFactory) private CartRepositoryFactory: CartRepositoryFactory,
     @inject("ProductService") private productService: ProductService
   ) {
-    this.cartRepository = this.CartRepositoryFactory.createRepository();
+    this.cartRepository = this.CartRepositoryFactory.getRepository();
   }
 
   private isProduct(product: any): product is Product {
@@ -34,7 +34,7 @@ export class CartService {
     if (!userCart) {
       await this.cartRepository.add({
         userId,
-        items: [{ productId: product._id, quantity, sellerId: product.sellerId }],
+        items: [{ productId: product._id, productName: product.name, quantity, sellerId: product.sellerId }],
       });
     } else {
       const productInCart = userCart.items.find(
@@ -43,7 +43,7 @@ export class CartService {
       if (productInCart) {
         throw AppError.conflict("Product already in cart");
       }
-      userCart.items.push({ productId: product._id, quantity, sellerId: product.sellerId });
+      userCart.items.push({ productId: product._id, productName: product.name, quantity, sellerId: product.sellerId });
       await this.cartRepository.updateCart(userId, userCart.items);
     }
     return { message: 'Product added to cart successfully' };

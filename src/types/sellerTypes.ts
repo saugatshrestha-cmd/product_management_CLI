@@ -10,4 +10,6 @@ export interface Seller {
     role: Role;
     isDeleted?: boolean,
     deletedAt?: Date | null;
+    createdAt?: Date;
+    updatedAt?: Date;
 }

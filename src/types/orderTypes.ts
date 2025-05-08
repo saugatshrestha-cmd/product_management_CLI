@@ -10,6 +10,8 @@ export interface Order{
     cancelledAt ?: Date | null,
     isDeleted?: boolean,
     deletedAt?: Date | null;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface OrderInput{
@@ -27,25 +29,28 @@ export interface OrderInput{
 export interface OrderItem {
     _id: string;
     productId: string;
+    productName: string,
     quantity: number;
     sellerId: string;
     price: number;
-    status: OrderItemStatus; // The status of each order item
+    status: OrderItemStatus; 
 }
 
 export interface OrderItemInput {
     _id?: string;
     productId: string;
+    productName: string,
     quantity: number;
     sellerId: string;
     price: number;
-    status: OrderItemStatus; // The status of each order item
+    status: OrderItemStatus;
 }
 
 export interface SellerOrder {
     _id: string;
     userId: string;
-    timestamp: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
     isDeleted?: boolean;
     items: OrderItem[];
 }

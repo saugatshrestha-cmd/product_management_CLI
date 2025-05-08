@@ -19,9 +19,10 @@ export class MongoProductRepository implements ProductRepository {
     return await ProductModel.findOne({ name, status: { $ne: ProductStatus.DELETED } });
   }
 
-  async add(productData: ProductInput): Promise<void> {
+  async add(productData: ProductInput): Promise<Product> {
     const newProduct = new ProductModel(productData);
     await newProduct.save();
+    return newProduct.toObject() as Product;
   }
 
   async update(productId: string, updatedInfo: Partial<Product>): Promise<void> {

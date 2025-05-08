@@ -6,12 +6,12 @@ import { PasswordManager } from '@utils/passwordUtils';
 import { AppError } from "@utils/errorHandler";
 import { User } from '@mytypes/userTypes';
 import { Role } from '@mytypes/enumTypes';
-import { EmailService } from '@services/emailService';
+import { NotificationService } from "./notificationService";
 
 @injectable()
 export class AuthService {
     constructor(
-      @inject("EmailService") private emailService: EmailService,
+      @inject("NotificationService") private notificationService: NotificationService,
       @inject("UserService") private userService: UserService,
       @inject("SellerService") private sellerService: SellerService,
       @inject("PasswordManager") private passwordManager: PasswordManager
@@ -39,32 +39,21 @@ export class AuthService {
           );
           return { token, message: 'Login successful as seller' };
         }
-    
         throw AppError.unauthorized("Invalid credentials");
     }
 
     async register(userData: User) {
     const exists = await this.userService.findByEmail(userData.email);
     if (exists) return { message: 'Email already registered' };
-
     const salt = this.passwordManager.createSalt();
     const hashed = this.passwordManager.hashPassword(userData.password, salt);
     const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
-
     const finalUser = { ...userData, password: combined, role: Role.CUSTOMER};
     await this.userService.addUser(finalUser);
-
     const user = await this.userService.getAllUsers()
         .then(users => users.find(u => u.email === userData.email));
     if (!user) return { message: 'User creation failed' };
-      await this.emailService.sendEmail({
-          to: user.email,
-          subject: 'Welcome to Our Platform',
-          templateName: 'welcome',
-          templateData: {
-              name: user.firstName || 'Valued Customer',
-          },
-      });
+      await this.notificationService.sendWelcomeEmail(user);
     return { message: 'Registration successful', user };
     }
 }

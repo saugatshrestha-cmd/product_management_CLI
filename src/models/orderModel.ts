@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Status } from '@mytypes/enumTypes';
+import { Order } from '@mytypes/orderTypes';
 
 const orderSchema = new mongoose.Schema({
     userId: {
@@ -37,6 +38,10 @@ const orderSchema = new mongoose.Schema({
             type: String,
             required: true
         },
+        productName: {
+            type: String,
+            required: true
+        },
         quantity: {
             type: Number,
             required: true
@@ -55,6 +60,8 @@ const orderSchema = new mongoose.Schema({
             required: true
         }
     }]
-});
+},
+{ timestamps: true }
+);
 
-export const OrderModel = mongoose.model('Order', orderSchema);
+export const OrderModel = mongoose.model<Order & mongoose.Document>('Order', orderSchema);

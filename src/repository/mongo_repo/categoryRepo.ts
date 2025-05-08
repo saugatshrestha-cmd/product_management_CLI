@@ -18,10 +18,10 @@ export class MongoCategoryRepository implements CategoryRepository {
     return await CategoryModel.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
   }
 
-  async add(categoryData: Category): Promise<void> {
+  async add(categoryData: Category): Promise<Category> {
     const newCategory = new CategoryModel(categoryData );
     await newCategory.save();
-    return;
+    return newCategory.toObject();
   }
 
   async update(categoryId: string, updatedInfo: Partial<Category>): Promise<void> {

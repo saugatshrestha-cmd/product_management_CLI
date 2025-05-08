@@ -18,9 +18,10 @@ export class MongoUserRepository implements UserRepository {
     return await UserModel.findOne({ email, isDeleted: false });
   }
 
-  async add(userData: User): Promise<void> {
+  async add(userData: User): Promise<User> {
     const newUser = new UserModel(userData);
     await newUser.save();
+    return newUser.toObject();
   }
 
   async update(userId: string, updatedInfo: Partial<User>): Promise<void> {
