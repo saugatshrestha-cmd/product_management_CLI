@@ -5,6 +5,9 @@ import { Order, OrderInput } from "./orderTypes";
 import { OrderItemStatus } from "./enumTypes";
 import { Seller } from "./sellerTypes";
 import { Category } from "./categoryTypes";
+import { FileMetadata } from "./fileTypes";
+import { Audit } from "./auditTypes";
+import { FilterQuery } from 'mongoose';
 
 export interface Repository<T> {
     getAll(): Promise<T[]>;
@@ -45,4 +48,7 @@ export interface CartRepository extends Repository<Cart> {
     add(cartData: CartInput): Promise<Cart>;
     updateCart(userId: string, updatedItems: CartItem[]): Promise<void>;
     removeCartByUserId(userId: string): Promise<boolean>;
+}
+
+export interface FileRepository extends Repository<FileMetadata> {
 }

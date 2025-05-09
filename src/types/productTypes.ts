@@ -7,6 +7,7 @@ export interface Product {
     price: number;
     quantity: number;
     categoryId: string;
+    images: string;
     sellerId: string;
     status: ProductStatus;
     deletedAt?: Date | null;
@@ -20,6 +21,7 @@ export interface ProductInput {
     price: number;
     quantity: number;
     categoryId: string;
+    images?: string;
     sellerId: string;
     status: ProductStatus;
     deletedAt?: Date | null;

@@ -14,9 +14,10 @@ export class ProductController {
     async createProduct(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
             const loggedInUser = req.user?._id as string;
+            const file = req.file as Express.Multer.File;
             const productData = req.body;
-            productData.sellerId = loggedInUser;
-            const result = await this.productService.createProduct(productData);
+            productData.sellerId = loggedInUser;           
+            const result = await this.productService.createProduct(productData, file.buffer, file.originalname);
             logger.info('Product added successfully');
             handleSuccess(res, result);
         } catch(error){
@@ -39,9 +40,10 @@ export class ProductController {
         try {
             const sellerId = req.user?._id as string;
             const productId = req.params.id;
-            const updatedInfo = req.body
-            const result = await this.productService.updateProduct(productId, updatedInfo);
-            logger.info('Product updated successfully', { productId, updatedInfo });
+            const updatedInfo = req.body;
+            const file = req.file as Express.Multer.File;
+            const result = await this.productService.updateProduct(productId, updatedInfo, file?.buffer || null, file?.originalname || null);
+            logger.info('Product updated successfully', { productId, updatedInfo});
             handleSuccess(res, result);
         } catch(error){
             handleError(next, error);
@@ -85,7 +87,8 @@ export class ProductController {
         try {
             const productId = req.params.id;
             const updatedInfo = req.body;
-            const result = await this.productService.updateProduct(productId, updatedInfo);
+            const file = req.file as Express.Multer.File;
+            const result = await this.productService.updateProduct(productId, updatedInfo, file?.buffer || null, file?.originalname || null);
             logger.info('Product updated successfully', { productId, updatedInfo });
             handleSuccess(res, result);
         } catch(error) {

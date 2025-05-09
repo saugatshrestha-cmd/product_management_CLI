@@ -6,7 +6,7 @@ import { convert } from 'html-to-text';
 type TemplateData = Record<string, any>;
 type CompiledTemplates = Record<string, HandlebarsTemplateDelegate>;
 
-const templateDir = path.join(__dirname, '..', 'templates');
+const templateDir = path.join(__dirname, '..', '..', 'templates');
 const templateCache: CompiledTemplates = {};
 
 function preloadTemplates(): void {

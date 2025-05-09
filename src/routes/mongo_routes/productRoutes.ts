@@ -5,6 +5,9 @@ import { AuthMiddleware } from '@middleware/authMiddleware';
 import { RoleMiddleware } from '@middleware/roleMiddleware';
 import { Validator } from "@middleware/validationMiddleware";
 import { createProductSchema, updateProductSchema } from "@validation/productValidation";
+import { validateImage } from "@middleware/fileMiddleware";
+import multer from 'multer';
+const upload = multer();
 
 const router = express.Router();
 const controller = container.resolve(ProductController);
@@ -12,8 +15,8 @@ const controller = container.resolve(ProductController);
 router.use(AuthMiddleware.verifyToken);
 
 router.get('/seller', RoleMiddleware.hasRole('seller'), controller.getProductBySeller.bind(controller));
-router.post('/', new Validator(createProductSchema).validate(), RoleMiddleware.hasRole('seller'), controller.createProduct.bind(controller));
-router.put('/seller', RoleMiddleware.hasRole('seller'), new Validator(updateProductSchema).validate(), controller.updateProduct.bind(controller));
+router.post('/', new Validator(createProductSchema).validate(), RoleMiddleware.hasRole('seller'), upload.single('images'), validateImage, controller.createProduct.bind(controller));
+router.put('/seller/:id', RoleMiddleware.hasRole('seller'), new Validator(updateProductSchema).validate(), upload.single('images'), validateImage, controller.updateProduct.bind(controller));
 router.delete('/delete/:id', RoleMiddleware.hasRole('seller'), controller.deleteProduct.bind(controller));
 
 router.get('/', RoleMiddleware.hasRole('admin'), controller.getAllProducts.bind(controller));

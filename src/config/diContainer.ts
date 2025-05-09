@@ -9,6 +9,7 @@ import { SellerRepositoryFactory } from "@factories/sellerFactory";
 import { OrderRepositoryFactory } from "@factories/orderFactory";
 import { CartRepositoryFactory } from "@factories/cartFactory";
 import { CategoryRepositoryFactory } from "@factories/categoryFactory";
+import { FileRepositoryFactory } from "@factories/fileFactory";
 
 import { MongoUserRepository } from "@repository/userRepo";
 import { MongoProductRepository } from "@repository/productRepo";
@@ -16,6 +17,7 @@ import { MongoCategoryRepository } from "@repository/categoryRepo";
 import { MongoOrderRepository } from "@repository/orderRepo";
 import { MongoSellerRepository } from "@repository/sellerRepo";
 import { MongoCartRepository } from "@repository/cartRepo";
+import { MongoFileRepository } from "@repository/fileRepo";
 
 import { UserService } from "@services/userService";
 import { ProductService } from "@services/productService";
@@ -26,6 +28,8 @@ import { CartService } from "@services/cartService";
 import { AuthService } from "@services/authService";
 import { EmailService } from "@services/etherealEmailService";
 import { NotificationService } from "@services/notificationService";
+import { CloudService } from "@services/cloudService";
+import { FileService } from "@services/fileService";
 
 import { UserController } from "@controller/userController";
 import { ProductController } from "@controller/productController";
@@ -44,6 +48,7 @@ container.register("CategoryRepositoryFactory", { useClass: CategoryRepositoryFa
 container.register("OrderRepositoryFactory", { useClass: OrderRepositoryFactory});
 container.register("SellerRepositoryFactory", { useClass: SellerRepositoryFactory});
 container.register("CartRepositoryFactory", { useClass: CartRepositoryFactory});
+container.register("FileRepositoryFactory", { useClass: FileRepositoryFactory});
 
 container.register("MongoUserRepository", { useClass: MongoUserRepository });
 container.register("MongoProductRepository", { useClass: MongoProductRepository });
@@ -51,6 +56,7 @@ container.register("MongoCategoryRepository", { useClass: MongoCategoryRepositor
 container.register("MongoOrderRepository", { useClass: MongoOrderRepository});
 container.register("MongoSellerRepository", { useClass: MongoSellerRepository});
 container.register("MongoCartRepository", { useClass: MongoCartRepository});
+container.register("MongoFileRepository", { useClass: MongoFileRepository});
 
 container.register("NotificationService", { useClass: NotificationService });
 container.register("UserService", { useClass: UserService });
@@ -61,6 +67,8 @@ container.register("SellerService", { useClass: SellerService});
 container.register("CartService", { useClass: CartService});
 container.register("AuthService", { useClass: AuthService});
 container.register("EmailService", { useClass: EmailService});
+container.register("CloudService", { useClass: CloudService});
+container.register("FileService", { useClass: FileService});
 
 container.register("UserController", { useClass: UserController });
 container.register("ProductController", { useClass: ProductController });
