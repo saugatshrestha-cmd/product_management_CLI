@@ -9,12 +9,13 @@
 - **Validation:** Joi  
 - **Cloud:** Cloudinary
 - **Email:** Node Mailer
+- **Logger:** Winston
 
 ---
 
 ## Roles
 
-1. **User**  
+1. **Customer**  
 2. **Seller**  
 3. **Admin**
 
@@ -25,7 +26,7 @@
 ### Authentication
 
 - **Register/Login:**
-  - Separate endpoints for User, Seller, and Admin (e.g., `/auth/register`, `/seller`)
+  - Separate endpoints for Customer, Seller, and Admin (e.g., `/auth/register`, `/seller`)
   - JWT tokens include a role claim for role-based access
 
 - **Password Management:**
@@ -34,7 +35,7 @@
 
 ---
 
-### User Features
+### Customer Features
 
 - **Cart:**
   - Each user has a single cart
@@ -77,7 +78,7 @@
   - Delete any product
 
 - **User & Seller Management:**
-  - View and manage all registered users and sellers
+  - View and manage all registered customers and sellers
 
 ---
 
@@ -107,6 +108,12 @@
 
 ---
 
+### Logger
+
+- Success and Error logs is shown in the console.
+
+---
+
 ### Input Validation
 
 - **Joi** is used for request body validation
@@ -122,6 +129,8 @@
   - Clear separation: Controller → Service → Repository
 - **Standardized Responses:**
   - `SuccessResponse` and `ErrorResponse` format all API responses
+- **Audit Trail:**
+  - Each action is audited and stored in database. 
 
 ---
 
