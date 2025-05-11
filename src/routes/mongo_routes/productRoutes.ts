@@ -15,8 +15,8 @@ const controller = container.resolve(ProductController);
 router.use(AuthMiddleware.verifyToken);
 
 router.get('/seller', RoleMiddleware.hasRole('seller'), controller.getProductBySeller.bind(controller));
-router.post('/', new Validator(createProductSchema).validate(), RoleMiddleware.hasRole('seller'), upload.single('images'), validateImage, controller.createProduct.bind(controller));
-router.put('/seller/:id', RoleMiddleware.hasRole('seller'), new Validator(updateProductSchema).validate(), upload.single('images'), validateImage, controller.updateProduct.bind(controller));
+router.post('/', new Validator(createProductSchema).validate(), RoleMiddleware.hasRole('seller'), upload.array('images', 5), validateImage, controller.createProduct.bind(controller));
+router.put('/seller/:id', RoleMiddleware.hasRole('seller'), new Validator(updateProductSchema).validate(), upload.array('newFiles', 5), validateImage, controller.updateProduct.bind(controller));
 router.delete('/delete/:id', RoleMiddleware.hasRole('seller'), controller.deleteProduct.bind(controller));
 
 router.get('/', RoleMiddleware.hasRole('admin'), controller.getAllProducts.bind(controller));

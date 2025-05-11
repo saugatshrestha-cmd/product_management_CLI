@@ -22,7 +22,7 @@ export class AuthController {
       sameSite: 'strict',
     });
     
-      const result = await this.authService.login(email, password);
+      const result = await this.authService.login(email, password, req);
 
       if (!result.token) {
         logger.warn('Failed login attempt', { email });
@@ -51,7 +51,7 @@ export class AuthController {
 
   async register(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const result = await this.authService.register(req.body);
+      const result = await this.authService.register(req.body, req);
 
       if (!result.user) {
         logger.warn('Registration failed', {

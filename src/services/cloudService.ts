@@ -7,8 +7,18 @@ import { logger } from "@utils/logger";
 
 @injectable()
 export class CloudService {
-    async uploadFile(
-        fileBuffer: Buffer,
+
+    async upload(
+        files: { buffer: Buffer; originalName: string }[],
+        folderName: string
+    ): Promise<FileMetadata[]> {
+        return Promise.all(
+            files.map(file => this.uploadSingle(file.buffer, folderName, file.originalName))
+        );
+    }
+
+    private async uploadSingle(
+        buffer: Buffer,
         folderName: string,
         originalName: string
     ): Promise<FileMetadata> {
@@ -16,32 +26,31 @@ export class CloudService {
         const basePath = FilePathGenerator.generateFilePath(folderName, fileType);
         const uuid = uuidv4();
         const fileName = `${uuid}.${fileType}`;
+
         return new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
-            {
-                public_id: fileName,
-                folder: basePath,
-                resource_type: 'auto',
-                type: 'authenticated'
-            },
-            (error, result) => {
-                if (error) {
-                    return reject(error);
+                {
+                    folder: basePath,
+                    public_id: fileName,
+                    resource_type: 'auto',
+                    type: 'authenticated'
+                },
+                (error, result) => {
+                    if (error || !result) {
+                        logger.error('Upload failed:', error);
+                        reject(error || new Error('Upload failed'));
+                        return;
+                    }
+                    resolve({
+                        originalName,
+                        publicId: result.public_id,
+                        fileType,
+                        size: result.bytes,
+                        url: result.secure_url
+                    });
                 }
-                if (!result) {
-                    return reject(new Error('Upload failed'));
-                }
-                const metadata: FileMetadata = {
-                    originalName,
-                    publicId: result.public_id,
-                    fileType,
-                    size: result.bytes,
-                    url: result.secure_url,
-                };
-                resolve(metadata);
-            }
-        );
-            uploadStream.end(fileBuffer);
+            );
+            uploadStream.end(buffer);
         });
     }
 
@@ -103,31 +112,51 @@ export class CloudService {
         });
     }
 
-    async deleteFile(publicId: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-        if (!publicId || typeof publicId !== 'string') {
-            logger.error('Invalid publicId provided');
-            return reject(new Error('Invalid file identifier'));
-        }
-
-        cloudinary.uploader.destroy(
-            publicId, 
-            {
-                type: 'authenticated',
-            },
-            (error, result) => {
-                if (error) {
-                    logger.error(`Cloudinary error: ${error.message}`);
-                    return reject(error);
-                }
-                if (result?.result !== 'ok') {
-                    logger.error(`Deletion failed. Full response:`, result);
-                    return reject(new Error(`Failed to delete. Cloudinary response: ${JSON.stringify(result)}`));
-                }
-                logger.info(`Successfully deleted ${publicId}`);
-                resolve(true);
-            }
+    async update(
+        files: { buffer: Buffer; originalName: string }[],
+        folderName: string,
+        existingPublicIds: string[]
+    ): Promise<FileMetadata[]> {
+        const updatedFiles = await Promise.all(
+            files.map((file, index) => 
+                this.updateFile(file.buffer, folderName, file.originalName, existingPublicIds[index])
+            )
         );
-    });
-}
+        return updatedFiles;
+    }
+
+    async deleteFile(publicId: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            if (!publicId || typeof publicId !== 'string') {
+                logger.error('Invalid publicId provided');
+                return reject(new Error('Invalid file identifier'));
+            }
+
+            cloudinary.uploader.destroy(
+                publicId, 
+                {
+                    type: 'authenticated',
+                },
+                (error, result) => {
+                    if (error) {
+                        logger.error(`Cloudinary error: ${error.message}`);
+                        return reject(error);
+                    }
+                    if (result?.result !== 'ok') {
+                        logger.error(`Deletion failed. Full response:`, result);
+                        return reject(new Error(`Failed to delete. Cloudinary response: ${JSON.stringify(result)}`));
+                    }
+                    logger.info(`Successfully deleted ${publicId}`);
+                    resolve(true);
+                }
+            );
+        });
+    }
+
+    async delete(publicIds: string[]): Promise<boolean[]> {
+        const results = await Promise.all(
+            publicIds.map(publicId => this.deleteFile(publicId))  // Calling the existing deleteFile method for each publicId
+        );
+        return results;
+    }
 }

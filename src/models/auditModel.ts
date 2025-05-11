@@ -1,21 +1,39 @@
+import mongoose, { Schema} from 'mongoose';
 import { Audit } from '@mytypes/auditTypes';
-import mongoose, { Schema } from 'mongoose';
 
 const auditSchema = new mongoose.Schema({
-    entityType: { type: String, required: true, index: true },
-    entityId: { type: Schema.Types.ObjectId, required: true, index: true },
-    action: { type: String, required: true, index: true },
-    performedBy: { type: Schema.Types.ObjectId, required: true, ref: 'User', index: true },
-    userRole: { type: String, required: true },
-    timestamp: { type: Date, default: Date.now, index: true },
+    action: { type: String, required: true },
+    entity: { type: String, required: true }, 
+    entityId: { type: String, required: true },
+    userId: { type: String },
+    userRole: { type: String },
     ipAddress: { type: String },
     userAgent: { type: String },
-    previousState: { type: Schema.Types.Mixed },
-    newState: { type: Schema.Types.Mixed },
-    details: { type: Schema.Types.Mixed },
-    affectedFields: [{ type: String }]
+    request: {
+        method: {
+            type: String,
+            required: true,
+            enum: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+        },
+        endpoint: {
+            type: String,
+            required: true
+        },
+        params: {
+            type: Schema.Types.Mixed,
+            required: false
+        }
+    },
+    message: { type: String },
+    beforeState: { type: Schema.Types.Mixed },
+    afterState: { type: Schema.Types.Mixed },
+    status: { type: String, enum: ['success', 'failed'], required: true }
 },
 { timestamps: true }
 );
 
+
+
+
 export const AuditModel = mongoose.model<Audit & mongoose.Document>('Audit', auditSchema);
+

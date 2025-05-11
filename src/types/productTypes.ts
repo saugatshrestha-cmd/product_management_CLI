@@ -7,7 +7,7 @@ export interface Product {
     price: number;
     quantity: number;
     categoryId: string;
-    images: string;
+    images: string[]; // Array of FileMetadata IDs
     sellerId: string;
     status: ProductStatus;
     deletedAt?: Date | null;
@@ -21,8 +21,8 @@ export interface ProductInput {
     price: number;
     quantity: number;
     categoryId: string;
-    images?: string;
+    images?: string[]; // For incoming file uploads
     sellerId: string;
-    status: ProductStatus;
+    status: ProductStatus; // Made optional with default
     deletedAt?: Date | null;
 }

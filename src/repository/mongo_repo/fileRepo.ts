@@ -20,8 +20,16 @@ export class MongoFileRepository implements FileRepository {
         await FileModel.updateOne({ _id: fileId }, updatedInfo);
     };
 
+    async updateMetadata(id: string, data: Partial<FileMetadata>): Promise<void> {
+        await FileModel.findByIdAndUpdate(id, data, { new: true });
+    }
+
     async getAll(): Promise<FileMetadata[]>{
         return await FileModel.find();
     };
+
+    async deleteManyByIds(id: string): Promise<void> {
+        await FileModel.deleteMany({ _id: { $in: id } });
+    }
 
 }

@@ -1,59 +1,72 @@
+// src/middleware/AuditMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
-import { AuditService } from '@services/auditService';
-import { inject, injectable } from 'tsyringe';
+import { AuditService } from '../services/auditService';
+import { AuthRequest } from '../types/authTypes';
+import { injectable, inject } from 'tsyringe';
 
 @injectable()
 export class AuditMiddleware {
   constructor(
-                @inject("AuditService") private auditService: AuditService
-            ) {}
+    @inject("AuditService") private readonly auditService: AuditService
+  ) {}
 
-  createMiddleware(
-    entityType: string,
-    actionGetter: (req: Request) => string,
-    entityIdGetter: (req: Request) => string,
-    detailsGetter?: (req: Request, res: Response) => any
-  ) {
-    return async (req: Request, res: Response, next: NextFunction) => {
-      const originalEnd = res.end;
+  public handle(action: string, entity: string) {
+    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+      const originalSend = res.send;
+      let responseBody: any;
 
-      res.end = function (
-        this: Response,
-        chunk?: any,
-        encoding?: BufferEncoding | (() => void),
-        cb?: () => void
-      ): Response {
-        try {
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            const action = actionGetter(req);
-            const entityId = entityIdGetter(req);
-            const details = detailsGetter ? detailsGetter(req, res) : undefined;
-
-            // Log the audit
-            (async () => {
-              try {
-                await AuditMiddleware.prototype.auditService.logActivity(
-                  req,
-                  entityType,
-                  entityId,
-                  action,
-                  req.body.originalData,
-                  req.body,
-                  details
-                );
-              } catch (err) {
-                console.error('Audit logging failed:', err);
-              }
-            })();
-          }
-        } catch (err) {
-          console.error('Error in audit middleware:', err);
-        }
-
-        return originalEnd.call(this, chunk, encoding as BufferEncoding, cb);
+      // Override res.send to capture response body
+      res.send = (body?: any): any => {
+        responseBody = body;
+        return originalSend.call(res, body);
       };
+
+      // Log after response finishes
+      res.on('finish', async () => {
+        await this.logAuditData(req, res, action, entity, responseBody);
+      });
 
       next();
     };
+  }
+
+  private async logAuditData(
+    req: AuthRequest,
+    res: Response,
+    action: string,
+    entity: string,
+    responseBody: any
+  ): Promise<void> {
+    try {
+      const status = this.determineStatus(res.statusCode);
+      const entityId = this.extractEntityId(req, responseBody);
+
+      if (entityId) {
+        await this.auditService.logAudit({
+          action,
+          entity,
+          entityId,
+          userId: req.user?._id,
+          userRole: req.user?.role,
+          req,
+          status
+        });
+      }
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  private determineStatus(statusCode: number): 'success' | 'failed' {
+    return statusCode >= 200 && statusCode < 300 ? 'success' : 'failed';
+  }
+
+  private extractEntityId(req: AuthRequest, responseBody: any): string | undefined {
+    return req.params.id || responseBody?._id || responseBody?.id;
+  }
+
+  private handleError(error: unknown): void {
+    console.error('Audit logging failed:', error);
+    // Consider injecting a logger service here
   }
 }

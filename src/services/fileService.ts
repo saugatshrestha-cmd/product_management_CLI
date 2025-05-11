@@ -43,28 +43,27 @@ export class FileService {
             if (!fileId) {
                 throw AppError.badRequest("Invalid file ID");
             }
-
             // First perform the update
             await this.fileRepository.update(fileId, updates);
-            
             // Then fetch the updated document
             const updatedFile = await this.fileRepository.findById(fileId);
-            
             if (!updatedFile) {
                 logger.warn(`File metadata not found after update: ${fileId}`);
                 throw AppError.notFound("File metadata not found after update", fileId);
             }
-
             logger.info(`File metadata updated for ID: ${fileId}`);
             return updatedFile;
         } catch (error) {
             logger.error(`Failed to update file metadata: ${error instanceof Error ? error.message : String(error)}`);
-            
             if (error instanceof AppError) {
                 throw error;
             }
             
             throw AppError.internal("Failed to update file metadata");
         }
+    }
+
+    async deleteFileMetadata(fileId: string): Promise<void> {
+        await this.fileRepository.deleteManyByIds(fileId); // implement this in repo
     }
 }

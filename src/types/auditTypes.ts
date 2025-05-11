@@ -1,16 +1,30 @@
-import mongoose from "mongoose";
-
 export interface Audit {
-  entityType: string;         
-  entityId: mongoose.Types.ObjectId | string;
-  action: string;             
-  performedBy: mongoose.Types.ObjectId | string;
-  userRole: string;           
+  action: string;
+  entity: string;
+  entityId: string;
+  userId?: string;
+  userRole?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  request?: {
+    method: string;
+    endpoint: string;
+    params?: Record<string, unknown>;
+  };
+  message?:string,
+  beforeState?: any;
+  afterState?: any;
+  status: 'success' | 'failed';
   timestamp: Date;
-  ipAddress: string;
-  userAgent: string;
-  previousState: any;       
-  newState: any;              
-  details: any;               
-  affectedFields?: string[];  
+}
+
+export interface AuditFilter {
+  action?: string;
+  entity?: string;
+  entityId?: string;
+  userId?: string;
+  userRole?: string;
+  status?: 'success' | 'failed';
+  startDate?: Date;
+  endDate?: Date;
 }

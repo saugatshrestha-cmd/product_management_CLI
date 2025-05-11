@@ -1,68 +1,46 @@
+// src/controllers/auditController.ts
 import { Request, Response, NextFunction } from 'express';
-import { AuditService } from '@services/auditService';
-import { inject, injectable } from 'tsyringe';
+import { AuditRepo } from '@repository/auditRepo';
+import { AuditFilter } from '@mytypes/auditTypes';
 import { handleSuccess, handleError } from '@utils/apiResponse';
+import { injectable, inject } from 'tsyringe';
+import { logger } from '@utils/logger';
 
 @injectable()
 export class AuditController {
-    constructor(
-                @inject("AuditService") private auditService: AuditService
-            ) {}
+  constructor(
+    @inject("AuditRepo") private auditRepo: AuditRepo
+  ) {}
 
-  async getEntityHistory(req: Request, res: Response, next: NextFunction) {
+  async getAuditLogs(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { entityType, entityId } = req.params;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 20;
+      const { page = 1, limit = 10, ...filter } = req.query;
       
-      const logs = await this.auditService.getEntityHistory(entityType, entityId, page, limit);
-      
-      return handleSuccess(res, logs);
+      const { logs, total } = await this.auditRepo.getAuditLogs(
+        filter as AuditFilter,
+        parseInt(page as string),
+        parseInt(limit as string)
+      );
+
+      logger.info('Audit logs fetched successfully', {
+        page,
+        limit,
+        totalResults: total
+      });
+
+      handleSuccess(res, {
+        message: 'Audit logs fetched successfully',
+        data: logs,
+        meta: {
+          total,
+          page: parseInt(page as string),
+          limit: parseInt(limit as string),
+          totalPages: Math.ceil(total / parseInt(limit as string))
+        }
+      });
     } catch (error) {
-      console.error('Error retrieving entity history:', error);
-      return handleError(next, error);
-    }
-  }
-  
-  async getUserActivity(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { userId } = req.params;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 20;
-      
-      const logs = await this.auditService.getUserActivityLogs(userId, page, limit);
-      
-      return handleSuccess(res, logs);
-    } catch (error) {
-      console.error('Error retrieving user activity logs:', error);
-      return handleError(next, error);
-    }
-  }
-  
-  async searchAuditLogs(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { entityType, action, userId, startDate, endDate } = req.query;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 20;
-      
-      const filter: any = {};
-      
-      if (entityType) filter.entityType = entityType;
-      if (action) filter.action = action;
-      if (userId) filter.performedBy = userId;
-      
-      if (startDate || endDate) {
-        filter.timestamp = {};
-        if (startDate) filter.timestamp.$gte = new Date(startDate as string);
-        if (endDate) filter.timestamp.$lte = new Date(endDate as string);
-      }
-      
-      const result = await this.auditService.searchAuditLogs(filter, page, limit);
-      
-      return handleSuccess(res, result);
-    } catch (error) {
-      console.error('Error searching audit logs:', error);
-      return handleError(next, error);
+      logger.error('Failed to fetch audit logs', { error });
+      handleError(next, error);
     }
   }
 }

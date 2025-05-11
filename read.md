@@ -7,6 +7,8 @@
 - **Authentication:** JWT (Role-based access control)  
 - **Dependency Injection:** tsyringe  
 - **Validation:** Joi  
+- **Cloud:** Cloudinary
+- **Email:** Node Mailer
 
 ---
 
@@ -51,6 +53,7 @@
 
 - **Product Management:**
   - Full CRUD operations (Create, Read, Update, Delete)
+  - Upload image of product to cloud.
 
 - **Order Fulfillment:**
   - View orders for products they added
@@ -62,11 +65,6 @@
 
 - **Category Management:**
   - Full CRUD operations
-
-- **Cart Management:**
-  - View all carts
-  - Calculate cart summaries
-  - Delete carts
 
 - **Order Management:**
   - View all orders
@@ -96,6 +94,12 @@
 
 ---
 
+### Email Notification
+
+- Email notification send when registering user, order confirmed, order status change.
+
+---
+
 ### Error Handling
 
 - Centralized error-handling middleware
@@ -112,8 +116,8 @@
 
 ### ⚙️ Architecture
 
-- **Base Classes:**
-  - `BaseRepository`, `BaseService`, `BaseController` used for code reuse and consistency
+- **Factory Pattern**
+  - Factory pattern implementation to accommodate future database addition.
 - **Layered Structure:**
   - Clear separation: Controller → Service → Repository
 - **Standardized Responses:**

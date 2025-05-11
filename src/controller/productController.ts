@@ -4,6 +4,7 @@ import { handleSuccess, handleError } from '@utils/apiResponse';
 import { AuthRequest } from '@mytypes/authTypes';
 import { injectable, inject } from "tsyringe";
 import { logger } from '@utils/logger';
+import { AppError } from '@utils/errorHandler';
 
 @injectable()
 export class ProductController {
@@ -14,10 +15,13 @@ export class ProductController {
     async createProduct(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
             const loggedInUser = req.user?._id as string;
-            const file = req.file as Express.Multer.File;
+            const files = req.files as Express.Multer.File[];
             const productData = req.body;
-            productData.sellerId = loggedInUser;           
-            const result = await this.productService.createProduct(productData, file.buffer, file.originalname);
+            productData.sellerId = loggedInUser;
+            if (!files || files.length === 0) {
+            return next(new AppError('At least one image is required'));  // Custom error if no files are uploaded
+        }           
+            const result = await this.productService.createProduct(productData, files);
             logger.info('Product added successfully');
             handleSuccess(res, result);
         } catch(error){
@@ -40,9 +44,16 @@ export class ProductController {
         try {
             const sellerId = req.user?._id as string;
             const productId = req.params.id;
+            const filesToDelete = Array.isArray(req.body.filesToDelete) 
+    ? req.body.filesToDelete 
+    : req.body.filesToDelete 
+      ? [req.body.filesToDelete] 
+      : [];
             const updatedInfo = req.body;
-            const file = req.file as Express.Multer.File;
-            const result = await this.productService.updateProduct(productId, updatedInfo, file?.buffer || null, file?.originalname || null);
+            const result = await this.productService.updateProduct(productId, req.body,       // Other updated fields
+    req.files as Express.Multer.File[],  // New files
+    filesToDelete   // Files to delete
+    );
             logger.info('Product updated successfully', { productId, updatedInfo});
             handleSuccess(res, result);
         } catch(error){
@@ -87,8 +98,7 @@ export class ProductController {
         try {
             const productId = req.params.id;
             const updatedInfo = req.body;
-            const file = req.file as Express.Multer.File;
-            const result = await this.productService.updateProduct(productId, updatedInfo, file?.buffer || null, file?.originalname || null);
+            const result = await this.productService.updateProduct(productId, updatedInfo);
             logger.info('Product updated successfully', { productId, updatedInfo });
             handleSuccess(res, result);
         } catch(error) {

@@ -23,7 +23,7 @@ const productSchema = new mongoose.Schema({
         required: true 
     },
     images: { 
-        type: mongoose.Schema.Types.ObjectId,
+        type: [mongoose.Schema.Types.ObjectId],
         ref: 'File', 
         required: true 
     },

@@ -30,6 +30,7 @@ import { EmailService } from "@services/etherealEmailService";
 import { NotificationService } from "@services/notificationService";
 import { CloudService } from "@services/cloudService";
 import { FileService } from "@services/fileService";
+import { AuditService } from "@services/auditService";
 
 import { UserController } from "@controller/userController";
 import { ProductController } from "@controller/productController";
@@ -39,6 +40,7 @@ import { SellerController } from "@controller/sellerController";
 import { CartController } from "@controller/cartController";
 import { AuthController } from "@controller/authController";
 import { AdminController } from "@controller/adminController";
+import { AuditController } from "@controller/auditController";
 
 container.register("PasswordManager", { useClass: PasswordManager });
 
@@ -69,6 +71,7 @@ container.register("AuthService", { useClass: AuthService});
 container.register("EmailService", { useClass: EmailService});
 container.register("CloudService", { useClass: CloudService});
 container.register("FileService", { useClass: FileService});
+container.register("AuditService", { useClass: AuditService});
 
 container.register("UserController", { useClass: UserController });
 container.register("ProductController", { useClass: ProductController });
@@ -78,5 +81,6 @@ container.register("SellerController", { useClass: SellerController});
 container.register("CartController", { useClass: CartController});
 container.register("AuthController", { useClass: AuthController});
 container.register("AdminController", { useClass: AdminController});
+container.register("AuditController", { useClass: AuditController});
 
 export { container };

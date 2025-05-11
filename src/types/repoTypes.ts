@@ -6,8 +6,6 @@ import { OrderItemStatus } from "./enumTypes";
 import { Seller } from "./sellerTypes";
 import { Category } from "./categoryTypes";
 import { FileMetadata } from "./fileTypes";
-import { Audit } from "./auditTypes";
-import { FilterQuery } from 'mongoose';
 
 export interface Repository<T> {
     getAll(): Promise<T[]>;
@@ -51,4 +49,6 @@ export interface CartRepository extends Repository<Cart> {
 }
 
 export interface FileRepository extends Repository<FileMetadata> {
+    updateMetadata(id: string, data: Partial<FileMetadata>): Promise<void>;
+    deleteManyByIds(id: string): Promise<void>;
 }
