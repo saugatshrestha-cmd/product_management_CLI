@@ -7,7 +7,7 @@ import categoryRoutes from './categoryRoutes';
 import authRoutes from './authRoutes';
 import adminRoutes from './adminRoutes';
 import sellerRoutes from './sellerRoutes';
-
+import auditRoutes from './auditRoutes';
 
 const routes = Router();
 
@@ -27,5 +27,6 @@ routes.use('/categories', categoryRoutes);
 routes.use('/auth', authRoutes);
 routes.use('/admin', adminRoutes);
 routes.use('/sellers', sellerRoutes);
+routes.use('/audit', auditRoutes);
 
 export default routes;

@@ -4,7 +4,6 @@ export interface Audit {
   entityId: string;
   userId?: string;
   userRole?: string;
-  ipAddress?: string;
   userAgent?: string;
   request?: {
     method: string;
@@ -16,6 +15,19 @@ export interface Audit {
   afterState?: any;
   status: 'success' | 'failed';
   timestamp: Date;
+}
+
+export interface AuditLogParams {
+  action: string;
+  entity: string;
+  entityId: string;
+  userId?: string;
+  userRole?: string;
+  req?: Request;
+  message:string;
+  beforeState?: any;
+  afterState?: any;
+  status: 'success' | 'failed';
 }
 
 export interface AuditFilter {

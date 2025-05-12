@@ -10,6 +10,7 @@ import { OrderRepositoryFactory } from "@factories/orderFactory";
 import { CartRepositoryFactory } from "@factories/cartFactory";
 import { CategoryRepositoryFactory } from "@factories/categoryFactory";
 import { FileRepositoryFactory } from "@factories/fileFactory";
+import { AuditRepositoryFactory } from "@factories/auditFactory";
 
 import { MongoUserRepository } from "@repository/userRepo";
 import { MongoProductRepository } from "@repository/productRepo";
@@ -18,6 +19,7 @@ import { MongoOrderRepository } from "@repository/orderRepo";
 import { MongoSellerRepository } from "@repository/sellerRepo";
 import { MongoCartRepository } from "@repository/cartRepo";
 import { MongoFileRepository } from "@repository/fileRepo";
+import { MongoAuditRepository } from "@repository/auditRepo";
 
 import { UserService } from "@services/userService";
 import { ProductService } from "@services/productService";
@@ -51,6 +53,7 @@ container.register("OrderRepositoryFactory", { useClass: OrderRepositoryFactory}
 container.register("SellerRepositoryFactory", { useClass: SellerRepositoryFactory});
 container.register("CartRepositoryFactory", { useClass: CartRepositoryFactory});
 container.register("FileRepositoryFactory", { useClass: FileRepositoryFactory});
+container.register("AuditRepositoryFactory", { useClass: AuditRepositoryFactory});
 
 container.register("MongoUserRepository", { useClass: MongoUserRepository });
 container.register("MongoProductRepository", { useClass: MongoProductRepository });
@@ -59,6 +62,7 @@ container.register("MongoOrderRepository", { useClass: MongoOrderRepository});
 container.register("MongoSellerRepository", { useClass: MongoSellerRepository});
 container.register("MongoCartRepository", { useClass: MongoCartRepository});
 container.register("MongoFileRepository", { useClass: MongoFileRepository});
+container.register("MongoAuditRepository", { useClass: MongoAuditRepository});
 
 container.register("NotificationService", { useClass: NotificationService });
 container.register("UserService", { useClass: UserService });

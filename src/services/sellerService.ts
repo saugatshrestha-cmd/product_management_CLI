@@ -1,6 +1,7 @@
 import { injectable, inject } from "tsyringe";
 import { SellerRepository } from '@mytypes/repoTypes';
 import { ProductService } from "@services/productService";
+import { NotificationService } from "./notificationService";
 import { Seller } from '@mytypes/sellerTypes';
 import { AppError } from "@utils/errorHandler";
 import { PasswordManager } from '@utils/passwordUtils';
@@ -17,6 +18,7 @@ export class SellerService {
     @inject("SellerRepositoryFactory") private sellerRepositoryFactory: SellerRepositoryFactory,
     @inject("PasswordManager") private passwordManager: PasswordManager,
     @inject("ProductService") private productService: ProductService,
+    @inject("NotificationService") private notificationService: NotificationService,
     @inject("AuditService") private auditService: AuditService
   ) {
     this.sellerRepository = this.sellerRepositoryFactory.getRepository();
@@ -50,6 +52,7 @@ export class SellerService {
     const combined = this.passwordManager.combineSaltAndHash(salt, hashed);
     const finalSeller = { ...sellerData, password: combined, role: Role.SELLER };
     await this.sellerRepository.add(finalSeller);
+    await this.notificationService.sendWelcomeEmailSeller(finalSeller);
     await this.auditService.logAudit({
         action: 'create_seller',
         entity: 'Seller',

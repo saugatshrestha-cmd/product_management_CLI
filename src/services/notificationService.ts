@@ -3,6 +3,7 @@ import { EmailService } from "./etherealEmailService";
 import { getEmailTemplate } from "@utils/emailTemplates";
 import { Order } from "@mytypes/orderTypes";
 import { User } from "@mytypes/userTypes";
+import { Seller } from "@mytypes/sellerTypes";
 import { logger } from "@utils/logger";
 
 @injectable()
@@ -26,6 +27,25 @@ export class NotificationService {
             });
         } catch (error) {
             logger.error('Failed to send welcome email', { error, userId: user._id });
+            throw error;
+        }
+    }
+
+    async sendWelcomeEmailSeller(seller: Seller): Promise<void> {
+        try {
+            const { html, text } = getEmailTemplate('welcome', {
+            name: seller.storeName || seller.email.split('@')[0]
+            });
+            await this.emailService.sendEmail({
+                to: seller.email,
+                subject: 'Welcome to Our E-commerce Platform!',
+                templateName: 'welcome', 
+                templateData: { name: seller.storeName || seller.email.split('@')[0] }, 
+                html,  
+                text   
+            });
+        } catch (error) {
+            logger.error('Failed to send welcome email', { error, userId: seller._id });
             throw error;
         }
     }

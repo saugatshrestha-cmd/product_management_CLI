@@ -59,21 +59,21 @@ export class ProductService {
       throw AppError.internal("Image upload failed");
     }
   }
-  await this.auditService.logAudit({
+    await this.productRepository.add({ ...productData, images: fileIds, status: ProductStatus.ACTIVE });
+    await this.auditService.logAudit({
         action: 'create_product',
         entity: 'Product',
-        entityId: productData.sellerId,
+        entityId: productData._id,
         status: 'success',
         message: 'Product added successfully',
         req
       });
-    await this.productRepository.add({ name, description, price, categoryId, quantity, images: fileIds, sellerId, status: ProductStatus.ACTIVE });
     return { message: "Product added successfully" };
   }catch(error){
       await this.auditService.logAudit({
         action: 'create_product',
         entity: 'Product',
-        entityId: productData.sellerId,
+        entityId: productData._id,
         status: 'failed',
         message: 'Failed to create product',
         req

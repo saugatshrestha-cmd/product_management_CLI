@@ -16,6 +16,7 @@ export interface Product {
 }
 
 export interface ProductInput {
+    _id: string;
     name: string;
     description: string;
     price: number;

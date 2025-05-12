@@ -36,9 +36,18 @@ export class CartService {
     }
     const userCart = await this.cartRepository.findCartByUserId(userId);
     if (!userCart) {
-      await this.cartRepository.add({
+      const newCart = await this.cartRepository.add({
         userId,
         items: [{ productId: product._id, productName: product.name, quantity, sellerId: product.sellerId }],
+      });
+      await this.auditService.logAudit({
+        action: 'add_to_cart',
+        entity: 'Cart',
+        entityId: newCart._id,
+        userId,
+        status: 'success',
+        message: 'Product added to cart successfully',
+        req
       });
     } else {
       const productInCart = userCart.items.find(
@@ -49,16 +58,17 @@ export class CartService {
       }
       userCart.items.push({ productId: product._id, productName: product.name, quantity, sellerId: product.sellerId });
       await this.cartRepository.updateCart(userId, userCart.items);
-    }
-    await this.auditService.logAudit({
+      await this.auditService.logAudit({
         action: 'add_to_cart',
         entity: 'Cart',
-        entityId: userId,
+        entityId: userCart._id,
         userId,
         status: 'success',
         message: 'Product added to cart successfully',
         req
       });
+    }
+    
     return { message: 'Product added to cart successfully' };
     } catch(error){
       await this.auditService.logAudit({
@@ -101,7 +111,7 @@ export class CartService {
     await this.auditService.logAudit({
         action: 'update_cart_quantity',
         entity: 'Cart',
-        entityId: userId,
+        entityId: cart._id,
         userId,
         status: 'success',
         beforeState, // Now included
@@ -141,7 +151,7 @@ export class CartService {
     await this.auditService.logAudit({
           action: 'remove_from_cart',
           entity: 'Cart',
-          entityId: userId,
+          entityId: userCart._id,
           userId,
           status: 'success',
           message: 'Product removed from cart successfully',

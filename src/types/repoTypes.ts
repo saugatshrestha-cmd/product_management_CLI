@@ -6,6 +6,7 @@ import { OrderItemStatus } from "./enumTypes";
 import { Seller } from "./sellerTypes";
 import { Category } from "./categoryTypes";
 import { FileMetadata } from "./fileTypes";
+import { Audit } from "./auditTypes";
 
 export interface Repository<T> {
     getAll(): Promise<T[]>;
@@ -51,4 +52,11 @@ export interface CartRepository extends Repository<Cart> {
 export interface FileRepository extends Repository<FileMetadata> {
     updateMetadata(id: string, data: Partial<FileMetadata>): Promise<void>;
     deleteManyByIds(id: string): Promise<void>;
+}
+
+export interface AuditRepository {
+    getAuditLogs(filter: Partial<Audit>,page: number,limit: number): Promise<{ logs: Audit[]; total: number }>;
+    getAuditLogsByUserId(userId: string,page: number,limit: number): Promise<{ logs: Audit[]; total: number }>;
+    getAuditLogsByEntityId(entityId: string,page: number,limit: number): Promise<{ logs: Audit[]; total: number }>;
+    add(audit: Audit): Promise<void>;
 }

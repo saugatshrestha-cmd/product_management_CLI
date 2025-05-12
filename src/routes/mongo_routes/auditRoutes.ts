@@ -10,6 +10,8 @@ const controller = container.resolve(AuditController);
 router.use(AuthMiddleware.verifyToken);
 router.use(RoleMiddleware.hasRole('admin'));
 
-router.get('/', controller.getAuditLogs.bind);
+router.get('/', controller.getAuditLogs.bind(controller));
+router.get('/user/:id', controller.getAuditLogsByUserId.bind(controller));
+router.get('/entity/:id', controller.getAuditLogsByEntityId.bind(controller));
 
 export default router;

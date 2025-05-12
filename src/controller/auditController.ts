@@ -1,31 +1,30 @@
-// src/controllers/auditController.ts
 import { Request, Response, NextFunction } from 'express';
-import { AuditRepo } from '@repository/auditRepo';
-import { AuditFilter } from '@mytypes/auditTypes';
-import { handleSuccess, handleError } from '@utils/apiResponse';
 import { injectable, inject } from 'tsyringe';
+import { AuditService } from '@services/auditService'; 
+import { handleSuccess, handleError } from '@utils/apiResponse';
 import { logger } from '@utils/logger';
+import { Audit } from '@mytypes/auditTypes';
 
 @injectable()
 export class AuditController {
   constructor(
-    @inject("AuditRepo") private auditRepo: AuditRepo
+    @inject("AuditService") private auditService: AuditService 
   ) {}
 
   async getAuditLogs(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { page = 1, limit = 10, ...filter } = req.query;
-      
-      const { logs, total } = await this.auditRepo.getAuditLogs(
-        filter as AuditFilter,
-        parseInt(page as string),
-        parseInt(limit as string)
-      );
+      const page = parseInt((req.query.page as string) || '1', 10);
+      const limit = parseInt((req.query.limit as string) || '10', 10);
+      const { page: _p, limit: _l, ...rawFilter } = req.query;
+
+      const filter = rawFilter as unknown as Partial<Audit>;
+
+      const { logs, total } = await this.auditService.getAuditLogs(filter, page, limit);
 
       logger.info('Audit logs fetched successfully', {
         page,
         limit,
-        totalResults: total
+        totalResults: total,
       });
 
       handleSuccess(res, {
@@ -33,13 +32,74 @@ export class AuditController {
         data: logs,
         meta: {
           total,
-          page: parseInt(page as string),
-          limit: parseInt(limit as string),
-          totalPages: Math.ceil(total / parseInt(limit as string))
-        }
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       });
     } catch (error) {
       logger.error('Failed to fetch audit logs', { error });
+      handleError(next, error);
+    }
+  }
+
+  async getAuditLogsByUserId(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const page = parseInt((req.query.page as string) || '1', 10);
+      const limit = parseInt((req.query.limit as string) || '10', 10);
+
+      const { logs, total } = await this.auditService.getAuditLogsByUserId(id, page, limit);
+
+      logger.info('Audit logs by user ID fetched successfully', {
+        userId: id,
+        page,
+        limit,
+        totalResults: total,
+      });
+
+      handleSuccess(res, {
+        message: 'Audit logs by user ID fetched successfully',
+        data: logs,
+        meta: {
+          total,
+          page,
+          totalPages: Math.ceil(total / limit),
+        },
+      });
+    } catch (error) {
+      logger.error('Failed to fetch audit logs by user ID', { error });
+      handleError(next, error);
+    }
+  }
+
+  async getAuditLogsByEntityId(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const page = parseInt((req.query.page as string) || '1', 10);
+      const limit = parseInt((req.query.limit as string) || '10', 10);
+
+      const { logs, total } = await this.auditService.getAuditLogsByEntityId(id, page, limit);
+
+      logger.info('Audit logs by entity ID fetched successfully', {
+        entityId: id,
+        page,
+        limit,
+        totalResults: total,
+      });
+
+      handleSuccess(res, {
+        message: 'Audit logs by entity ID fetched successfully',
+        data: logs,
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
+      });
+    } catch (error) {
+      logger.error('Failed to fetch audit logs by entity ID', { error });
       handleError(next, error);
     }
   }

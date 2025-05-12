@@ -130,7 +130,7 @@
 - **Standardized Responses:**
   - `SuccessResponse` and `ErrorResponse` format all API responses
 - **Audit Trail:**
-  - Each action is audited and stored in database. 
+  - Each action is audited and stored in database.
 
 ---
 
