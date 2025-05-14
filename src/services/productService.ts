@@ -26,8 +26,8 @@ export class ProductService {
 
 
   async createProduct(productData: ProductInput, files: Express.Multer.File[] = [], req?: Request): Promise<{ message: string }> {
-    try{
-      const { name, description = "", price, categoryId, quantity, sellerId } = productData;
+
+    const { name, description = "", price, categoryId, quantity, sellerId } = productData;
     const existingProduct = await this.productRepository.getAll();
     if (existingProduct.some(product => product.name.toLowerCase() === name.toLowerCase())) {
       logger.warn("Product already exists");
@@ -62,26 +62,12 @@ export class ProductService {
     await this.auditService.logAudit({
         action: 'create_product',
         entity: 'Product',
-        entityId: newProduct._id,
         userId: newProduct.sellerId,
         status: 'success',
         message: 'Product added successfully',
         req
       });
     return { message: "Product added successfully" };
-  }catch(error:any){
-    logger.error("Unexpected error while creating product", error);
-      await this.auditService.logAudit({
-        action: 'create_product',
-        entity: 'Product',
-        entityId: productData.sellerId,
-        userId: productData.sellerId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      throw AppError.badRequest("Something went wrong while creating the product");
-    }
   }
 
   async getProductById(productId: string): Promise<Product | { message: string }> {
@@ -107,7 +93,6 @@ export class ProductService {
     newFiles: Express.Multer.File[] = [],
     filesToDelete: string[] = [], req?: Request
   ): Promise<{ message: string }> {
-    try{
       const product = await this.productRepository.findById(productId);
     if (!product) {
       logger.warn("Product not found");
@@ -169,18 +154,6 @@ export class ProductService {
         req
       });
     return { message: "Product updated successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'update_product',
-        entity: 'Product',
-        entityId: productId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while updating product", error);
-  throw AppError.internal("Something went wrong while updating the product");
-  }
   }
 
   async updateQuantity(productId: string, newQuantity: number): Promise<{ message: string }> {
@@ -218,7 +191,7 @@ export class ProductService {
   }
 
   async deleteProduct(productId: string, req?: Request): Promise<{ message: string }> {
-    try{const product = await this.productRepository.findById(productId);
+    const product = await this.productRepository.findById(productId);
     if (!product) {
       logger.warn("Product not found");
       throw AppError.notFound('Product', productId);
@@ -243,7 +216,6 @@ export class ProductService {
         logger.info(`All files deleted for product ${productId}`);
       } catch (error) {
         logger.error(`Failed to delete files for product ${productId}: ${error instanceof Error ? error.message : String(error)}`);
-        // Continue with product deletion even if file deletion fails
       }
     }
     await this.productRepository.update(productId, {
@@ -261,22 +233,10 @@ export class ProductService {
         req
       });
     return { message: "Product deleted successfully" };
-  }catch(error:any){
-    logger.error("Unexpected error while deleting product", error);
-    await this.auditService.logAudit({
-        action: 'delete_product',
-        entity: 'Product',
-        entityId: productId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-  throw AppError.internal("Something went wrong while deleting the product");
-  }
   }
 
   async deleteProductsBySellerId(sellerId: string, req?: Request): Promise<{ message: string }> {
-    try{const products = await this.productRepository.getBySellerId(sellerId);
+    const products = await this.productRepository.getBySellerId(sellerId);
     if (!products || products.length === 0) {
       logger.warn("Product not found for this seller");
       throw AppError.notFound("Products not found for this seller");
@@ -296,17 +256,5 @@ export class ProductService {
         req
       });
     return { message: "Product deleted successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'delete_product',
-        entity: 'Product',
-        entityId: sellerId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while deleting product", error);
-  throw AppError.internal("Something went wrong while deleting the product");;
-  }
   }
 }

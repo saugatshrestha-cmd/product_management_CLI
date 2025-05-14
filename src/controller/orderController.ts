@@ -14,7 +14,7 @@ export class OrderController {
         const userId = req.user?._id as string;
         try {
             const result = await this.orderService.getOrderByUserId(userId);
-            logger.info(`[${req.method}] ${req.originalUrl} - Orders fetched successfully`, { userId });
+            logger.info(`Orders fetched successfully`, { userId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);

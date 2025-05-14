@@ -9,15 +9,13 @@ import { createUserSchema, updateUserSchema, updateUserEmailSchema, updateUserPa
 const router = express.Router();
 const controller = container.resolve(AdminController);
 
-router.use(AuthMiddleware.verifyToken);
 
-
-router.get('/', controller.getProfile.bind(controller));
+router.get('/', AuthMiddleware.verifyToken, controller.getProfile.bind(controller));
 router.post('/', new Validator(createUserSchema).validate(), controller.createAdmin.bind(controller));
-router.put('/update', RoleMiddleware.hasRole('admin'), new Validator(updateUserSchema).validate(), controller.updateProfile.bind(controller));
-router.put('/change-email', RoleMiddleware.hasRole('admin'), new Validator(updateUserEmailSchema).validate(), controller.updateEmail.bind(controller));
-router.put('/change-password', RoleMiddleware.hasRole('admin'), new Validator(updateUserPasswordSchema).validate(), controller.updatePassword.bind(controller));
-router.delete('/:id', RoleMiddleware.hasRole('admin'), controller.deleteAdmin.bind(controller));
+router.put('/update', AuthMiddleware.verifyToken, RoleMiddleware.hasRole('admin'), new Validator(updateUserSchema).validate(), controller.updateProfile.bind(controller));
+router.put('/change-email', AuthMiddleware.verifyToken, RoleMiddleware.hasRole('admin'), new Validator(updateUserEmailSchema).validate(), controller.updateEmail.bind(controller));
+router.put('/change-password', AuthMiddleware.verifyToken, RoleMiddleware.hasRole('admin'), new Validator(updateUserPasswordSchema).validate(), controller.updatePassword.bind(controller));
+router.delete('/:id', AuthMiddleware.verifyToken, RoleMiddleware.hasRole('admin'), controller.deleteAdmin.bind(controller));
 
 
 export default router;

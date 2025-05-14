@@ -1,4 +1,3 @@
-import { AuditModel } from '@models/auditModel';
 import { Audit } from '@mytypes/auditTypes';
 import { Request } from 'express';
 import { omit } from 'lodash';
@@ -9,7 +8,7 @@ import { AuditRepositoryFactory } from '@factories/auditFactory';
 interface AuditLogParams {
   action: string;
   entity: string;
-  entityId: string;
+  entityId?: string;
   userId?: string;
   userRole?: string;
   req?: Request;

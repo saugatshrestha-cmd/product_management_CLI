@@ -80,8 +80,6 @@ export class AuthService {
     await this.auditService.logAudit({
             action: 'register',
             entity: 'User',
-            entityId: user._id,
-            userId: user._id,
             userRole: user.role,
             message: 'Registration successful',
             req,

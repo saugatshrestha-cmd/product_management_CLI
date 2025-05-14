@@ -7,7 +7,7 @@ import { SellerRepository } from "@mytypes/repoTypes";
 export class MongoSellerRepository implements SellerRepository {
 
     async getAll(): Promise<Seller[]> {
-    return await SellerModel.find().select('-password');
+    return await SellerModel.find().select('-password -isDeleted');
     }
 
     async findById(sellerId: string): Promise<Seller | null> {

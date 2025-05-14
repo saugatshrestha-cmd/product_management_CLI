@@ -1,7 +1,7 @@
 export interface Audit {
   action: string;
   entity: string;
-  entityId: string;
+  entityId?: string;
   userId?: string;
   userRole?: string;
   userAgent?: string;
@@ -20,7 +20,7 @@ export interface Audit {
 export interface AuditLogParams {
   action: string;
   entity: string;
-  entityId: string;
+  entityId?: string;
   userId?: string;
   userRole?: string;
   req?: Request;

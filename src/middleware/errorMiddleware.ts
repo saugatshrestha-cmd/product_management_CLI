@@ -10,25 +10,6 @@ export const errorMiddleware = (
     next: NextFunction
 ): void => {
     if (err instanceof AppError) {
-        // Log operational errors
-        logger.error(`[${err.errorType}] ${err.message}`, {
-            statusCode: err.statusCode,
-            errorType: err.errorType,
-            email: req.body?.email || req.params?.id,
-            method: req.method,
-            url: req.originalUrl,
-        });
-    } else {
-        // Log unexpected errors
-        logger.error('Unexpected error', {
-            message: err.message,
-            stack: err.stack,
-            email: req.body?.email || req.params?.id,
-            method: req.method,
-            url: req.originalUrl,
-        });
-    }
-    if (err instanceof AppError) {
         sendError(res, err);
         return;
     }else{

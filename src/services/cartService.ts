@@ -25,7 +25,6 @@ export class CartService {
   }
 
   async createCart(productId: string, quantity: number, userId: string, req?: Request): Promise<{ message: string }> {
-    try{ 
       const product = await this.productService.getProductById(productId);
     if (!this.isProduct(product)) {
       logger.warn("Product not found");
@@ -43,7 +42,6 @@ export class CartService {
       await this.auditService.logAudit({
         action: 'add_to_cart',
         entity: 'Cart',
-        entityId: newCart._id,
         userId,
         status: 'success',
         message: 'Product added to cart successfully',
@@ -70,23 +68,10 @@ export class CartService {
     }
     
     return { message: 'Product added to cart successfully' };
-    } catch(error:any){
-      await this.auditService.logAudit({
-        action: 'add_to_cart',
-        entity: 'Cart',
-        entityId: userId,
-        userId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while creating cart", error);
-      throw AppError.internal("Something went wrong while creating the cart");
-    }
   }
 
   async updateItemQuantity(userId: string, productId: string, quantity: number, req?: Request): Promise<{ message: string }> {
-    try{if (quantity <= 0) {
+    if (quantity <= 0) {
       return { message: "Amount must be greater than zero" }; // You can adjust the condition to allow only positive numbers.
     }
     const cart = await this.cartRepository.findCartByUserId(userId);
@@ -120,24 +105,9 @@ export class CartService {
         req
       });
     return { message: "Product quantity updated successfully" };
-  } catch(error:any){
-    await this.auditService.logAudit({
-        action: 'update_cart',
-        entity: 'Cart',
-        entityId: userId,
-        userId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while updating cart", error);
-      throw AppError.internal("Something went wrong while updating the cart");
-  }
   }      
 
   async removeFromCart(productId: string, userId: string, req?: Request): Promise<{ message: string }> {
-    try
-    {
       const userCart = await this.cartRepository.findCartByUserId(userId);
     if (!userCart) {
       logger.warn("Cart not found");
@@ -158,19 +128,6 @@ export class CartService {
           req
         });
     return { message: 'Product removed from cart successfully' };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'remove_from_cart',
-        entity: 'Cart',
-        entityId: userId,
-        userId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while removing product from cart", error);
-      throw AppError.internal("Something went wrong while removing product from the cart");
-  }
   }
 
   async removeCartByUserId(userId: string, req?: Request): Promise<{ message: string }> {

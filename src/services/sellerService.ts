@@ -42,7 +42,7 @@ export class SellerService {
   }
 
   async createSeller(sellerData: Seller, req?: Request): Promise<{ message: string }> {
-    try{const exists = await this.sellerRepository.findByEmail(sellerData.email);
+    const exists = await this.sellerRepository.findByEmail(sellerData.email);
     if (exists){
       logger.warn(`Email already registered: ${sellerData.email}`);
       throw AppError.conflict("Email already registered");
@@ -56,29 +56,15 @@ export class SellerService {
     await this.auditService.logAudit({
         action: 'create_seller',
         entity: 'Seller',
-        entityId: sellerData._id,
         status: 'success',
         message: 'Seller created successfully',
         req
       });
     return { message: "Seller created successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'create_seller',
-        entity: 'Seller',
-        entityId: sellerData._id,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while creating seller", error);
-      throw AppError.internal("Something went wrong while creating the seller");
-  }
   }  
   
 
   async updateSeller(sellerId: string, updatedInfo: Seller, req?: Request): Promise<{ message: string }> {
-    try{
       const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
       logger.warn(`Seller not found: ${sellerId}`);
@@ -111,22 +97,10 @@ export class SellerService {
         req
       });
     return { message: "Seller updated successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'update_seller',
-        entity: 'Seller',
-        entityId: sellerId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while updating seller", error);
-      throw AppError.internal("Something went wrong while updating the seller");
-  }
   }
 
   async updateEmail(sellerId: string, newEmail: string, req?: Request): Promise<{ message: string }> {
-    try{const seller = await this.sellerRepository.findById(sellerId);
+    const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
       logger.warn(`Seller not found: ${sellerId}`);
       throw AppError.notFound("Seller not found", sellerId);
@@ -147,22 +121,10 @@ export class SellerService {
         req
       });
     return { message: "Email updated successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'update_seller_email',
-        entity: 'Seller',
-        entityId: sellerId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while updating email of seller", error);
-      throw AppError.internal("Something went wrong while updating email of the seller");
-  }
   }
 
   async updatePassword(sellerId: string, newPassword: string, req?: Request): Promise<{ message: string }> {
-    try{const seller = await this.sellerRepository.findById(sellerId);
+    const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
       logger.warn(`Seller not found: ${sellerId}`);
       throw AppError.notFound("Seller not found", sellerId);
@@ -180,22 +142,10 @@ export class SellerService {
         req
       });
     return { message: "Password updated successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'update_seller_password',
-        entity: 'Seller',
-        entityId: sellerId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while updating password of seller", error);
-      throw AppError.internal("Something went wrong while updating password of the seller");
-  }
   }
 
   async deleteSeller(sellerId: string, req?: Request): Promise<{ message: string }> {
-    try{const seller = await this.sellerRepository.findById(sellerId);
+    const seller = await this.sellerRepository.findById(sellerId);
     if (!seller || seller.isDeleted) {
       logger.warn(`Seller not found: ${sellerId}`);
       throw AppError.notFound("Seller not found or already deleted", sellerId);
@@ -214,17 +164,5 @@ export class SellerService {
         req
       });
     return { message: "Seller and their products deleted successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'delete_seller',
-        entity: 'Seller',
-        entityId: sellerId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while deleting seller", error);
-      throw AppError.internal("Something went wrong while deleting the seller");
-  }
   }
 }

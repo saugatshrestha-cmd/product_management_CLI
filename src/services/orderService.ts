@@ -30,7 +30,6 @@ export class OrderService {
   }
 
   async createOrder(userId: string, req?: Request): Promise<{ message: string }> {
-    try{
       const cart = await this.cartService.getCartByUserId(userId);
     if ('message' in cart) {
       return { message: `Cannot place order: ${cart.message}` };
@@ -75,25 +74,12 @@ export class OrderService {
   await this.auditService.logAudit({
         action: 'create_order',
         entity: 'Order',
-        entityId: newOrder._id,
         userId,
         status: 'success',
         message: 'Order created successfully',
         req
       });
     return { message: "Order created successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'create_order',
-        entity: 'Order',
-        entityId: userId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while creating order", error);
-      throw AppError.internal("Something went wrong while creating the order");
-  }
   }
 
   async getAllOrders(): Promise<Order[]> {
@@ -145,8 +131,7 @@ export class OrderService {
     sellerId: string, 
     newStatus: OrderItemStatus, req?: Request
   ): Promise<{ message: string }> {
-    try
-    {const order = await this.orderRepository.findById(orderId);
+    const order = await this.orderRepository.findById(orderId);
     if (!order) {
       return { message: `Order with id ${orderId} not found.` };
     }
@@ -204,18 +189,6 @@ export class OrderService {
         req
       });
     return { message: `Item status updated to ${newStatus} successfully` };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'update_order_item',
-        entity: 'Order',
-        entityId: orderId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while updating order", error);
-      throw AppError.internal("Something went wrong while updating the order");
-  }
   }
 
   async updateOrderStatus(orderId: string, updatedInfo: Partial<Order>): Promise<{ message: string }> {
@@ -228,7 +201,6 @@ export class OrderService {
   }
 
   async cancelOrder(orderId: string, userId: string, req?: Request): Promise<{ message: string }> {
-    try{
       const order = await this.orderRepository.findById(orderId);
     if (!order) throw AppError.notFound( "Order not found" );
     if (order.userId !== userId) return { message: "Unauthorized to cancel this order" };
@@ -242,7 +214,10 @@ export class OrderService {
         }))
       };
     for (const item of order.items) {
-      await this.productService.increaseQuantity(item.productId, item.quantity);
+      if (item.status !== OrderItemStatus.CANCELLED) {
+        await this.productService.increaseQuantity(item.productId, item.quantity);
+        await this.orderRepository.updateOrderItemStatus(orderId, item._id.toString(), item.sellerId, OrderItemStatus.CANCELLED);
+      }
     }
     await this.orderRepository.update(orderId, {
       status: Status.CANCELLED,
@@ -263,23 +238,9 @@ export class OrderService {
         req
       });
     return { message: "Order cancelled successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'cancel_order',
-        entity: 'Order',
-        entityId: orderId,
-        userId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while cancelling order", error);
-      throw AppError.internal("Something went wrong while cancelling the order");
-  }
   }
 
   async cancelOrderAdmin(orderId: string, req?: Request): Promise<{ message: string }> {
-    try{
       const order = await this.orderRepository.findById(orderId);
     if (!order) throw AppError.notFound( "Order not found" );
     if (order.status !== Status.PENDING && order.status !== Status.SHIPPED) return { message: "Only pending and shipped orders can be cancelled" };
@@ -312,23 +273,10 @@ export class OrderService {
         req
       });
     return { message: "Order cancelled successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'cancel_order',
-        entity: 'Order',
-        entityId: orderId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while cancelling order", error);
-      throw AppError.internal("Something went wrong while cancelling the order");
-  }
   }
   
   async deleteOrder(orderId: string, userId: string, req?: Request): Promise<{ message: string }> {
-    try{
-      const order = await this.orderRepository.findById(orderId);
+    const order = await this.orderRepository.findById(orderId);
     if (!order) throw AppError.notFound("Order not found" );
     if (order.userId !== userId) return { message: "Unauthorized to cancel this order" };
     if (order.isDeleted) return { message: "Order already deleted" };
@@ -349,23 +297,9 @@ export class OrderService {
         req
       });
     return { message: "Order deleted successfully" };
-  }catch(error:any){
-      await this.auditService.logAudit({
-        action: 'delete_order',
-        entity: 'Order',
-        entityId: orderId,
-        userId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while deleting order", error);
-      throw AppError.internal("Something went wrong while deleting the order");
-    }
   }
 
   async deleteOrderByUserId(userId: string, req?: Request): Promise<{ message: string }> {
-    try{
       const orders = await this.orderRepository.getOrdersByUserId(userId);
     if (!orders) throw AppError.notFound("Order not found" );
     await Promise.all(
@@ -386,23 +320,9 @@ export class OrderService {
         req
       });
     return { message: "Order deleted successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'delete_order',
-        entity: 'Order',
-        entityId: userId,
-        userId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while deleting order", error);
-      throw AppError.internal("Something went wrong while deleting the order");
-  }
   }
 
   async deleteOrderAdmin(orderId: string, req?: Request): Promise<{ message: string }> {
-    try{
       const order = await this.orderRepository.findById(orderId);
     if (!order) throw AppError.notFound("Order not found" );
     if (order.isDeleted) return { message: "Order already deleted" };
@@ -419,17 +339,5 @@ export class OrderService {
         req
       });
     return { message: "Order deleted successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'delete_order',
-        entity: 'Order',
-        entityId: orderId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while deleting order", error);
-      throw AppError.internal("Something went wrong while deleting the order");
-  }
   }
 }

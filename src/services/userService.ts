@@ -47,7 +47,7 @@ export class UserService {
   }
 
   async createAdmin(adminData: User, req?: Request): Promise<{ message: string }> {
-    try{
+
       const exists = await this.userRepository.findByEmail(adminData.email);
     if (exists){
       logger.warn(`Admin creation failed, email already exists: ${adminData.email}`);
@@ -61,29 +61,15 @@ export class UserService {
     await this.auditService.logAudit({
         action: 'create_admin',
         entity: 'User',
-        entityId: adminData._id,
         status: 'success',
         message: 'Admin created successfully',
         req
       });
     return { message: "Admin created successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'create_admin',
-        entity: 'User',
-        entityId: adminData._id,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while creating admin", error);
-      throw AppError.internal("Something went wrong while creating the admin");
-  }
   }  
   
 
   async updateUser(userId: string, updatedInfo: User, req?: Request): Promise<{ message: string }> {
-    try{
       const user = await this.userRepository.findById(userId);
     if (!user) {
       logger.warn(`Update failed, user not found: ${userId}`);
@@ -118,22 +104,9 @@ export class UserService {
         req
       });
     return { message: "User updated successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'update_user',
-        entity: 'User',
-        entityId: userId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while updating user", error);
-      throw AppError.internal("Something went wrong while updating the user");
-  }
   }
 
   async updateEmail(userId: string, newEmail: string, req?: Request): Promise<{ message: string }> {
-    try{
       const user = await this.userRepository.findById(userId);
     if (!user) {
       logger.warn(`Email update failed, user not found: ${userId}`);
@@ -155,22 +128,9 @@ export class UserService {
       });
     await this.userRepository.update(userId, { email: newEmail });
     return { message: "Email updated successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'update_user_email',
-        entity: 'User',
-        entityId: userId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while updating email of user", error);
-      throw AppError.internal("Something went wrong while updating email of the user");
-  }
   }
 
   async updatePassword(userId: string, newPassword: string, req?: Request): Promise<{ message: string }> {
-    try{
       const user = await this.userRepository.findById(userId);
     if (!user) {
       logger.warn(`Password update failed, user not found: ${userId}`);
@@ -189,22 +149,9 @@ export class UserService {
         req
       });
     return { message: "Password updated successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'update_user_password',
-        entity: 'User',
-        entityId: userId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while updating password of user", error);
-      throw AppError.internal("Something went wrong while updating password of the user");
-  }
   }
 
   async deleteUser(userId: string, req?: Request): Promise<{ message: string }> {
-    try{
       const user = await this.userRepository.findById(userId);
     if (!user) {
       logger.warn(`Delete failed, user not found: ${userId}`);
@@ -225,17 +172,5 @@ export class UserService {
         req
       });
     return { message: "User deleted successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'delete_user',
-        entity: 'User',
-        entityId: userId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while deleting user", error);
-      throw AppError.internal("Something went wrong while deleting the user");
-  }
   }
 }

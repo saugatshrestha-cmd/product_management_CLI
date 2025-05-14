@@ -17,7 +17,6 @@ export class CategoryService {
     this.categoryRepository = this.categoryRepositoryFactory.getRepository();
   }
   async createCategory(categoryData: Category, req?: Request): Promise<{ message: string }> {
-    try {
       const { name, description } = categoryData;
     if (await this.categoryRepository.findByName(name)) {
       logger.warn("Category not found");
@@ -27,24 +26,11 @@ export class CategoryService {
     await this.auditService.logAudit({
         action: 'create_category',
         entity: 'Category',
-        entityId: categoryData._id,
         status: 'success',
         message: 'Category added successfully',
         req
       });
     return { message: "Category added successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'create_category',
-        entity: 'Category',
-        entityId: categoryData._id,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while creating category", error);
-      throw AppError.internal("Something went wrong while creating the category");
-  }
   }
 
   async getCategoryById(categoryId: string): Promise<Category | { message: string }> {
@@ -61,7 +47,6 @@ export class CategoryService {
   }
 
   async updateCategory(categoryId: string, updatedInfo: Partial<Category>, req?: Request): Promise<{ message: string }> {
-    try{
       const oldCategory = await this.categoryRepository.findById(categoryId);
     if (!oldCategory) {
       logger.warn("Category not found");
@@ -82,22 +67,9 @@ export class CategoryService {
         req
       });
     return { message: "Category updated successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'update_category',
-        entity: 'Category',
-        entityId: categoryId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while updating category", error);
-      throw AppError.internal("Something went wrong while updating the category");
-  }
   }
 
   async deleteCategory(categoryId: string, req?: Request): Promise<{ message: string }> {
-    try{
       const category = await this.categoryRepository.findById(categoryId);
     if (!category) {
       logger.warn("Category not found");
@@ -113,17 +85,6 @@ export class CategoryService {
         req
       });  
     return { message: "Category deleted successfully" };
-  }catch(error:any){
-    await this.auditService.logAudit({
-        action: 'delete_category',
-        entity: 'Category',
-        entityId: categoryId,
-        status: 'failed',
-        message: error.message,
-        req
-      });
-      logger.error("Unexpected error while deleting category", error);
-      throw AppError.internal("Something went wrong while deleting the category");
-  }
+    throw AppError.internal("Something went wrong while deleting the category");
   }
 }
