@@ -21,7 +21,7 @@ export class AuditController {
 
       const { logs, total } = await this.auditService.getAuditLogs(filter, page, limit);
 
-      logger.info('Audit logs fetched successfully', {
+      logger.info(`[${req.method}] ${req.originalUrl} - Audit logs fetched successfully`, {
         page,
         limit,
         totalResults: total,
@@ -51,7 +51,7 @@ export class AuditController {
 
       const { logs, total } = await this.auditService.getAuditLogsByUserId(id, page, limit);
 
-      logger.info('Audit logs by user ID fetched successfully', {
+      logger.info(`[${req.method}] ${req.originalUrl} - Audit logs by user ID fetched successfully`, {
         userId: id,
         page,
         limit,
@@ -81,7 +81,7 @@ export class AuditController {
 
       const { logs, total } = await this.auditService.getAuditLogsByEntityId(id, page, limit);
 
-      logger.info('Audit logs by entity ID fetched successfully', {
+      logger.info(`[${req.method}] ${req.originalUrl} - Audit logs by entity ID fetched successfully`, {
         entityId: id,
         page,
         limit,

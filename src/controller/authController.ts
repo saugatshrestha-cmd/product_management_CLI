@@ -30,16 +30,14 @@ export class AuthController {
         return;
       }
 
-      logger.info('User logged in successfully', { email });
+      logger.info(`[${req.method}] ${req.originalUrl} - User logged in successfully`, { email });
       res.cookie('token', result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         maxAge: 3600000,
       });
-
       
-
       handleSuccess(res, { 
         message: result.message,
         token: result.token
@@ -61,7 +59,7 @@ export class AuthController {
         throw AppError.badRequest(result.message);
       }
 
-      logger.info('User registered successfully');
+      logger.info(`[${req.method}] ${req.originalUrl} - User registered successfully`);
 
       handleSuccess(res, { message: result.message });
     } catch (error) {
@@ -84,7 +82,7 @@ export class AuthController {
         sameSite: 'strict',
       });
 
-      logger.info('User logged out successfully');
+      logger.info(`[${req.method}] ${req.originalUrl} - User logged out successfully`);
 
       handleSuccess(res, { message: 'Logged out successfully' });
     } catch (error) {

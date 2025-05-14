@@ -5,6 +5,7 @@ import { Order } from "@mytypes/orderTypes";
 import { User } from "@mytypes/userTypes";
 import { Seller } from "@mytypes/sellerTypes";
 import { logger } from "@utils/logger";
+import { AppError } from "@utils/errorHandler";
 
 @injectable()
 export class NotificationService {
@@ -27,7 +28,7 @@ export class NotificationService {
             });
         } catch (error) {
             logger.error('Failed to send welcome email', { error, userId: user._id });
-            throw error;
+            throw AppError.internal("Failed to send welcome email");
         }
     }
 
@@ -46,7 +47,7 @@ export class NotificationService {
             });
         } catch (error) {
             logger.error('Failed to send welcome email', { error, userId: seller._id });
-            throw error;
+            throw AppError.internal("Failed to send welcome email to seller");
         }
     }
 
@@ -68,7 +69,7 @@ export class NotificationService {
             });
         } catch (error) {
             logger.error('Failed to send order confirmation', { error, orderId: order._id });
-            throw error;
+            throw AppError.internal("Failed to send order confirmation");
         }
     }
 
@@ -88,7 +89,7 @@ export class NotificationService {
             });
         } catch (error) {
             logger.error('Failed to send shipping notification', { error, orderId: order._id });
-            throw error;
+            throw AppError.internal("Failed to send order shipped notification");
         }
     }
 }

@@ -9,9 +9,9 @@ import { Role } from '@mytypes/enumTypes';
 import { NotificationService } from "./notificationService";
 import { AuditService } from "./auditService";
 import { Request } from "express";
-
 @injectable()
 export class AuthService {
+  
     constructor(
       @inject("NotificationService") private notificationService: NotificationService,
       @inject("UserService") private userService: UserService,
@@ -21,7 +21,7 @@ export class AuthService {
     ) {
     }
 
-    async login(email: string, password: string, req?: Request): Promise<{ token?: string; message: string }> {
+    async login(email: string, password: string, req: Request): Promise<{ token?: string; message: string }> {
         // Check if it's a user
         const user = await this.userService.findByEmail(email);
         if (user && this.passwordManager.verifyPassword(password, user.password)) {

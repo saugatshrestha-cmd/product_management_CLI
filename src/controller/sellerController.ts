@@ -14,8 +14,8 @@ export class SellerController {
     async createSeller(req: Request, res: Response, next: NextFunction): Promise<void>{
         try{
             const newSeller = req.body;
-            const result = await this.sellerService.createSeller(newSeller);
-            logger.info('Seller registered successfully');
+            const result = await this.sellerService.createSeller(newSeller, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Seller registered successfully`);
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -26,7 +26,7 @@ export class SellerController {
         try {
             const sellerId = req.user?._id as string;
             const result = await this.sellerService.getSellerById(sellerId);
-            logger.info('Seller profile fetched successfully', { sellerId });
+            logger.info(`[${req.method}] ${req.originalUrl} - Seller profile fetched successfully`, { sellerId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -37,8 +37,8 @@ export class SellerController {
         try {
             const sellerId = req.user?._id as string;
             const updatedInfo = req.body;
-            const result = await this.sellerService.updateSeller(sellerId, updatedInfo);
-            logger.info('Seller profile updated successfully', { sellerId, updatedInfo });
+            const result = await this.sellerService.updateSeller(sellerId, updatedInfo, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Seller profile updated successfully`, { sellerId, updatedInfo });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -48,8 +48,8 @@ export class SellerController {
     async updateEmail(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.user?._id as string;
-            const result = await this.sellerService.updateEmail(sellerId, req.body.email);
-            logger.info('Seller email successfully', { email: req.body.email });
+            const result = await this.sellerService.updateEmail(sellerId, req.body.email, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Seller email successfully`, { email: req.body.email });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);;
@@ -59,8 +59,8 @@ export class SellerController {
     async updatePassword(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.user?._id as string;
-            const result = await this.sellerService.updatePassword(sellerId, req.body.password);
-            logger.info('Password updated successfully');
+            const result = await this.sellerService.updatePassword(sellerId, req.body.password, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Password updated successfully`);
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -70,8 +70,8 @@ export class SellerController {
     async deleteSeller(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.user?._id as string;
-            const result = await this.sellerService.deleteSeller(sellerId);
-            logger.info('Seller deleted successfully', { sellerId });
+            const result = await this.sellerService.deleteSeller(sellerId, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Seller deleted successfully`, { sellerId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -81,7 +81,7 @@ export class SellerController {
     async getAllSellers(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const result = await this.sellerService.getAllSellers();
-            logger.info('Sellers fetched successfully');
+            logger.info(`[${req.method}] ${req.originalUrl} - Sellers fetched successfully`);
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -92,7 +92,7 @@ export class SellerController {
         try {
             const sellerId = req.params.id;
             const result = await this.sellerService.getSellerById(sellerId);
-            logger.info('Seller fetched successfully', { sellerId });
+            logger.info(`[${req.method}] ${req.originalUrl} - Seller fetched successfully`, { sellerId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -103,8 +103,8 @@ export class SellerController {
         try {
             const sellerId = req.params.id;
             const updatedSellerInfo = req.body;
-            const result = await this.sellerService.updateSeller(sellerId, updatedSellerInfo);
-            logger.info('Seller profile updated successfully', { sellerId, updatedSellerInfo });
+            const result = await this.sellerService.updateSeller(sellerId, updatedSellerInfo, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Seller profile updated successfully`, { sellerId, updatedSellerInfo });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -114,8 +114,8 @@ export class SellerController {
     async adminUpdateEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.params.id;
-            const result = await this.sellerService.updateEmail(sellerId, req.body.email);
-            logger.info('Seller email successfully', { email: req.body.email });
+            const result = await this.sellerService.updateEmail(sellerId, req.body.email, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Seller email successfully`, { email: req.body.email });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -125,8 +125,8 @@ export class SellerController {
     async adminUpdatePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.params.id;
-            const result = await this.sellerService.updatePassword(sellerId, req.body.password);
-            logger.info('Password updated successfully');
+            const result = await this.sellerService.updatePassword(sellerId, req.body.password, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Password updated successfully`);
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -136,8 +136,8 @@ export class SellerController {
     async adminDeleteSeller(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const sellerId = req.params.id;
-            const result = await this.sellerService.deleteSeller(sellerId);
-            logger.info('Seller deleted successfully', { sellerId });
+            const result = await this.sellerService.deleteSeller(sellerId, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Seller deleted successfully`, { sellerId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);

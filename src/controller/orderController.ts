@@ -14,7 +14,7 @@ export class OrderController {
         const userId = req.user?._id as string;
         try {
             const result = await this.orderService.getOrderByUserId(userId);
-            logger.info('Orders fetched successfully', { userId });
+            logger.info(`[${req.method}] ${req.originalUrl} - Orders fetched successfully`, { userId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -26,8 +26,8 @@ export class OrderController {
         const { orderId, itemId } = req.body;
         const newStatus = req.body.status;
         try {
-            const result = await this.orderService.updateOrderItemStatus(orderId, itemId, sellerId, newStatus);
-            logger.info('Order Item Status updated successfully', { orderId, itemId });
+            const result = await this.orderService.updateOrderItemStatus(orderId, itemId, sellerId, newStatus, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Order Item Status updated successfully`, { orderId, itemId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -38,7 +38,7 @@ export class OrderController {
         const sellerId = req.user?._id as string;
         try {
             const result = await this.orderService.getOrderBySellerId(sellerId);
-            logger.info('Orders fetched successfully', { sellerId });
+            logger.info(`[${req.method}] ${req.originalUrl} - Orders fetched successfully`, { sellerId });
             handleSuccess(res, result);
         } catch(error){
             handleError(next, error);
@@ -48,8 +48,8 @@ export class OrderController {
     async createUserOrder(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
         const userId = req.user?._id as string;
         try {
-            const result = await this.orderService.createOrder(userId);
-            logger.info('Order created successfully');
+            const result = await this.orderService.createOrder(userId, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Order created successfully`);
             handleSuccess(res, result);
         } catch(error){
             handleError(next, error);
@@ -60,8 +60,8 @@ export class OrderController {
         const userId = req.user?._id as string;
         const { orderId } = req.body;
         try {
-            const result = await this.orderService.cancelOrder(orderId, userId);
-            logger.info('Order cancelled successfully', { orderId });
+            const result = await this.orderService.cancelOrder(orderId, userId, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Order cancelled successfully`, { orderId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -72,8 +72,8 @@ export class OrderController {
         try {
             const userId = req.user?._id as string;
             const orderId = req.params.id;
-            const result = await this.orderService.deleteOrder(orderId, userId);
-            logger.info('Order deleted successfully', { orderId });
+            const result = await this.orderService.deleteOrder(orderId, userId, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Order deleted successfully`, { orderId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -83,7 +83,7 @@ export class OrderController {
     async getAllOrders(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const orders = await this.orderService.getAllOrders();
-            logger.info('All orders fetched successfully');
+            logger.info(`[${req.method}] ${req.originalUrl} - All orders fetched successfully`);
             res.json(orders);
         } catch(error) {
             handleError(next, error);
@@ -94,7 +94,7 @@ export class OrderController {
         try {
             const userId = req.params.id;
             const result = await this.orderService.getOrderByUserId(userId);
-            logger.info('Orders fetched successfully', { userId });
+            logger.info(`[${req.method}] ${req.originalUrl} - Orders fetched successfully`, { userId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -106,7 +106,7 @@ export class OrderController {
             const orderId = req.params.id;
             const updatedInfo = req.body;
             const result = await this.orderService.updateOrderStatus(orderId, updatedInfo);
-            logger.info('Order Status updated successfully', { orderId });
+            logger.info(`[${req.method}] ${req.originalUrl} - Order Status updated successfully`, { orderId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -116,8 +116,8 @@ export class OrderController {
     async cancelOrderByAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const orderId = req.params.id;
-            const result = await this.orderService.cancelOrderAdmin(orderId);
-            logger.info('Order cancelled successfully', { orderId });
+            const result = await this.orderService.cancelOrderAdmin(orderId, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Order cancelled successfully`, { orderId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -127,8 +127,8 @@ export class OrderController {
     async deleteOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const orderId = req.params.id;
-            const result = await this.orderService.deleteOrderAdmin(orderId);
-            logger.info('Order deleted successfully', { orderId });
+            const result = await this.orderService.deleteOrderAdmin(orderId, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Order deleted successfully`, { orderId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);

@@ -67,13 +67,13 @@ export class UserService {
         req
       });
     return { message: "Admin created successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'create_admin',
         entity: 'User',
         entityId: adminData._id,
         status: 'failed',
-        message: 'Failed to create admin',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while creating admin", error);
@@ -118,13 +118,13 @@ export class UserService {
         req
       });
     return { message: "User updated successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'update_user',
         entity: 'User',
         entityId: userId,
         status: 'failed',
-        message: 'Failed to update user',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while updating user", error);
@@ -155,13 +155,13 @@ export class UserService {
       });
     await this.userRepository.update(userId, { email: newEmail });
     return { message: "Email updated successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'update_user_email',
         entity: 'User',
         entityId: userId,
         status: 'failed',
-        message: 'Failed to update user email',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while updating email of user", error);
@@ -189,13 +189,13 @@ export class UserService {
         req
       });
     return { message: "Password updated successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'update_user_password',
         entity: 'User',
         entityId: userId,
         status: 'failed',
-        message: 'Failed to update user password',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while updating password of user", error);
@@ -225,13 +225,13 @@ export class UserService {
         req
       });
     return { message: "User deleted successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'delete_user',
         entity: 'User',
         entityId: userId,
         status: 'failed',
-        message: 'Failed to delete user',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while deleting user", error);

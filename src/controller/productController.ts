@@ -19,10 +19,10 @@ export class ProductController {
             const productData = req.body;
             productData.sellerId = loggedInUser;
             if (!files || files.length === 0) {
-            return next(new AppError('At least one image is required'));  // Custom error if no files are uploaded
+            throw AppError.badRequest('At least one image is required');  // Custom error if no files are uploaded
         }           
-            const result = await this.productService.createProduct(productData, files);
-            logger.info('Product added successfully');
+            const result = await this.productService.createProduct(productData, files, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Product added successfully`);
             handleSuccess(res, result);
         } catch(error){
             handleError(next, error);
@@ -33,7 +33,7 @@ export class ProductController {
         try {
             const sellerId = req.user?._id as string;
             const products = await this.productService.getProductsBySeller(sellerId);
-            logger.info('Products fetched successfully');
+            logger.info(`[${req.method}] ${req.originalUrl} - Products fetched successfully`);
             handleSuccess(res, products);
         } catch(error) {
             handleError(next, error);
@@ -45,16 +45,13 @@ export class ProductController {
             const sellerId = req.user?._id as string;
             const productId = req.params.id;
             const filesToDelete = Array.isArray(req.body.filesToDelete) 
-    ? req.body.filesToDelete 
-    : req.body.filesToDelete 
-      ? [req.body.filesToDelete] 
-      : [];
+                ? req.body.filesToDelete 
+                : req.body.filesToDelete 
+                ? [req.body.filesToDelete] 
+                : [];
             const updatedInfo = req.body;
-            const result = await this.productService.updateProduct(productId, req.body,       // Other updated fields
-    req.files as Express.Multer.File[],  // New files
-    filesToDelete   // Files to delete
-    );
-            logger.info('Product updated successfully', { productId, updatedInfo});
+            const result = await this.productService.updateProduct(productId, req.body, req.files as Express.Multer.File[],filesToDelete, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Product updated successfully`, { productId, updatedInfo});
             handleSuccess(res, result);
         } catch(error){
             handleError(next, error);
@@ -65,8 +62,8 @@ export class ProductController {
         try {
             const sellerId = req.user?._id as string;
             const productId = req.params.id;
-            const result = await this.productService.deleteProduct(productId);
-            logger.info('Product deleted successfully', { productId });
+            const result = await this.productService.deleteProduct(productId, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Product deleted successfully`, { productId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -76,7 +73,7 @@ export class ProductController {
     async getAllProducts(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const result = await this.productService.getAllProducts();
-            logger.info('All products fetched successfully');
+            logger.info(`[${req.method}] ${req.originalUrl} - All products fetched successfully`);
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -87,7 +84,7 @@ export class ProductController {
         try {
             const productId = req.params.id;
             const result = await this.productService.getProductById(productId);
-            logger.info('Product fetched successfully', { productId });
+            logger.info(`[${req.method}] ${req.originalUrl} - Product fetched successfully`, { productId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -99,7 +96,7 @@ export class ProductController {
             const productId = req.params.id;
             const updatedInfo = req.body;
             const result = await this.productService.updateProduct(productId, updatedInfo);
-            logger.info('Product updated successfully', { productId, updatedInfo });
+            logger.info(`[${req.method}] ${req.originalUrl} - Product updated successfully`, { productId, updatedInfo });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -109,8 +106,8 @@ export class ProductController {
     async adminDeleteProduct(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const productId = req.params.id;
-            const result = await this.productService.deleteProduct(productId);
-            logger.info('Product deleted successfully', { productId });
+            const result = await this.productService.deleteProduct(productId, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Product deleted successfully`, { productId });
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);

@@ -62,13 +62,13 @@ export class SellerService {
         req
       });
     return { message: "Seller created successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'create_seller',
         entity: 'Seller',
         entityId: sellerData._id,
         status: 'failed',
-        message: 'Failed to create seller',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while creating seller", error);
@@ -111,13 +111,13 @@ export class SellerService {
         req
       });
     return { message: "Seller updated successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'update_seller',
         entity: 'Seller',
         entityId: sellerId,
         status: 'failed',
-        message: 'Failed to update seller',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while updating seller", error);
@@ -147,13 +147,13 @@ export class SellerService {
         req
       });
     return { message: "Email updated successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'update_seller_email',
         entity: 'Seller',
         entityId: sellerId,
         status: 'failed',
-        message: 'Failed to update seller email',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while updating email of seller", error);
@@ -180,13 +180,13 @@ export class SellerService {
         req
       });
     return { message: "Password updated successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'update_seller_password',
         entity: 'Seller',
         entityId: sellerId,
         status: 'failed',
-        message: 'Failed to update seller password',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while updating password of seller", error);
@@ -214,13 +214,13 @@ export class SellerService {
         req
       });
     return { message: "Seller and their products deleted successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'delete_seller',
         entity: 'Seller',
         entityId: sellerId,
         status: 'failed',
-        message: 'Failed to delete seller',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while deleting seller", error);

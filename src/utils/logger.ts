@@ -1,104 +1,93 @@
 import winston from 'winston';
-
+import { Request, Response } from 'express';
 
 interface LoggerOptions {
-    console: boolean;
-    level?: string;
-    format?: string; 
-    colorize?: boolean; 
-    showTimestamp?: boolean; 
+  console?: boolean;
+  level?: string;
+  colorize?: boolean;
+  showTimestamp?: boolean;
 }
-
-const formatPresets = {
-    simple: winston.format.printf(({ level, message }) => {
-        return `[${level}]: ${message}`;
-    }),
-    detailed: winston.format.printf(({ timestamp, level, message, ...metadata }) => {
-        return `${timestamp} [${level}]: ${message} ${
-            Object.keys(metadata).length ? JSON.stringify(metadata) : ''
-        }`;
-    }),
-    json: winston.format.json(),
-    structured: winston.format.printf(({ timestamp, level, message, ...metadata }) => {
-        const metaStr = Object.keys(metadata).length 
-            ? '\n' + Object.entries(metadata)
-                .map(([key, value]) => `  ${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`)
-                .join('\n')
-            : '';
-        return `${timestamp} [${level}] ${message}${metaStr}`;
-    }),
-};
 
 class CustomLogger {
-    private logger: winston.Logger;
-    
-    constructor(options: LoggerOptions) {
-        const formatters = [];
-        if (options.colorize !== false) {
-            formatters.push(winston.format.colorize());
-        }
-        if (options.showTimestamp !== false) {
-            formatters.push(winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }));
-        }
-        const selectedFormat = options.format && formatPresets[options.format as keyof typeof formatPresets]
-            ? formatPresets[options.format as keyof typeof formatPresets]
-            : formatPresets.detailed;
-        
-        formatters.push(selectedFormat);
-        
-        const transports: winston.transport[] = [];
-        
-        if (options.console) {
-            transports.push(
-                new winston.transports.Console({
-                    format: winston.format.combine(...formatters)
-                })
-            );
-        }
-        
-        this.logger = winston.createLogger({
-            level: options.level || 'info',
-            transports,
-            exceptionHandlers: [
-                new winston.transports.Console()
-            ],
-            rejectionHandlers: [
-                new winston.transports.Console()
-            ]
-        });
+  private logger: winston.Logger;
+
+  constructor(options: LoggerOptions = {}) {
+    const formatters = [];
+
+    if (options.showTimestamp !== false) {
+      formatters.push(winston.format.timestamp({
+        format: 'YYYY-MM-DD HH:mm:ss'
+      }));
     }
-    
-    public log(level: string, message: string, meta?: any): void {
-        this.logger.log(level, message, meta);
+
+    if (options.colorize !== false && process.env.NODE_ENV !== 'production') {
+      formatters.push(winston.format.colorize());
     }
-    
-    public error(message: string, meta?: any): void {
-        this.log('error', message, meta);
-    }
-    
-    public warn(message: string, meta?: any): void {
-        this.log('warn', message, meta);
-    }
-    
-    public info(message: string, meta?: any): void {
-        this.log('info', message, meta);
-    }
-    
-    public http(message: string, meta?: any): void {
-        this.log('http', message, meta);
-    }
-    
-    public debug(message: string, meta?: any): void {
-        this.log('debug', message, meta);
-    }
+
+    formatters.push(winston.format.printf(({ timestamp, level, message, ...metadata }) => {
+      const metaStr = Object.keys(metadata).length
+        ? '\n' + Object.entries(metadata)
+            .map(([key, val]) => `  ${key}: ${typeof val === 'object' ? JSON.stringify(val) : val}`)
+            .join('\n')
+        : '';
+      
+      return `${timestamp} [${level}] ${message}${metaStr}`;
+    }));
+
+    this.logger = winston.createLogger({
+      level: options.level || 'info',
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(...formatters)
+        })
+      ]
+    });
+  }
+
+  logRequest(req: Request) {
+    this.logger.info(`[${req.method}] ${req.originalUrl} - Started`, {
+      headers: {
+        'user-agent': req.headers['user-agent'],
+        referer: req.headers.referer
+      }
+    });
+  }
+
+  logResponse(req: Request, res: Response) {
+  const isError = res.statusCode >= 400;
+  const logMessage = `[${req.method}] ${req.originalUrl} - ${isError ? 'Failed' : 'Completed'}`;
+
+  const logPayload = {
+    status: res.statusCode,
+    ...(isError && { body: res.locals.responseBody }),
+  };
+
+  if (isError) {
+    this.logger.error(logMessage, logPayload);
+  } else {
+    this.logger.info(logMessage, logPayload);
+  }
 }
 
-const logger = new CustomLogger({
-    console: true,
-    level: process.env.LOG_LEVEL || 'info',
-    format: 'structured',
-    colorize: process.env.LOG_COLORIZE !== 'false',
-    showTimestamp: process.env.LOG_TIMESTAMP !== 'false'
-});
+  error(message: string, meta?: any) {
+    this.logger.error(message, meta);
+  }
 
-export { CustomLogger, logger };
+  warn(message: string, meta?: any) {
+    this.logger.warn(message, meta);
+  }
+
+  info(message: string, meta?: any) {
+    this.logger.info(message, meta);
+  }
+
+  debug(message: string, meta?: any) {
+    this.logger.debug(message, meta);
+  }
+}
+
+export const logger = new CustomLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  colorize: process.env.NODE_ENV !== 'production',
+  showTimestamp: true
+});

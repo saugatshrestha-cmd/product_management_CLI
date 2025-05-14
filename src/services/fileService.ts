@@ -64,6 +64,12 @@ export class FileService {
     }
 
     async deleteFileMetadata(fileId: string): Promise<void> {
-        await this.fileRepository.deleteManyByIds(fileId); // implement this in repo
+        try{
+        await this.fileRepository.deleteManyByIds(fileId); 
+        logger.info("FileMetadata deleted successfully");
+        } catch(error){
+            logger.error("Failed to delete FileMetadata", error);
+            throw AppError.internal("Failed to delete file metadata");
+        }
     }
 }

@@ -33,13 +33,13 @@ export class CategoryService {
         req
       });
     return { message: "Category added successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'create_category',
         entity: 'Category',
         entityId: categoryData._id,
         status: 'failed',
-        message: 'Failed to create category',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while creating category", error);
@@ -82,13 +82,13 @@ export class CategoryService {
         req
       });
     return { message: "Category updated successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'update_category',
         entity: 'Category',
         entityId: categoryId,
         status: 'failed',
-        message: 'Failed to update category',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while updating category", error);
@@ -113,13 +113,13 @@ export class CategoryService {
         req
       });  
     return { message: "Category deleted successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'delete_category',
         entity: 'Category',
         entityId: categoryId,
         status: 'failed',
-        message: 'Failed to delete category',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while deleting category", error);

@@ -70,14 +70,14 @@ export class CartService {
     }
     
     return { message: 'Product added to cart successfully' };
-    } catch(error){
+    } catch(error:any){
       await this.auditService.logAudit({
         action: 'add_to_cart',
         entity: 'Cart',
         entityId: userId,
         userId,
         status: 'failed',
-        message: 'Failed to add product to cart',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while creating cart", error);
@@ -120,14 +120,14 @@ export class CartService {
         req
       });
     return { message: "Product quantity updated successfully" };
-  } catch(error){
+  } catch(error:any){
     await this.auditService.logAudit({
         action: 'update_cart',
         entity: 'Cart',
         entityId: userId,
         userId,
         status: 'failed',
-        message: 'Failed to update quantity',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while updating cart", error);
@@ -158,14 +158,14 @@ export class CartService {
           req
         });
     return { message: 'Product removed from cart successfully' };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'remove_from_cart',
         entity: 'Cart',
         entityId: userId,
         userId,
         status: 'failed',
-        message: 'Failed to remove product from cart',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while removing product from cart", error);

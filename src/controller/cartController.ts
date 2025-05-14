@@ -16,7 +16,7 @@ export class CartController {
         const userId = req.user?._id as string;
         try {
             const cart = await this.cartService.getCartByUserId(userId);
-            logger.info(`Successfully retrieved cart for user: ${userId}`);
+            logger.info(`[${req.method}] ${req.originalUrl} - Successfully retrieved cart for user: ${userId}`);
             handleSuccess(res, cart);
         } catch(error) {
             handleError(next, error);
@@ -27,8 +27,8 @@ export class CartController {
         const userId = req.user?._id as string;
         const { productId, quantity } = req.body;
         try {
-            const result = await this.cartService.createCart(productId, quantity, userId);
-            logger.info(`Cart created for user: ${userId} with product: ${productId}, quantity: ${quantity}`);
+            const result = await this.cartService.createCart(productId, quantity, userId, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Cart created for user: ${userId} with product: ${productId}, quantity: ${quantity}`);
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -39,8 +39,8 @@ export class CartController {
         const userId = req.user?._id as string;
         const { productId, quantity } = req.body;
         try {
-            const result = await this.cartService.updateItemQuantity(userId, productId, quantity);
-            logger.info(`Updated cart for user: ${userId} with product: ${productId}, new quantity: ${quantity}`);
+            const result = await this.cartService.updateItemQuantity(userId, productId, quantity, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Updated cart for user: ${userId} with product: ${productId}, new quantity: ${quantity}`);
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -51,8 +51,8 @@ export class CartController {
         const userId = req.user?._id as string;
         const { productId } = req.body;
         try {
-            const result = await this.cartService.removeFromCart(productId, userId);
-            logger.info(`Removed product: ${productId} from cart for user: ${userId}`);
+            const result = await this.cartService.removeFromCart(productId, userId, req);
+            logger.info(`[${req.method}] ${req.originalUrl} - Removed product: ${productId} from cart for user: ${userId}`);
             handleSuccess(res, result);
         } catch(error) {
             handleError(next, error);
@@ -63,7 +63,7 @@ export class CartController {
         const userId = req.user?._id as string;
         try {
             const summary = await this.cartService.calculateCartSummary(userId);
-            logger.info(`Successfully retrieved cart summary for user: ${userId}`);
+            logger.info(`[${req.method}] ${req.originalUrl} - Successfully retrieved cart summary for user: ${userId}`);
             handleSuccess(res, summary);
         } catch(error) {
             handleError(next, error);

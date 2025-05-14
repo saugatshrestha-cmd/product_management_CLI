@@ -82,13 +82,13 @@ export class OrderService {
         req
       });
     return { message: "Order created successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'create_order',
         entity: 'Order',
         entityId: userId,
         status: 'failed',
-        message: 'Failed to create order',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while creating order", error);
@@ -204,13 +204,13 @@ export class OrderService {
         req
       });
     return { message: `Item status updated to ${newStatus} successfully` };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'update_order_item',
         entity: 'Order',
         entityId: orderId,
         status: 'failed',
-        message: 'Failed to update item status',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while updating order", error);
@@ -263,14 +263,14 @@ export class OrderService {
         req
       });
     return { message: "Order cancelled successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'cancel_order',
         entity: 'Order',
         entityId: orderId,
         userId,
         status: 'failed',
-        message: 'Failed to cancel order',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while cancelling order", error);
@@ -312,13 +312,13 @@ export class OrderService {
         req
       });
     return { message: "Order cancelled successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'cancel_order',
         entity: 'Order',
         entityId: orderId,
         status: 'failed',
-        message: 'Failed to cancel order',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while cancelling order", error);
@@ -349,14 +349,14 @@ export class OrderService {
         req
       });
     return { message: "Order deleted successfully" };
-  }catch(error){
+  }catch(error:any){
       await this.auditService.logAudit({
         action: 'delete_order',
         entity: 'Order',
         entityId: orderId,
         userId,
         status: 'failed',
-        message: 'Failed to delete order',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while deleting order", error);
@@ -386,14 +386,14 @@ export class OrderService {
         req
       });
     return { message: "Order deleted successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'delete_order',
         entity: 'Order',
         entityId: userId,
         userId,
         status: 'failed',
-        message: 'Failed to delete order',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while deleting order", error);
@@ -419,13 +419,13 @@ export class OrderService {
         req
       });
     return { message: "Order deleted successfully" };
-  }catch(error){
+  }catch(error:any){
     await this.auditService.logAudit({
         action: 'delete_order',
         entity: 'Order',
         entityId: orderId,
         status: 'failed',
-        message: 'Failed to delete order',
+        message: error.message,
         req
       });
       logger.error("Unexpected error while deleting order", error);

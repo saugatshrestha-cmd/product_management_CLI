@@ -7,9 +7,11 @@ import routes from './routes/mongo_routes';
 import { errorMiddleware } from "@middleware/errorMiddleware";
 import cookieParser from 'cookie-parser';
 import { logger } from '@utils/logger';
+import { autoLogger } from '@middleware/autoLogger';
 
 
 const app = express();
+app.use(autoLogger());
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || '';
 
